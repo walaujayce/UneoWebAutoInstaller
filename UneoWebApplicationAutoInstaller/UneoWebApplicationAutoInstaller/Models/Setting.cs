@@ -64,6 +64,10 @@ namespace UneoWebApplicationAutoInstaller.Models
                 OnPropertyChanged(nameof(InputList)); 
             }
         }
-        public ObservableCollection<DictionaryInput> KeyValueItems { get; set; }
+        public ObservableCollection<DictionaryInput> KeyValueItems { get; set; } = new()
+        {
+            new DictionaryInput()
+        };
+
     }
 }

@@ -17,7 +17,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 {
     public class InstallProcessViewModel : ViewModelBase
     {
-        private ObservableCollection<Install> _installSelection;
+        private ObservableCollection<Install> _installSelection = new();
         public ObservableCollection<Install> InstallSelection
         {
             get => _installSelection;
@@ -29,7 +29,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         }
 
         private List<Install> _installSelected;
-        private ObservableCollection<Install> temp_InstallSelection;
         public InstallProcessViewModel()
         {
             InstallSelection = new ObservableCollection<Install>()
@@ -180,7 +179,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     }
                 },
             };
-            //InstallSelection = temp_InstallSelection;
         }
 
         private DelegateNavigate? delegateNavigate = null;
@@ -203,25 +201,42 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         {
             delegateOverlayShow?.Invoke(true);
             _installSelected = new();
+
             foreach (var item in InstallSelection)
             {
                 if (item.IsChecked == true)
                 {
-                    _installSelected.Add(item);
+                    
+                    _installSelected.Add(CloneInstall(item));
                     Debug.WriteLine(item.InstallName);
                 }
             }
             Debug.WriteLine("");
-            //List<Install> oldList = _installSelected.Select(item => new Install
-            //{
-            //    InstallID = item.InstallID,
-            //    InstallName = item.InstallName,
-            //    InstallDescription = item.InstallDescription,
-            //    IsChecked = item.IsChecked,
-            //    SettingList = item.SettingList
-            //}).ToList();
-
             delegateSelectedInstallation?.Invoke(_installSelected);
         }
+        private Install CloneInstall(Install original)
+        {
+            return new Install
+            {
+                InstallID = original.InstallID,
+                InstallName = original.InstallName,
+                InstallDescription = original.InstallDescription,
+                IsChecked = original.IsChecked,
+                SettingList = new ObservableCollection<Setting>(
+                    original.SettingList.Select(s => new Setting
+                    {
+                        SettingType = s.SettingType,
+                        SettingName = s.SettingName,
+                        SettingValue = s.SettingValue,
+                        KeyValueItems = new ObservableCollection<DictionaryInput>(
+                            s.KeyValueItems.Select(kv => new DictionaryInput
+                            {
+                                DictionaryKey = kv.DictionaryKey,
+                                DictionaryValue = kv.DictionaryValue
+                            }))
+                    }))
+            };
+        }
+
     }
 }
