@@ -9,6 +9,7 @@ using System.Windows;
 using UneoWebApplicationAutoInstaller.Models;
 using static UneoWebApplicationAutoInstaller.ViewModels.MainWindowViewModel;
 using System.Diagnostics;
+using System.Windows.Media;
 
 namespace UneoWebApplicationAutoInstaller.ViewModels
 {
@@ -40,7 +41,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
     #endregion
 
     public class SettingViewModel : ViewModelBase
-    {
+    {        
         private string _installationName = "";
         public string InstallationName
         {
@@ -64,11 +65,15 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             set
             {
                 _settingList = value;
-                OnPropertyChanged(nameof(SettingList));
+                OnPropertyChanged(nameof(SettingList)); 
             }
         }
 
-        public ObservableCollection<int> ProgressItems { get; set; }
+        public ObservableCollection<ProgressBarItem> ProgressItems { get; set; }
+
+        public readonly SolidColorBrush greenProgressBar = new SolidColorBrush(Color.FromRgb(0x00, 0xE5, 0x00));
+
+        public readonly SolidColorBrush grayProgressBar = new SolidColorBrush(Colors.LightGray);
 
         private SortedDictionary<int, ObservableCollection<Setting>> InstallationItems = new();
 
@@ -80,7 +85,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
         public SettingViewModel()
         {
-            ProgressItems = new ObservableCollection<int>();
+            ProgressItems = new ObservableCollection<ProgressBarItem>();
 
             _keyValueItems = new ObservableCollection<DictionaryInput>()
             {
@@ -158,7 +163,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             {
                 for (int i = 0; i < selectedInstallation.Count; i++)
                 {
-                    ProgressItems.Add(i);
+                    ProgressItems.Add( i < 1 ? new ProgressBarItem() { ProgressBarColor = greenProgressBar } : new ProgressBarItem() { ProgressBarColor = grayProgressBar });
                 }
 
                 foreach (var item in selectedInstallation)
@@ -244,6 +249,10 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 currentSettingListIndex++;
                 int nextKey = OrderedKeysInInstalltionSettings[currentSettingListIndex];
                 Debug.WriteLine($"NextBtn, Currrent Key: {nextKey}");
+                ProgressItems[nextKey] = new ProgressBarItem()
+                {
+                    ProgressBarColor = greenProgressBar,
+                };
                 SettingList = InstallationItems[nextKey];
             }
             else
@@ -267,6 +276,10 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 currentSettingListIndex--;
                 int previousKey = OrderedKeysInInstalltionSettings[currentSettingListIndex];
                 Debug.WriteLine($"PreviousBtn, Currrent Key: {previousKey}");
+                ProgressItems[previousKey+1] = new ProgressBarItem()
+                {
+                    ProgressBarColor = grayProgressBar,
+                };
                 SettingList = InstallationItems[previousKey];
             }
             else

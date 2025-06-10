@@ -147,7 +147,7 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Height="3" Background="Black" CornerRadius="1.5"/>
+                            <Border Height="3" Background="{Binding ProgressBarColor}" CornerRadius="1.5"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
