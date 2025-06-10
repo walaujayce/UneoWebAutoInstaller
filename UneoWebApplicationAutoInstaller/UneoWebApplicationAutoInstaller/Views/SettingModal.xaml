@@ -44,66 +44,71 @@
         </Style>
         <!-- Single Input Template -->
         <DataTemplate x:Key="SingleInputTemplate">
-            <StackPanel Orientation="Vertical" Margin="0,0,0,15">
-                <TextBlock Text="{Binding SettingName}" Style="{DynamicResource TextBlock_Name}"/>
-                <Border Height="35" Style="{DynamicResource Border_Short}">
-                    <TextBox Text="{Binding SettingValue}" Style="{DynamicResource TextBox_Value}"/>
-                </Border>
-            </StackPanel>
+            <Grid MouseLeftButtonDown="SetCurrentSettingSelected_Clicked">
+                <StackPanel Orientation="Vertical" Margin="0,0,0,15">
+                    <TextBlock Text="{Binding SettingName}" Style="{DynamicResource TextBlock_Name}"/>
+                    <Border Height="35" Style="{DynamicResource Border_Short}">
+                        <TextBox Text="{Binding SettingValue}" Style="{DynamicResource TextBox_Value}"/>
+                    </Border>
+                </StackPanel>
+            </Grid>
         </DataTemplate>
         <!-- Multiple Input Template -->
         <DataTemplate x:Key="MultipleInputTemplate">
-            <StackPanel Orientation="Vertical" Margin="0,0,0,0">
-                <TextBlock Text="{Binding SettingName}" Style="{DynamicResource TextBlock_Name}"/>
-                <ItemsControl ItemsSource="{Binding InputList}">                    
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Height="35" Margin="0,0,0,15">
-                                <Grid.ColumnDefinitions>    
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Style="{DynamicResource Border_Short}">
-                                    <TextBox Text="{Binding DictionaryValue}" Style="{DynamicResource TextBox_Value}"/>
-                                </Border>
-                                <Border Grid.Column="1" Style="{DynamicResource Border_Image}" MouseLeftButtonUp="AddInputBtn_Clicked">
-                                    <Image Width="Auto" Source="/Views/Assets/Icon_Add_FFD3D3D3.png" />
-                                </Border>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>                
-            </StackPanel>
+            <Grid MouseLeftButtonDown="SetCurrentSettingSelected_Clicked">
+                <StackPanel Orientation="Vertical" Margin="0,0,0,0">
+                    <TextBlock Text="{Binding SettingName}" Style="{DynamicResource TextBlock_Name}"/>
+                    <ItemsControl ItemsSource="{Binding InputList}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Height="35" Margin="0,0,0,15">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Style="{DynamicResource Border_Short}">
+                                        <TextBox Text="{Binding DictionaryValue}" Style="{DynamicResource TextBox_Value}"/>
+                                    </Border>
+                                    <Border Grid.Column="1" Style="{DynamicResource Border_Image}" Cursor="Hand" MouseLeftButtonUp="AddInputBtn_Clicked">
+                                        <Image Width="Auto" Source="{Binding AddBtnImageSource}" />
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
         </DataTemplate>
         <!-- Multiple Key Value Template -->
         <DataTemplate x:Key="MultipleKeyValueTemplate">
-            <StackPanel Orientation="Vertical" Margin="0,0,0,0">
-                <TextBlock Text="{Binding SettingName}" Style="{DynamicResource TextBlock_Name}"/>
-                <ItemsControl ItemsSource="{Binding KeyValueItems}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Height="35" Margin="0,0,0,15">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="10"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Style="{DynamicResource Border_Short}">
-                                    <TextBox Text="{Binding DictionaryKey}" Style="{DynamicResource TextBox_Value}"/>
-                                </Border>
-                                <Border Grid.Column="2" Style="{DynamicResource Border_Short}">
-                                    <TextBox Text="{Binding DictionaryValue}" Style="{DynamicResource TextBox_Value}"/>
-                                </Border>
-                                <Border Grid.Column="3" Style="{DynamicResource Border_Image}" Cursor="Hand" MouseLeftButtonUp="AddKeyValuePairBtn_Clicked">
-                                    <Image Width="Auto" Source="{Binding AddBtnImageSource}" />
-                                </Border>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                
-            </StackPanel>
+            <Grid MouseLeftButtonDown="SetCurrentSettingSelected_Clicked">
+                <StackPanel Orientation="Vertical" Margin="0,0,0,0">
+                    <TextBlock Text="{Binding SettingName}" Style="{DynamicResource TextBlock_Name}"/>
+                    <ItemsControl ItemsSource="{Binding KeyValueItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Height="35" Margin="0,0,0,15">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Style="{DynamicResource Border_Short}">
+                                        <TextBox Text="{Binding DictionaryKey}" Style="{DynamicResource TextBox_Value}"/>
+                                    </Border>
+                                    <Border Grid.Column="2" Style="{DynamicResource Border_Short}">
+                                        <TextBox Text="{Binding DictionaryValue}" Style="{DynamicResource TextBox_Value}"/>
+                                    </Border>
+                                    <Border Grid.Column="3" Style="{DynamicResource Border_Image}" Cursor="Hand" MouseLeftButtonUp="AddKeyValuePairBtn_Clicked">
+                                        <Image Width="Auto" Source="{Binding AddBtnImageSource}" />
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
         </DataTemplate>
 
         <!-- The Selector -->
@@ -130,11 +135,13 @@
                 <!--Title-->
                 <Grid Grid.Row="0">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" FontFamily="Verdana" FontWeight="Bold" Text="{Binding SettingTitle}" FontSize="14" Padding="0" Margin="0,5"/>
-                    <Border Grid.Column="1" Style="{DynamicResource Border_Image}">
+                    <Border Grid.Column="0" Width="35"/>
+                    <TextBlock Grid.Column="1" FontFamily="Roboto" FontWeight="Bold" Text="{Binding SettingTitle}" FontSize="16" Padding="0" Margin="0,0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <Border Grid.Column="2" Style="{DynamicResource Border_Image}">
                         <Image Cursor="Hand" MouseLeftButtonDown="CloseBtn_Clicked" Source="/Views/Assets/Icon_Close_FFD3D3D3.png"/>
                     </Border>
                 </Grid>

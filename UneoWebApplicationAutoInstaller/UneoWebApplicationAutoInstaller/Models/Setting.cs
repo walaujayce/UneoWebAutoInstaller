@@ -18,7 +18,8 @@ namespace UneoWebApplicationAutoInstaller.Models
         private string _settingName = "";
         private string _settingKey = "";
         private string _settingValue = "";
-        private ObservableCollection<DictionaryInput>? _inputList;
+        private ObservableCollection<DictionaryInput> _inputList = new();
+        private ObservableCollection<DictionaryInput> _keyValueItems = new();
 
         public string SettingTitle
         {
@@ -71,13 +72,25 @@ namespace UneoWebApplicationAutoInstaller.Models
             set
             {
                 _inputList = value;
+                if(_inputList.Count > 1)
+                {
+                    _inputList.First().IsRemovable = true;
+                }
                 OnPropertyChanged(nameof(InputList)); 
             }
         }
-        public ObservableCollection<DictionaryInput> KeyValueItems { get; set; } = new()
+        public ObservableCollection<DictionaryInput> KeyValueItems
         {
-            new DictionaryInput()
-        };
-
+            get => _keyValueItems;
+            set
+            {
+                _keyValueItems = value;
+                if (_keyValueItems.Count > 1)
+                {
+                    _keyValueItems.First().IsRemovable = true;
+                }
+                OnPropertyChanged(nameof(KeyValueItems));
+            }
+        }
     }
 }

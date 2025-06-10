@@ -62,17 +62,20 @@ namespace UneoWebApplicationAutoInstaller.Views
         }
         private void AddInputBtn_Clicked(object sender, MouseButtonEventArgs e)
         {
+            //var button = (Border)sender;
+            //settingVM.InputSelected = (DictionaryInput)button.DataContext;
+            ////settingVM.AddInputItems(settingVM.InputSelected);
+            //if (sender is Border border)
+            //{
+            //    var setting = FindAncestorDataContext<Setting>(border);
+            //    if (setting != null)
+            //    {
+            //        settingVM.AddInputItems(setting);
+            //    }
+            //}
             var button = (Border)sender;
             settingVM.InputSelected = (DictionaryInput)button.DataContext;
-            //settingVM.AddInputItems(settingVM.InputSelected);
-            if (sender is Border border)
-            {
-                var setting = FindAncestorDataContext<Setting>(border);
-                if (setting != null)
-                {
-                    settingVM.AddInputItems(setting);
-                }
-            }
+            settingVM.AddInputItems();
         }
         private T? FindAncestorDataContext<T>(DependencyObject obj) where T : class
         {
@@ -94,5 +97,10 @@ namespace UneoWebApplicationAutoInstaller.Views
             settingVM.AddKeyValuePair();
         }
 
+        private void SetCurrentSettingSelected_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            var button = (Grid)sender;
+            settingVM.SettingSelected = (Setting)button.DataContext;
+        }
     }
 }

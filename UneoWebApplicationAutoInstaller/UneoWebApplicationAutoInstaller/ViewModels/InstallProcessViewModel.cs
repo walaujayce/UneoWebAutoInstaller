@@ -44,19 +44,25 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                         {
                             SettingType = 0,
                             SettingName = "Image Name",
-                            SettingValue = "Value",
+                            SettingValue = "bitnami/postgresql:latest",
                         },
                         new Setting()
                         {
                             SettingType = 0,
                             SettingName = "Container Name",
-                            SettingValue = "Value",
+                            SettingValue = "UNEO_DATABASE",
                         },
                         new Setting()
                         {
                             SettingType = 1,
                             SettingName = "Ports",
-                            SettingValue = "Value",
+                            InputList = new ObservableCollection<DictionaryInput>()
+                            {
+                                new DictionaryInput()
+                                {
+                                    DictionaryValue = "5432:5432"
+                                },
+                            }                        
                         },
                         new Setting()
                         {
@@ -66,8 +72,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                             {
                                 new DictionaryInput()
                                 {
-                                    DictionaryKey = "Key0",
-                                    DictionaryValue = "Value0",
+                                    DictionaryKey = "C:\\Users\\uneo\\postgres_data",
+                                    DictionaryValue = "/bitnami/postgresql",
                                 }
                             }
                         },
@@ -79,8 +85,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                             {
                                 new DictionaryInput()
                                 {
-                                    DictionaryKey = "Key00",
-                                    DictionaryValue = "Value00",
+                                    DictionaryKey = "POSTGRESQL_PASSWORD",
+                                    DictionaryValue = "uccc07568009",
                                 }
                             }
                         },
@@ -98,40 +104,38 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                         {
                             SettingType = 0,
                             SettingName = "Image Name",
-                            SettingValue = "Value",
+                            SettingValue = "uneotw/umonitorwebapi:latest",
                         },
                         new Setting()
                         {
                             SettingType = 0,
                             SettingName = "Container Name",
-                            SettingValue = "Value",
+                            SettingValue = "UNEO_WEBAPI",
                         },
                         new Setting()
                         {
                             SettingType = 1,
                             SettingName = "Ports",
-                            SettingValue = "Value",
-                        },
-                        new Setting()
-                        {
-                            SettingType = 2,
-                            SettingName = "Environment Variables",
-                            KeyValueItems = new ObservableCollection<DictionaryInput>()
+                            InputList = new ObservableCollection<DictionaryInput>()
                             {
                                 new DictionaryInput()
                                 {
-                                    DictionaryKey = "Key1",
-                                    DictionaryValue = "Value1",
+                                    DictionaryValue = "7286:8032",
+                                },                                
+                                new DictionaryInput()
+                                {
+                                    DictionaryValue = "7284:8080"
                                 },
                             }
-                        },
+                        }
+                        
                     }
                 },
                 new Install() 
                 {
                     InstallID = (int)EInstallID.UMonitorSocketServer,
                     InstallName="UMonitorSocketServer",
-                    IsChecked = false, 
+                    IsChecked = true, 
                 },
                 new Install() 
                 { 
@@ -144,19 +148,26 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                         {
                             SettingType = 0,
                             SettingName = "Image Name",
-                            SettingValue = "Value",
+                            SettingValue = "p2211/uext-v1:latest",
                         },
                         new Setting()
                         {
                             SettingType = 0,
                             SettingName = "Container Name",
-                            SettingValue = "Value",
+                            SettingValue = "UNEO_WEBSITE",
                         },
                         new Setting()
                         {
                             SettingType = 1,
                             SettingName = "Ports",
                             SettingValue = "Value",
+                            InputList = new ObservableCollection<DictionaryInput>()
+                            {
+                                new DictionaryInput()
+                                {
+                                    DictionaryValue = "8005:5173"
+                                }
+                            }
                         },
                         new Setting()
                         {
@@ -167,12 +178,12 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "VITE_SOCKETSERVER_URL",
-                                    DictionaryValue = "Value2",
+                                    DictionaryValue = "f() GetIP",
                                 },                                
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "VITE_WEBAPI_URL",
-                                    DictionaryValue = "Value2",
+                                    DictionaryValue = "f() GetIP",
                                 },
                             }
                         },
@@ -228,11 +239,21 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                         SettingType = s.SettingType,
                         SettingName = s.SettingName,
                         SettingValue = s.SettingValue,
+                        InputList = new ObservableCollection<DictionaryInput>(
+                            s.InputList.Select(i => new DictionaryInput
+                            {
+                                DictionaryKey = i.DictionaryKey,
+                                DictionaryValue = i.DictionaryValue,
+                                IsRemovable = i.IsRemovable,
+                                AddBtnImageSource = i.AddBtnImageSource,
+                            })),
                         KeyValueItems = new ObservableCollection<DictionaryInput>(
                             s.KeyValueItems.Select(kv => new DictionaryInput
                             {
                                 DictionaryKey = kv.DictionaryKey,
-                                DictionaryValue = kv.DictionaryValue
+                                DictionaryValue = kv.DictionaryValue,
+                                IsRemovable = kv.IsRemovable,
+                                AddBtnImageSource = kv.AddBtnImageSource,
                             }))
                     }))
             };
