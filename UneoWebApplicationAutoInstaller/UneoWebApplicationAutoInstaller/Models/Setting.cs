@@ -13,12 +13,22 @@ namespace UneoWebApplicationAutoInstaller.Models
 
     public class Setting : ModelBase
     {
+        private string _settingTitle = "";
         private int _settingType = (int)ESettingType.SingleInput;
         private string _settingName = "";
         private string _settingKey = "";
         private string _settingValue = "";
         private ObservableCollection<DictionaryInput>? _inputList;
 
+        public string SettingTitle
+        {
+            get => _settingTitle;
+            set
+            {
+                _settingTitle = value;
+                OnPropertyChanged(nameof(SettingTitle));
+            }
+        }
         public int SettingType
         {
             get => _settingType;
@@ -27,7 +37,7 @@ namespace UneoWebApplicationAutoInstaller.Models
                 _settingType = value;
                 OnPropertyChanged(nameof(SettingType));
             }
-        }    
+        }
         public string SettingName
         {
             get => _settingName;

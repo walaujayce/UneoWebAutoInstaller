@@ -133,7 +133,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" FontFamily="Verdana" FontWeight="Bold" Text="Settings" FontSize="14" Padding="0" Margin="0,5"/>
+                    <TextBlock Grid.Column="0" FontFamily="Verdana" FontWeight="Bold" Text="{Binding SettingTitle}" FontSize="14" Padding="0" Margin="0,5"/>
                     <Border Grid.Column="1" Style="{DynamicResource Border_Image}">
                         <Image Cursor="Hand" MouseLeftButtonDown="CloseBtn_Clicked" Source="/Views/Assets/Icon_Close_FFD3D3D3.png"/>
                     </Border>

@@ -10,6 +10,7 @@ using UneoWebApplicationAutoInstaller.Models;
 using static UneoWebApplicationAutoInstaller.ViewModels.MainWindowViewModel;
 using System.Diagnostics;
 using System.Windows.Media;
+using static UneoWebApplicationAutoInstaller.Utilities.Enums;
 
 namespace UneoWebApplicationAutoInstaller.ViewModels
 {
@@ -41,7 +42,20 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
     #endregion
 
     public class SettingViewModel : ViewModelBase
-    {        
+    {
+        private string _settingTitle = "";
+        public string SettingTitle
+        {
+            get
+            {
+                return _settingTitle;
+            }
+            set
+            {
+                _settingTitle = value;
+                OnPropertyChanged(nameof(SettingTitle));
+            }
+        }        
         private string _installationName = "";
         public string InstallationName
         {
@@ -75,16 +89,20 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
         public readonly SolidColorBrush grayProgressBar = new SolidColorBrush(Colors.LightGray);
 
-        private SortedDictionary<int, ObservableCollection<Setting>> InstallationItems = new();
+        private Dictionary<string, ObservableCollection<Setting>> InstallationItems = new();
 
         private ObservableCollection<DictionaryInput> _keyValueItems;
 
         private int currentSettingListIndex = 0;
 
-        private List<int> OrderedKeysInInstalltionSettings; 
+        private bool isCloseSettingModalEnable = false;
+
+        //private List<int> OrderedKeysInInstalltionSettings; 
 
         public SettingViewModel()
         {
+            isCloseSettingModalEnable = false; 
+
             ProgressItems = new ObservableCollection<ProgressBarItem>();
 
             _keyValueItems = new ObservableCollection<DictionaryInput>()
@@ -136,26 +154,32 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         }
 
         #region DELEGATE METHODS
+
         private DelegateOverlayShow? delegateOverlayShow = null;
         public void SetVMDelegateOverlayShow(DelegateOverlayShow del)
         {
             this.delegateOverlayShow = del;
-        }
-        #endregion
-
-        //Remove Main Window Overlay
-        public void RemoveMainWindowOverlay()
+        }         
+        private DelegateInstallationData? delegateInstallationData = null;
+        public void SetVMDelegateInstallationData(DelegateInstallationData del)
         {
-            delegateOverlayShow?.Invoke(false);
+            this.delegateInstallationData = del;
         }
+        
+        #endregion
 
         //Deinitiate Setting Modal
         public void DeInit()
         {
             InstallationItems.Clear();
+            delegateOverlayShow?.Invoke(false);
             Debug.WriteLine("InstallationItems.count: " + InstallationItems.Count);
         }
-
+        //Close Setting Modal
+        public bool CloseSettingModal()
+        {
+            return isCloseSettingModalEnable;
+        }
         //Set the number of progress bar
         public void SelectedInstallationListener(List<Install> selectedInstallation)
         {
@@ -165,8 +189,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 {
                     ProgressItems.Add( i < 1 ? new ProgressBarItem() { ProgressBarColor = greenProgressBar } : new ProgressBarItem() { ProgressBarColor = grayProgressBar });
                 }
-
-                foreach (var item in selectedInstallation)
+                List<Install> sortedSelectedInstallation = new List<Install>();
+                sortedSelectedInstallation = selectedInstallation.OrderBy(s => s.InstallID).ToList();
+                foreach (var item in sortedSelectedInstallation)
                 {
                     //InstallationItems[item.InstallID] = new ObservableCollection<Setting>()
                     //{
@@ -195,10 +220,12 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     //        KeyValueItems = _keyValueItems
                     //    },
                     //};
-                    InstallationItems[item.InstallID] = item.SettingList;
+                    InstallationItems[item.InstallName] = item.SettingList;
                 }
+                
+                SettingTitle = InstallationItems.First().Key;
                 SettingList = InstallationItems.First().Value;
-                OrderedKeysInInstalltionSettings = InstallationItems.Keys.ToList();// already sorted because it's a SortedDictionary
+                //OrderedKeysInInstalltionSettings = InstallationItems.Keys.ToList();// already sorted because it's a SortedDictionary
             }
 
         }
@@ -247,17 +274,21 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             if (currentSettingListIndex < InstallationItems.Count - 1)
             {
                 currentSettingListIndex++;
-                int nextKey = OrderedKeysInInstalltionSettings[currentSettingListIndex];
+                //int nextKey = OrderedKeysInInstalltionSettings[currentSettingListIndex];
+                int nextKey = currentSettingListIndex;
                 Debug.WriteLine($"NextBtn, Currrent Key: {nextKey}");
                 ProgressItems[nextKey] = new ProgressBarItem()
                 {
                     ProgressBarColor = greenProgressBar,
                 };
-                SettingList = InstallationItems[nextKey];
+                SettingTitle = InstallationItems.ElementAt(nextKey).Key;
+                SettingList = InstallationItems.ElementAt(nextKey).Value;
             }
             else
             {
                 Debug.WriteLine("Already at last item.");
+
+                delegateInstallationData?.Invoke(InstallationItems);
 
                 //foreach (var item in InstallationItems)
                 //{
@@ -274,17 +305,19 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             if (currentSettingListIndex > 0)
             {
                 currentSettingListIndex--;
-                int previousKey = OrderedKeysInInstalltionSettings[currentSettingListIndex];
+                int previousKey = currentSettingListIndex;
                 Debug.WriteLine($"PreviousBtn, Currrent Key: {previousKey}");
                 ProgressItems[previousKey+1] = new ProgressBarItem()
                 {
                     ProgressBarColor = grayProgressBar,
                 };
-                SettingList = InstallationItems[previousKey];
+                SettingTitle = InstallationItems.ElementAt(previousKey).Key;
+                SettingList = InstallationItems.ElementAt(previousKey).Value;
             }
             else
             {
                 Debug.WriteLine("Already at first item.");
+                isCloseSettingModalEnable = true;
             }
         }
     }

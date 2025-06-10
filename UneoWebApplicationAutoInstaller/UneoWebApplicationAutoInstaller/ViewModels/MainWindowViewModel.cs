@@ -54,7 +54,10 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         public DelegateSettingModalShow delegateSettingModalShow;
 
         public delegate void DelegateOverlayShow(bool isShown);
-        public DelegateOverlayShow delegateOverlayShow;
+        public DelegateOverlayShow delegateOverlayShow; 
+        
+        public delegate void DelegateInstallationData(Dictionary<string, ObservableCollection<Setting>> installationData);
+        public DelegateInstallationData delegateInstallationData;
 
         public delegate void DelegateSelectedInstallation(List<Install> selectedInstallation);
         public DelegateSelectedInstallation delegateSelectedInstallation;
@@ -108,6 +111,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             {              
                 SettingModal settingModal = new SettingModal();
                 settingModal.SetDelegateOverlayShow(new DelegateOverlayShow(OverlayShowListener));
+                settingModal.SetDelegateInstallationData(new DelegateInstallationData(InstallationDataListener));
                 settingModal.SetSelectedInstallation(selectedInstallation);
                 settingModal.Show();
             }
@@ -128,6 +132,10 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     OverlayVisibility = Visibility.Collapsed;
                 });
             }
+        }
+        private void InstallationDataListener(Dictionary<string, ObservableCollection<Setting>> installationData)
+        {
+            Debug.WriteLine(installationData);
         }
 
     }

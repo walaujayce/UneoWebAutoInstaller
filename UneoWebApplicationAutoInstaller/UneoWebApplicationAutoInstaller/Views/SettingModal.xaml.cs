@@ -29,33 +29,37 @@ namespace UneoWebApplicationAutoInstaller.Views
             settingVM = new SettingViewModel();
             DataContext = settingVM;
         }
-
         private void CloseBtn_Clicked(object sender, MouseButtonEventArgs e)
         {
             this.Close();
             settingVM.DeInit();
-            settingVM.RemoveMainWindowOverlay();
         }
-
         private void BackToPrevious_SettingModal_Clicked(object sender, MouseButtonEventArgs e)
         {
             settingVM.BackToPreviousInstallationSettings();
+            if (settingVM.CloseSettingModal())
+            {
+                this.Close();
+                settingVM.DeInit();
+            }
         }
-
         private void ProceedToNextStage_SettingModal_Clicked(object sender, MouseButtonEventArgs e)
         {
             settingVM.GoToNextInstallationSettings();
         }
-
         public void SetDelegateOverlayShow(DelegateOverlayShow del)
         {
             settingVM.SetVMDelegateOverlayShow(del);
+        }        
+        public void SetDelegateInstallationData(DelegateInstallationData del)
+        {
+            settingVM.SetVMDelegateInstallationData(del);
         }
+        
         public void SetSelectedInstallation(List<Install> selectedInstallation)
         {       
             settingVM.SelectedInstallationListener(selectedInstallation);
         }
-
         private void AddInputBtn_Clicked(object sender, MouseButtonEventArgs e)
         {
             var button = (Border)sender;
@@ -89,5 +93,6 @@ namespace UneoWebApplicationAutoInstaller.Views
             settingVM.KeyValuePairSelected = (DictionaryInput)button.DataContext;
             settingVM.AddKeyValuePair();
         }
+
     }
 }
