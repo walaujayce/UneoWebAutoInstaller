@@ -210,7 +210,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
         public void ProceedToInstallation()
         {
-            delegateOverlayShow?.Invoke(true);
             _installSelected = new();
 
             foreach (var item in InstallSelection)
@@ -222,7 +221,12 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     Debug.WriteLine(item.InstallName);
                 }
             }
-            Debug.WriteLine("");
+            if(_installSelected.Count < 1)
+            {
+                MessageBox.Show("At least one application should be selected.", "Alert", MessageBoxButton.OK);
+                return;
+            }
+            delegateOverlayShow?.Invoke(true);
             delegateSelectedInstallation?.Invoke(_installSelected);
         }
         private Install CloneInstall(Install original)

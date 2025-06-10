@@ -108,12 +108,17 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         private void SettingModalListener(List<Install> selectedInstallation)
         {
             if (selectedInstallation.Count > 0)
-            {              
-                SettingModal settingModal = new SettingModal();
+            {
+                SettingModal settingModal = new SettingModal()
+                {
+                    Owner = Application.Current.MainWindow,
+                };
+
                 settingModal.SetDelegateOverlayShow(new DelegateOverlayShow(OverlayShowListener));
                 settingModal.SetDelegateInstallationData(new DelegateInstallationData(InstallationDataListener));
                 settingModal.SetSelectedInstallation(selectedInstallation);
-                settingModal.Show();
+
+                settingModal.ShowDialog();
             }
         }
         private void OverlayShowListener(bool isShown)
@@ -135,7 +140,10 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         }
         private void InstallationDataListener(Dictionary<string, ObservableCollection<Setting>> installationData)
         {
-            Debug.WriteLine(installationData);
+            foreach(var item in installationData)
+            {
+                Debug.WriteLine($"Key : {item.Key} | Value : {item.Value}");
+            }
         }
 
     }
