@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Views\Assets\Icon_Close.png" />
+    <None Remove="Views\Assets\Icon_Close_FFD3D3D3.png" />
+    <None Remove="Views\Assets\Icon_Remove_FFD3D3D3.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Views\Assets\Icon_Add_FFD3D3D3.png" />
+    <Resource Include="Views\Assets\Icon_Close.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Views\Assets\Icon_Close_FFD3D3D3.png" />
+    <Resource Include="Views\Assets\Icon_Remove_FFD3D3D3.png" />
+  </ItemGroup>
+
+</Project>
