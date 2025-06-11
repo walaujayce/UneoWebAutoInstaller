@@ -193,7 +193,7 @@
                                 <Storyboard>
                                     <ColorAnimation
                                     Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                    To="#02cc02"
+                                    To="#00d600"
                                     Duration="0:0:0.1"/>
                                 </Storyboard>
                             </BeginStoryboard>
@@ -329,7 +329,7 @@
                 </ItemsControl>
 
                 <!--Setting List-->
-                <Grid Grid.Row="2" Margin="0,5">
+                <Grid Grid.Row="2" Margin="0,5,0,10">
                     <Border BorderBrush="Black" BorderThickness="0" CornerRadius="5">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <Grid>

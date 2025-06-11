@@ -16,7 +16,7 @@ namespace UneoWebApplicationAutoInstaller.Models
         private string _settingTitle = "";
         private int _settingType = (int)ESettingType.SingleInput;
         private string _settingName = "";
-        private string _settingKey = "";
+        private string _settingDescription = "";
         private string _settingValue = "";
         private ObservableCollection<DictionaryInput> _inputList = new();
         private ObservableCollection<DictionaryInput> _keyValueItems = new();
@@ -48,13 +48,13 @@ namespace UneoWebApplicationAutoInstaller.Models
                 OnPropertyChanged(nameof(SettingName));
             }
         }
-        public string SettingKey
+        public string SettingDescription
         {
-            get => _settingKey;
+            get => _settingDescription;
             set
             {
-                _settingKey = value;
-                OnPropertyChanged(nameof(SettingKey));
+                _settingDescription = value;
+                OnPropertyChanged(nameof(SettingDescription));
             }
         }
         public string SettingValue
@@ -74,7 +74,11 @@ namespace UneoWebApplicationAutoInstaller.Models
                 _inputList = value;
                 if(_inputList.Count > 1)
                 {
-                    _inputList.First().IsRemovable = true;
+                    foreach (var item in _inputList)
+                    {
+                        if (item == _inputList.Last()) continue;
+                        item.IsRemovable = true;
+                    }
                 }
                 OnPropertyChanged(nameof(InputList)); 
             }
@@ -87,7 +91,11 @@ namespace UneoWebApplicationAutoInstaller.Models
                 _keyValueItems = value;
                 if (_keyValueItems.Count > 1)
                 {
-                    _keyValueItems.First().IsRemovable = true;
+                    foreach (var item in _keyValueItems)
+                    {
+                        if (item == _keyValueItems.Last()) continue;
+                        item.IsRemovable = true;
+                    }
                 }
                 OnPropertyChanged(nameof(KeyValueItems));
             }

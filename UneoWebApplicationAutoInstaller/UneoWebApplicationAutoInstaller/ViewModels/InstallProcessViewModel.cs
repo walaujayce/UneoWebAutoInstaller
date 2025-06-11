@@ -29,8 +29,11 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         }
 
         private List<Install> _installSelected;
+
         public InstallProcessViewModel()
         {
+            ObservableCollection<DictionaryInput> UMonitorSocketServerAppSettings = Utilities.PublicFunction.LoadJsonFile();
+
             InstallSelection = new ObservableCollection<Install>()
             {
                 new Install() 
@@ -136,6 +139,15 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     InstallID = (int)EInstallID.UMonitorSocketServer,
                     InstallName="UMonitorSocketServer",
                     IsChecked = true, 
+                    SettingList = new()
+                    {
+                        new Setting()
+                        {
+                            SettingType = 2,
+                            SettingName = "App Settings",
+                            KeyValueItems = UMonitorSocketServerAppSettings
+                        } 
+                    }
                 },
                 new Install() 
                 { 
@@ -180,6 +192,50 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                     DictionaryKey = "VITE_SOCKETSERVER_URL",
                                     DictionaryValue = "f() GetIP",
                                 },                                
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "VITE_WEBAPI_URL",
+                                    DictionaryValue = "f() GetIP",
+                                },
+                            }
+                        },
+                    }
+                },
+                new Install()
+                {
+                    InstallID = (int)EInstallID.UMonitorService,
+                    InstallName="UMonitorService",
+                    IsChecked = false,
+                    SettingList = new()
+                    {
+                        new Setting()
+                        {
+                            SettingType = 0,
+                            SettingName = "Image Name",
+                            SettingValue = "p2211/umonitorservices:latest",
+                        },
+                        new Setting()
+                        {
+                            SettingType = 0,
+                            SettingName = "Container Name",
+                            SettingValue = "UNEO_SERVICES",
+                        },
+                        new Setting()
+                        {
+                            SettingType = 2,
+                            SettingName = "Environment Variables",
+                            KeyValueItems = new ObservableCollection<DictionaryInput>()
+                            {
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "USERNAME",
+                                    DictionaryValue = "NTU",
+                                },
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "LOCAL_IP",
+                                    DictionaryValue = "f() GetIP",
+                                },
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "VITE_WEBAPI_URL",

@@ -23,4 +23,10 @@
     <Resource Include="Views\Assets\Icon_Remove_FFD3D3D3.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="UMonitorSocketServer\publish\appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

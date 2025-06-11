@@ -28,7 +28,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             WebAPI = 1,
             UMonitorSocketServer = 2,
             Website = 3,
-            UMonitorService = 4,
+            UMonitorService = 4,            
         }
     }
 }

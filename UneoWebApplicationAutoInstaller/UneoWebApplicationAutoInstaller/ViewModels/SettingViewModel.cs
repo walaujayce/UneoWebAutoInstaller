@@ -215,7 +215,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 if (selectedInstallation.Count == 1)
                 {
                     NextBtnLabel = "Run";
-                    NextBtnLabelForeground = Brushes.Black;
+                    NextBtnLabelForeground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF212121")); ;
                 }
                 //OrderedKeysInInstalltionSettings = InstallationItems.Keys.ToList();// already sorted because it's a SortedDictionary
             }
@@ -296,7 +296,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 if (nextKey == InstallationItems.Count - 1)
                 {
                     NextBtnLabel = "Run";
-                    NextBtnLabelForeground = Brushes.DimGray;
+                    NextBtnLabelForeground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF212121"));
                 }
                 else
                 {
