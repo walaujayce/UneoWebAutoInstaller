@@ -54,7 +54,7 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="{Binding ProgressName}" FontSize="14" FontFamily="Tahoma" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="0" Text="{Binding ProgressName}" FontSize="14" FontFamily="Times New Roman" VerticalAlignment="Center" Opacity="{Binding TextOpacity}"/>
                                     <Border Padding="5" Grid.Column="1">
                                         <Image x:Name="LoadingIcon" Style="{DynamicResource ProgressImageStyle}" RenderTransformOrigin="0.5,0.5" behaviors:ImageBehaviors.IsRotating="{Binding IsRotating}">
                                             <Image.RenderTransform>

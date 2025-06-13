@@ -16,6 +16,8 @@ namespace UneoWebApplicationAutoInstaller.Models
         private string _progressDescription = "";
         private int _statusState = (int)EInstallStatus.Pending;
         private string _statusImage = "";
+        private double _textOpacity = 0.5;
+        
         public bool IsRotating => StatusState == (int)EInstallStatus.Ongoing;
         public int ProgressID
         {
@@ -62,6 +64,15 @@ namespace UneoWebApplicationAutoInstaller.Models
             {
                 _statusImage = value;
                 OnPropertyChanged(nameof(StatusImage));
+            }
+        }
+        public double TextOpacity
+        {
+            get => _textOpacity;
+            set
+            {
+                _textOpacity = value;
+                OnPropertyChanged(nameof(TextOpacity));
             }
         }
     }

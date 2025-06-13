@@ -73,21 +73,22 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         private async void Test_1()
         {
 
-                await Task.Delay(100);
-                foreach (var item in _progressList.ToList())
+            await Task.Delay(100);
+            foreach (var item in _progressList.ToList())
+            {
+                item.StatusState = (int)EInstallStatus.Ongoing;
+                item.TextOpacity = 1.0;
+                await Task.Delay(1500);
+                if (item.ProgressID % 2 != 0)
                 {
-                    item.StatusState = (int)EInstallStatus.Ongoing;
-                    await Task.Delay(1500);
-                    if (item.ProgressID % 2 != 0)
-                    {
-                        item.StatusState = (int)EInstallStatus.Success;
-                    }
-                    else
-                    {
-                        item.StatusState = (int)EInstallStatus.Fail;
-                    }
-                    await Task.Delay(500);
+                    item.StatusState = (int)EInstallStatus.Success;
                 }
+                else
+                {
+                    item.StatusState = (int)EInstallStatus.Fail;
+                }
+                await Task.Delay(500);
+            }
         }
 
     }
