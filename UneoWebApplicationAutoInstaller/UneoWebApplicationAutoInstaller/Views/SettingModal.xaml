@@ -27,7 +27,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Padding" Value="10,0,0,0"/>            
+            <Setter Property="Padding" Value="10,5,5,5"/>            
         </Style>
         <Style x:Key="Border_Short" TargetType="Border">
             <Setter Property="BorderBrush" Value="LightGray"/>
@@ -211,6 +211,81 @@
                 </MultiDataTrigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="Border_Option_Image" TargetType="Border">
+            <Setter Property="Width" Value="Auto"/>
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="17.5"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="Transparent"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                        Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                        To="#f2f2f2"
+                        Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                        Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                        To="Transparent"
+                        Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ListBoxItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="Margin" Value="0,5,0,5"/>
+            <Setter Property="FontFamily" Value="Arial"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8"
+                            SnapsToDevicePixels="true">
+                            <ContentPresenter HorizontalAlignment="Left"
+                                          VerticalAlignment="Center"
+                                          Margin="4,2"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#FFE0E0E0"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#FF888888"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#FFD0D0D0"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#FF555555"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="#888888"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <!-- Single Input Template -->
         <DataTemplate x:Key="SingleInputTemplate">
             <Grid MouseLeftButtonDown="SetCurrentSettingSelected_Clicked">
@@ -279,12 +354,56 @@
                 </StackPanel>
             </Grid>
         </DataTemplate>
-
+        <!-- Multiple Key Value With Reference Template -->
+        <DataTemplate x:Key="MultipleKeyValueWithReferenceTemplate">
+            <Grid MouseLeftButtonDown="SetCurrentSettingSelected_Clicked">
+                <StackPanel Orientation="Vertical" Margin="0,0,0,0">
+                    <TextBlock Text="{Binding SettingName}" Style="{DynamicResource TextBlock_Name}"/>
+                    <ItemsControl ItemsSource="{Binding KeyValueItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>                                    
+                                    <Grid Height="35" Margin="0,0,0,15" VerticalAlignment="Top">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="10"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0" Style="{DynamicResource Border_Short}">
+                                            <TextBox Text="{Binding DictionaryKey}" Style="{DynamicResource TextBox_Value}"/>
+                                        </Border>
+                                        <Border Grid.Column="2" Style="{DynamicResource Border_Short}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox Grid.Column="0" Text="{Binding DictionaryValue}" Style="{DynamicResource TextBox_Value}"/>
+                                                <Border Grid.Column="1" Style="{DynamicResource Border_Option_Image}" Cursor="Hand" MouseLeftButtonUp="OptionBtn_Clicked" >
+                                                    <Image Source="/Views/Assets/Icon_Option_FFD3D3D3.png"/>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                        <Border Grid.Column="3" Style="{DynamicResource Border_Image}" Cursor="Hand" MouseLeftButtonUp="AddKeyValuePairBtn_Clicked">
+                                            <Image Width="Auto" Source="{Binding AddBtnImageSource}" />
+                                        </Border>
+                                    </Grid>
+                                    
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
         <!-- The Selector -->
         <vm:SettingTemplateSelector x:Key="SettingTemplateSelector"
                        SingleInputTemplate="{StaticResource SingleInputTemplate}"
                        MultipleInputTemplate="{StaticResource MultipleInputTemplate}"
-                       MultipleKeyValueTemplate="{StaticResource MultipleKeyValueTemplate}"/>
+                       MultipleKeyValueTemplate="{StaticResource MultipleKeyValueTemplate}"
+                       MultipleKeyValueWithReferenceTemplate="{StaticResource MultipleKeyValueWithReferenceTemplate}"
+        />
 
     </Window.Resources>
     
@@ -335,7 +454,9 @@
                             <Grid>
                                 <ItemsControl ItemsSource="{Binding SettingList}" ItemTemplateSelector="{StaticResource SettingTemplateSelector}" VerticalAlignment="Top">
                                 </ItemsControl>
+                                <!-- Test Area -->                            
                             </Grid>
+                            
                         </ScrollViewer>
                     </Border>
                 </Grid>
@@ -353,11 +474,27 @@
                     </Grid>
                     <Grid Grid.Column="2">
                         <Border Style="{DynamicResource NextBtn}" MouseLeftButtonUp="ProceedToNextStage_SettingModal_Clicked">
-                            <Label FontSize="14" Content="{Binding NextBtnLabel}" FontFamily="Tahoma" Foreground="{Binding NextBtnLabelForeground }" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                            <Label FontSize="14" Content="{Binding NextBtnLabel}" FontFamily="Tahoma" Foreground="{Binding NextBtnLabelForeground}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                         </Border>
                     </Grid>
                 </Grid>
             </Grid>
         </Border>
+        <Popup x:Name="OptionPopup"
+            AllowsTransparency="True"
+            Placement="MousePoint" 
+            IsOpen="False"
+            StaysOpen="False" 
+            PopupAnimation="Fade"
+            >
+            <Border Width="250" Height="Auto" Background="White"  BorderBrush="Black" BorderThickness="0.5" CornerRadius="5" Padding="2.5,0">
+                <ListBox x:Name="OptionsListBox" Background="Transparent" BorderThickness="0" SelectionChanged="OptionListBoxItem_SelectedChanged">
+                    <ListBoxItem Style="{DynamicResource ListBoxItemStyle}">192.9.120.154 (Wi-Fi)</ListBoxItem>
+                    <ListBoxItem Style="{DynamicResource ListBoxItemStyle}">192.168.120.154 (Ethernet)</ListBoxItem>
+                    <ListBoxItem Style="{DynamicResource ListBoxItemStyle}">123.0.1.1 (Docker Bridge Gateway)</ListBoxItem>
+                </ListBox>
+            </Border>   
+        </Popup>
     </Grid>
+
 </Window>

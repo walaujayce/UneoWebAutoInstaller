@@ -21,6 +21,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             SingleInput = 0,
             MultipleInput = 1,
             MultipleKeyValue = 2,
+            MultipleKeyValueWithReference = 3,
         }
         public enum EInstallID
         {

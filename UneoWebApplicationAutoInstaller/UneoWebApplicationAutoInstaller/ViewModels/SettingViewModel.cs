@@ -21,6 +21,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         public required DataTemplate SingleInputTemplate { get; set; }
         public required DataTemplate MultipleInputTemplate { get; set; }
         public required DataTemplate MultipleKeyValueTemplate { get; set; }
+        public required DataTemplate MultipleKeyValueWithReferenceTemplate { get; set; }
+        
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
@@ -34,6 +36,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                         return MultipleInputTemplate;
                     case 2:
                         return MultipleKeyValueTemplate;
+                    case 3:
+                        return MultipleKeyValueWithReferenceTemplate;
                 }
             }
             return base.SelectTemplate(item, container);
@@ -350,6 +354,10 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 Debug.WriteLine("Already at first item.");
                 isCloseSettingModalEnable = true;
             }
+        }
+        public void ShowOptionList()
+        {
+
         }
     }
 }

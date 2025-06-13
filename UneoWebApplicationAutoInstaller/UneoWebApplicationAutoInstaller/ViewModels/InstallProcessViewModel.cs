@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using UneoWebApplicationAutoInstaller.Models;
+using UneoWebApplicationAutoInstaller.Utilities;
 using static UneoWebApplicationAutoInstaller.Utilities.Enums;
 using static UneoWebApplicationAutoInstaller.ViewModels.InstallProcessViewModel;
 using static UneoWebApplicationAutoInstaller.ViewModels.MainWindowViewModel;
@@ -40,24 +41,24 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 {
                     InstallID = (int)EInstallID.PostgreSQLDatabase,
                     InstallName = "PostgreSQL Database", 
-                    IsChecked = true, 
+                    IsChecked = false, 
                     SettingList = new()
                     {
                         new Setting()
                         {
-                            SettingType = 0,
+                            SettingType = (int)ESettingType.SingleInput,
                             SettingName = "Image Name",
                             SettingValue = "bitnami/postgresql:latest",
                         },
                         new Setting()
                         {
-                            SettingType = 0,
+                            SettingType = (int)ESettingType.SingleInput,
                             SettingName = "Container Name",
                             SettingValue = "UNEO_DATABASE",
                         },
                         new Setting()
                         {
-                            SettingType = 1,
+                            SettingType = (int)ESettingType.MultipleInput,
                             SettingName = "Ports",
                             InputList = new ObservableCollection<DictionaryInput>()
                             {
@@ -69,7 +70,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                         },
                         new Setting()
                         {
-                            SettingType = 2,
+                            SettingType = (int)ESettingType.MultipleKeyValue,
                             SettingName = "Volumes",
                             KeyValueItems = new ObservableCollection<DictionaryInput>()
                             {
@@ -82,7 +83,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                         },
                         new Setting()
                         {
-                            SettingType = 2,
+                            SettingType = (int)ESettingType.MultipleKeyValue,
                             SettingName = "Environment Variables",
                             KeyValueItems = new ObservableCollection<DictionaryInput>()
                             {
@@ -100,24 +101,24 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 { 
                     InstallID = (int)EInstallID.WebAPI,
                     InstallName="WebAPI", 
-                    IsChecked = true,
+                    IsChecked = false,
                     SettingList = new()
                     {
                         new Setting()
                         {
-                            SettingType = 0,
+                            SettingType = (int)ESettingType.SingleInput,
                             SettingName = "Image Name",
                             SettingValue = "uneotw/umonitorwebapi:latest",
                         },
                         new Setting()
                         {
-                            SettingType = 0,
+                            SettingType = (int)ESettingType.SingleInput,
                             SettingName = "Container Name",
                             SettingValue = "UNEO_WEBAPI",
                         },
                         new Setting()
                         {
-                            SettingType = 1,
+                            SettingType = (int)ESettingType.MultipleInput,
                             SettingName = "Ports",
                             InputList = new ObservableCollection<DictionaryInput>()
                             {
@@ -138,12 +139,12 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 {
                     InstallID = (int)EInstallID.UMonitorSocketServer,
                     InstallName="UMonitorSocketServer",
-                    IsChecked = true, 
+                    IsChecked = false, 
                     SettingList = new()
                     {
                         new Setting()
                         {
-                            SettingType = 2,
+                            SettingType = (int)ESettingType.MultipleKeyValue,
                             SettingName = "App Settings",
                             KeyValueItems = UMonitorSocketServerAppSettings
                         } 
@@ -158,19 +159,19 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     {
                         new Setting()
                         {
-                            SettingType = 0,
+                            SettingType = (int)ESettingType.SingleInput,
                             SettingName = "Image Name",
                             SettingValue = "p2211/uext-v1:latest",
                         },
                         new Setting()
                         {
-                            SettingType = 0,
+                            SettingType = (int)ESettingType.SingleInput,
                             SettingName = "Container Name",
                             SettingValue = "UNEO_WEBSITE",
                         },
                         new Setting()
                         {
-                            SettingType = 1,
+                            SettingType = (int)ESettingType.MultipleInput,
                             SettingName = "Ports",
                             SettingValue = "Value",
                             InputList = new ObservableCollection<DictionaryInput>()
@@ -183,19 +184,19 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                         },
                         new Setting()
                         {
-                            SettingType = 2,
+                            SettingType = (int)ESettingType.MultipleKeyValueWithReference,
                             SettingName = "Environment Variables",
                             KeyValueItems = new ObservableCollection<DictionaryInput>()
                             {
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "VITE_SOCKETSERVER_URL",
-                                    DictionaryValue = "f() GetIP",
+                                    DictionaryValue = $"{PublicFunction.GetAllInterfaceName()?.FirstOrDefault().Value}",
                                 },                                
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "VITE_WEBAPI_URL",
-                                    DictionaryValue = "f() GetIP",
+                                    DictionaryValue = $"{PublicFunction.GetAllInterfaceName()?.FirstOrDefault().Value}",
                                 },
                             }
                         },
@@ -210,19 +211,19 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     {
                         new Setting()
                         {
-                            SettingType = 0,
+                            SettingType = (int)ESettingType.SingleInput,
                             SettingName = "Image Name",
                             SettingValue = "p2211/umonitorservices:latest",
                         },
                         new Setting()
                         {
-                            SettingType = 0,
+                            SettingType = (int)ESettingType.SingleInput,
                             SettingName = "Container Name",
                             SettingValue = "UNEO_SERVICES",
                         },
                         new Setting()
                         {
-                            SettingType = 2,
+                            SettingType = (int)ESettingType.MultipleKeyValueWithReference,
                             SettingName = "Environment Variables",
                             KeyValueItems = new ObservableCollection<DictionaryInput>()
                             {
@@ -234,12 +235,12 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "LOCAL_IP",
-                                    DictionaryValue = "f() GetIP",
+                                    DictionaryValue = $"{PublicFunction.GetAllInterfaceName()?.FirstOrDefault().Value}",
                                 },
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "VITE_WEBAPI_URL",
-                                    DictionaryValue = "f() GetIP",
+                                    DictionaryValue = $"{PublicFunction.GetAllInterfaceName()?.FirstOrDefault().Value}",
                                 },
                             }
                         },

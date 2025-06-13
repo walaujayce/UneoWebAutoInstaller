@@ -81,9 +81,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
             _progressMonitorPage.SetDelegate(new DelegateNavigate(NavigateToSelectedPage));
 
-            //string[] temp = { "a", "b", "c", "d" };
-            //temp = temp.Skip(4).ToArray();
-            //Debug.WriteLine($"the rest array: {string.Join(", ", temp)} | Length: {temp.Length}");
+            PublicFunction.GetAllInterfaceName();
         }
         private void NavigateToSelectedPage(int pageNumber)
         {

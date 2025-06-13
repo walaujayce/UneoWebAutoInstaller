@@ -13,6 +13,8 @@ namespace UneoWebApplicationAutoInstaller.Models
 
     public class Setting : ModelBase
     {
+        /// ***IMPORTANT: If add item, also add in CloneInstall() method (InstallProcessViewModel)*** /// 
+
         private string _settingTitle = "";
         private int _settingType = (int)ESettingType.SingleInput;
         private string _settingName = "";
@@ -28,7 +30,7 @@ namespace UneoWebApplicationAutoInstaller.Models
             {
                 _settingTitle = value;
                 OnPropertyChanged(nameof(SettingTitle));
-            }
+            }       
         }
         public int SettingType
         {

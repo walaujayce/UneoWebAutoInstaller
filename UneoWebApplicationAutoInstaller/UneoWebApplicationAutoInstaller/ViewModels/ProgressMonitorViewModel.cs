@@ -72,7 +72,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         }
         private async void Test_1()
         {
-
             await Task.Delay(100);
             foreach (var item in _progressList.ToList())
             {
