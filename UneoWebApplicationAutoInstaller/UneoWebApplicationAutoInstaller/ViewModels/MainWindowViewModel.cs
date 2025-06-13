@@ -80,6 +80,10 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             _installProcessPage.SetDelegateSelectedInstallation(new DelegateSelectedInstallation(SettingModalListener));
 
             _progressMonitorPage.SetDelegate(new DelegateNavigate(NavigateToSelectedPage));
+
+            //string[] temp = { "a", "b", "c", "d" };
+            //temp = temp.Skip(4).ToArray();
+            //Debug.WriteLine($"the rest array: {string.Join(", ", temp)} | Length: {temp.Length}");
         }
         private void NavigateToSelectedPage(int pageNumber)
         {
@@ -140,10 +144,21 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         }
         private void InstallationDataListener(Dictionary<string, ObservableCollection<Setting>> installationData)
         {
+            List<string> selectedInstallationList = new List<string>();
             foreach(var item in installationData)
             {
+                selectedInstallationList.Add(item.Key);
                 Debug.WriteLine($"Key : {item.Key} | Value : {item.Value}");
             }
+            _progressMonitorPage.GetSelectedInstallation(selectedInstallationList);
+            NavigateToSelectedPage((int)ENavigatePage.ProgressMonitorPage);
+            //Dataparser to new model for installation process
+
+        }
+
+        private void InstallationStatusListener(Dictionary<string, bool> installationResponse)
+        {
+            _progressMonitorPage.SendInstallationResponseToProgressMonitorPage(installationResponse);
         }
 
     }

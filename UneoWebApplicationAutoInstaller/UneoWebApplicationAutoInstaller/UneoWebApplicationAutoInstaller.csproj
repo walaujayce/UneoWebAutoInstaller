@@ -11,16 +11,33 @@
   <ItemGroup>
     <None Remove="Views\Assets\Icon_Close.png" />
     <None Remove="Views\Assets\Icon_Close_FFD3D3D3.png" />
+    <None Remove="Views\Assets\Icon_Fail_FFFF0000.png" />
+    <None Remove="Views\Assets\Icon_Pass_FF7CFC00.png" />
     <None Remove="Views\Assets\Icon_Remove_FFD3D3D3.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Views\Assets\Icon_Add_FFD3D3D3.png" />
-    <Resource Include="Views\Assets\Icon_Close.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Resource Include="Views\Assets\Icon_Add_FFD3D3D3.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Views\Assets\Icon_Close_FFD3D3D3.png" />
-    <Resource Include="Views\Assets\Icon_Remove_FFD3D3D3.png" />
+    <Resource Include="Views\Assets\Icon_Close.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Views\Assets\Icon_Close_FFD3D3D3.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Views\Assets\Icon_Fail_FFFF0000.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Views\Assets\Icon_Loading.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Views\Assets\Icon_Pass_FF7CFC00.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Views\Assets\Icon_Remove_FFD3D3D3.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>

@@ -55,6 +55,55 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                 return AppSettingsList;
             }
         }
+        public static List<string> EnumerateInstallToDoList(string installationName)
+        {   
+            List<string> list = new();
+            switch (installationName)
+            {
+                case "PostgreSQL Database":
+                    list = new List<string>()
+                    {
+                        "Set up local database file",
+                        "Pull PostgreSQL image \"bitnami/postgresql:latest\"",
+                        "Containerize PostgreSQL image",
+                        "Create \"uneo_web\" database",
+                        "Check PostgreSQL container is running"
+                    };
+                    break;
+                case "WebAPI":
+                    list = new List<string>()
+                    {
+                        "Pull WebAPI image \"uneotw/umonitorwebapi:latest\"",
+                        "Containerize WebAPI image",
+                        "Check WebAPI container is running"
+                    };
+                    break;
+                case "Website":
+                    list = new List<string>()
+                    {
+                        "Pull Website image \"p2211/uext-v1:latest\"",
+                        "Containerize Website image",
+                        "Check Website container is running"
+                    };
+                    break;
+                case "UMonitorSocketServer":
+                    list = new List<string>()
+                    {
+                        "Run UMonitorSocketServer",
+                        "Check UMonitorSocketServer is running"
+                    };
+                    break;
+                case "UMonitorService":
+                    list = new List<string>()
+                    {
+                        "Pull UMonitorService image \"p2211/umonitorservices:latest\"",
+                        "Containerize UMonitorService image",
+                        "Check UMonitorService container is running"
+                    };
+                    break;
+            }
+            return list;
+        }
 
     }
 }

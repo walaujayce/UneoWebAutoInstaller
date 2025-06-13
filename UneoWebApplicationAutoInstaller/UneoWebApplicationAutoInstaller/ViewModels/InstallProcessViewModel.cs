@@ -38,7 +38,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             {
                 new Install() 
                 {
-                    InstallID = (int)EInstallID.PostgreSQL,
+                    InstallID = (int)EInstallID.PostgreSQLDatabase,
                     InstallName = "PostgreSQL Database", 
                     IsChecked = true, 
                     SettingList = new()
@@ -153,7 +153,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 { 
                     InstallID = (int)EInstallID.Website,    
                     InstallName="Website", 
-                    IsChecked = false,
+                    IsChecked = true,
                     SettingList = new()
                     {
                         new Setting()
@@ -205,7 +205,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 {
                     InstallID = (int)EInstallID.UMonitorService,
                     InstallName="UMonitorService",
-                    IsChecked = false,
+                    IsChecked = true,
                     SettingList = new()
                     {
                         new Setting()

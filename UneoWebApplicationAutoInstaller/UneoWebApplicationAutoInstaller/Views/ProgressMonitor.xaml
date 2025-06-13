@@ -5,10 +5,33 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:UneoWebApplicationAutoInstaller.Views"
       xmlns:vm="clr-namespace:UneoWebApplicationAutoInstaller.ViewModels" d:DataContext="{d:DesignInstance Type=vm:ProgressMonitorViewModel}"
+      xmlns:behaviors="clr-namespace:UneoWebApplicationAutoInstaller.Utilities"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="ProgressMonitor">
 
+    <Page.Resources>
+        <Style x:Key="ProgressImageStyle" TargetType="Image">
+            <Style.Triggers>
+                <!-- Fail -->
+                <DataTrigger Binding="{Binding StatusState}" Value="0">
+                    <Setter Property="Source" Value="/Views/Assets/Icon_Fail_FFFF0000.png"/>
+                </DataTrigger>
+                <!-- Success -->
+                <DataTrigger Binding="{Binding StatusState}" Value="1">
+                    <Setter Property="Source" Value="/Views/Assets/Icon_Pass_FF7CFC00.png"/>
+                </DataTrigger>
+                <!-- Ongoing -->
+                <DataTrigger Binding="{Binding StatusState}" Value="2">
+                    <Setter Property="Source" Value="/Views/Assets/Icon_Loading.png"/>
+                </DataTrigger>
+                <!-- Pending -->
+                <DataTrigger Binding="{Binding StatusState}" Value="3">
+                    <Setter Property="Source" Value="{x:Null}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Page.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -17,17 +40,28 @@
         </Grid.RowDefinitions>
         <!--Label-->
         <Grid Grid.Row="0">
-            <Label Content="Installation Detail:" FontSize="14" Padding="0" Margin="0,5"/>            
+            <Label Content="Installation progress:" VerticalContentAlignment="Center" FontSize="14" Padding="0" Margin="0,5" FontFamily="Tahoma" FontWeight="Bold"/>
         </Grid>
         <!--Progress Messages List-->
         <Grid Grid.Row="1" Margin="0,5">
-            <Border BorderBrush="Black" BorderThickness="0.2" CornerRadius="5">
+            <Border BorderBrush="Black" BorderThickness="0.2" CornerRadius="5" Padding="2">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding ProgressList}">
+                    <ItemsControl ItemsSource="{Binding ProgressList}" Padding="5">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Grid>
-                                    <Label Content="{Binding ProgressName}"/>
+                                <Grid Height="35" Margin="0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding ProgressName}" FontSize="14" FontFamily="Tahoma" VerticalAlignment="Center"/>
+                                    <Border Padding="5" Grid.Column="1">
+                                        <Image x:Name="LoadingIcon" Style="{DynamicResource ProgressImageStyle}" RenderTransformOrigin="0.5,0.5" behaviors:ImageBehaviors.IsRotating="{Binding IsRotating}">
+                                            <Image.RenderTransform>
+                                                <RotateTransform x:Name="LoadingRotateTransform" Angle="0"/>
+                                            </Image.RenderTransform>
+                                        </Image>                                        
+                                    </Border>
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

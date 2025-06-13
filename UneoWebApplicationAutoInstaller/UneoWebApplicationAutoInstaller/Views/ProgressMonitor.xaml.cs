@@ -9,6 +9,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -29,6 +30,7 @@ namespace UneoWebApplicationAutoInstaller.Views
             InitializeComponent();
             _progressMonitorVM = new ProgressMonitorViewModel();
             DataContext = _progressMonitorVM;
+            //StartLoadingAnimation();
         }
 
         private void BackToPrevious_ProgressMonitor_Clicked(object sender, MouseButtonEventArgs e)
@@ -38,10 +40,21 @@ namespace UneoWebApplicationAutoInstaller.Views
 
         private void ProceedToNextStage_ProgressMonitor_Clicked(object sender, MouseButtonEventArgs e)
         {
+            _progressMonitorVM.Test_Click();
         }
         public void SetDelegate(DelegateNavigate del)
         {
             _progressMonitorVM.SetDelegateNavigate(del);
         }
+        public void GetSelectedInstallation(List<string> selectedInstallation)
+        {
+            _progressMonitorVM.GetSelectedInstallationVM(selectedInstallation);
+        }
+        public void SendInstallationResponseToProgressMonitorPage(Dictionary<string, bool> installationResponse)
+        {
+            _progressMonitorVM.InstallationResponseListener(installationResponse);
+        }
+
+        
     }
 }

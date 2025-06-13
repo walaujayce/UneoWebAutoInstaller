@@ -46,6 +46,11 @@ namespace UneoWebApplicationAutoInstaller.Views
         private void ProceedToNextStage_SettingModal_Clicked(object sender, MouseButtonEventArgs e)
         {
             settingVM.GoToNextInstallationSettings();
+            if (settingVM.CloseSettingModal())
+            {
+                this.Close();
+                settingVM.DeInit();
+            }
         }
         public void SetDelegateOverlayShow(DelegateOverlayShow del)
         {
