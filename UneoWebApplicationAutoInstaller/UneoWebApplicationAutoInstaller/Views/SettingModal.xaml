@@ -82,7 +82,7 @@
         <!-- Close button -->
         <Style x:Key="Border_Image_CloseBtn" TargetType="Border">
             <Setter Property="Height" Value="35"/>
-            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="Margin" Value="5,0,0,0"/>
             <Setter Property="Padding" Value="10"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -269,7 +269,7 @@
                 <StackPanel Orientation="Vertical" Margin="0,0,0,15">
                     <TextBlock Text="{Binding SettingName}" Style="{DynamicResource TextBlock_Name}"/>
                     <Border Height="35" Style="{DynamicResource Border_Short}">
-                        <TextBox Text="{Binding SettingValue}" Style="{DynamicResource TextBox_Value}"/>
+                        <TextBox Text="{Binding SettingValue}" Style="{DynamicResource TextBox_Value}" TextChanged="SettingValue_TextChanged"/>
                     </Border>
                 </StackPanel>
             </Grid>
@@ -289,7 +289,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <Border Grid.Column="0" Style="{DynamicResource Border_Short}">
-                                        <TextBox Text="{Binding DictionaryValue}" Style="{DynamicResource TextBox_Value}"/>
+                                        <TextBox Text="{Binding DictionaryValue}" Style="{DynamicResource TextBox_Value}" TextChanged="DictionaryValue_TextChanged"/>
                                     </Border>
                                     <Border Grid.Column="1" Style="{DynamicResource Border_Image}" Cursor="Hand" MouseLeftButtonUp="AddInputBtn_Clicked">
                                         <Image Width="Auto" Source="{Binding AddBtnImageSource}" />
@@ -318,10 +318,10 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <Border Grid.Column="0" Style="{DynamicResource Border_Short}">
-                                        <TextBox Text="{Binding DictionaryKey}" Style="{DynamicResource TextBox_Value}"/>
+                                        <TextBox Text="{Binding DictionaryKey}" Style="{DynamicResource TextBox_Value}" TextChanged="DictionaryKey_TextChanged"/>
                                     </Border>
                                     <Border Grid.Column="2" Style="{DynamicResource Border_Short}">
-                                        <TextBox Text="{Binding DictionaryValue}" Style="{DynamicResource TextBox_Value}"/>
+                                        <TextBox Text="{Binding DictionaryValue}" Style="{DynamicResource TextBox_Value}" TextChanged="DictionaryValue_TextChanged"/>
                                     </Border>
                                     <Border Grid.Column="3" Style="{DynamicResource Border_Image}" Cursor="Hand" MouseLeftButtonUp="AddKeyValuePairBtn_Clicked">
                                         <Image Width="Auto" Source="{Binding AddBtnImageSource}" />
@@ -351,7 +351,7 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <Border Grid.Column="0" Style="{DynamicResource Border_Short}">
-                                            <TextBox Text="{Binding DictionaryKey}" Style="{DynamicResource TextBox_Value}"/>
+                                            <TextBox Text="{Binding DictionaryKey}" Style="{DynamicResource TextBox_Value}" TextChanged="DictionaryKey_TextChanged"/>
                                         </Border>
                                         <Border Grid.Column="2" Style="{DynamicResource Border_Short}">
                                             <Grid>
@@ -359,7 +359,7 @@
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBox Grid.Column="0" Text="{Binding DictionaryValue}" Style="{DynamicResource TextBox_Value}"/>
+                                                <TextBox Grid.Column="0" Text="{Binding DictionaryValue}" Style="{DynamicResource TextBox_Value}" TextChanged="DictionaryValue_TextChanged"/>
                                                 <Border Grid.Column="1" Style="{DynamicResource Border_Option_Image}" Cursor="Hand" MouseLeftButtonUp="OptionBtn_Clicked" >
                                                     <Image Source="/Views/Assets/Icon_Option_FFD3D3D3.png"/>
                                                 </Border>
@@ -435,8 +435,7 @@
                                 <ItemsControl ItemsSource="{Binding SettingList}" ItemTemplateSelector="{StaticResource SettingTemplateSelector}" VerticalAlignment="Top">
                                 </ItemsControl>
                                 <!-- Test Area -->                            
-                            </Grid>
-                            
+                            </Grid>                            
                         </ScrollViewer>
                     </Border>
                 </Grid>

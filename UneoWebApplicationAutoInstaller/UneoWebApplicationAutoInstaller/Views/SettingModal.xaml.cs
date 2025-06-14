@@ -29,6 +29,10 @@ namespace UneoWebApplicationAutoInstaller.Views
             InitializeComponent();
             settingVM = new SettingViewModel();
             DataContext = settingVM;
+
+            OptionPopupList.ViewModel.OptionSelectedChanged += OnOptionSelectedChanged;
+            OptionPopupList.ViewModel.Init(); // Load the options list
+
         }
         private void CloseBtn_Clicked(object sender, MouseButtonEventArgs e)
         {
@@ -102,17 +106,42 @@ namespace UneoWebApplicationAutoInstaller.Views
             settingVM.KeyValuePairSelected = (DictionaryInput)button.DataContext;
             settingVM.AddKeyValuePair();
         }
-
         private void SetCurrentSettingSelected_Clicked(object sender, MouseButtonEventArgs e)
         {
             var button = (Grid)sender;
             settingVM.SettingSelected = (Setting)button.DataContext;
         }
-
+        private void SettingValue_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var button = (TextBox)sender;
+            settingVM.SettingSelected = (Setting)button.DataContext;
+            settingVM.SettingSelected.SettingValue = (string)button.Text;
+        }
+        private void DictionaryKey_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var button = (TextBox)sender;
+            settingVM.KeyValuePairSelected = (DictionaryInput)button.DataContext;
+            settingVM.KeyValuePairSelected.DictionaryKey = (string)button.Text;
+            settingVM.CheckSelectedObject();
+        }
+        private void DictionaryValue_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var button = (TextBox)sender;
+            settingVM.KeyValuePairSelected = (DictionaryInput)button.DataContext;
+            settingVM.KeyValuePairSelected.DictionaryValue = (string)button.Text;
+            settingVM.CheckSelectedObject();
+        }
+        private void OnOptionSelectedChanged(object? sender, OptionSelectedEventArgs e)
+        {
+            settingVM.CheckSelectedObject();
+            settingVM.KeyValuePairSelected.DictionaryValue = e.SelectedValue;
+        }
         private void OptionBtn_Clicked(object sender, MouseButtonEventArgs e)
         {
-            settingVM.ShowOptionList();
+            var button = (Border)sender;
+            settingVM.KeyValuePairSelected = (DictionaryInput)button.DataContext;
             OptionPopupList.ShowPopup();
         }
+
     }
 }

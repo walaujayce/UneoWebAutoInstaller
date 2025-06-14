@@ -24,6 +24,8 @@ namespace UneoWebApplicationAutoInstaller.Views
     public partial class OptionsPopup : UserControl
     {
         private OptionsPopupViewModel optionsPopupVM;
+        public OptionsPopupViewModel ViewModel => optionsPopupVM;
+
         public OptionsPopup()
         {
             InitializeComponent();

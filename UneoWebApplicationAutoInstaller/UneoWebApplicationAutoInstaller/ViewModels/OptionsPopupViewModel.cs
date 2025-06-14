@@ -10,8 +10,14 @@ using UneoWebApplicationAutoInstaller.Utilities;
 
 namespace UneoWebApplicationAutoInstaller.ViewModels
 {
+    public class OptionSelectedEventArgs : EventArgs
+    {
+        public string SelectedValue { get; set; } = "";
+    }
     public class OptionsPopupViewModel : ViewModelBase
     {
+        public event EventHandler<OptionSelectedEventArgs> OptionSelectedChanged;
+
         private ObservableCollection<Option> _optionsList;
         public ObservableCollection<Option> OptionsList
         {
@@ -37,6 +43,13 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 _optionSelected = value;
                 Debug.WriteLine("Selected: " + _optionSelected.OptionName);
                 OnPropertyChanged(nameof(OptionSelected));
+
+                // Raise event
+                OptionSelectedChanged?.Invoke(this, new OptionSelectedEventArgs
+                {
+                    SelectedValue = _optionSelected?.OptionName ?? string.Empty
+                });
+
             }
         }
         public OptionsPopupViewModel()

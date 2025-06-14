@@ -144,6 +144,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
         private bool isCloseSettingModalEnable = false;
         public Setting SettingSelected { get; set; }    
+        public DictionaryInput InputSelected { get; set; }
+        public DictionaryInput KeyValuePairSelected { get; set; }
 
         public SettingViewModel()
         {
@@ -226,7 +228,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         }
 
         //Button of adding single input box to inputlist
-        public DictionaryInput InputSelected { get; set; }
         //public void AddInputItems(Setting setting)
         //{
         //    Debug.WriteLine("count of InputList " + InputSelected.DictionaryValue);
@@ -259,7 +260,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         }
 
         //Button of adding key value input box to keyValueItemsList
-        public DictionaryInput KeyValuePairSelected { get; set; }
         public void AddKeyValuePair()
         {
             Debug.WriteLine($"Key : {KeyValuePairSelected.DictionaryKey} | Value : {KeyValuePairSelected.DictionaryValue}");
@@ -355,9 +355,10 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 isCloseSettingModalEnable = true;
             }
         }
-        public void ShowOptionList()
+        public void CheckSelectedObject()
         {
-
+            //Debug.WriteLine($"SettingName : {SettingSelected.SettingName}");
+            Debug.WriteLine($"Key : {KeyValuePairSelected.DictionaryKey} | Value : {KeyValuePairSelected.DictionaryValue}");
         }
     }
 }
