@@ -48,6 +48,31 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <!-- Listbox item style-->
+        <Style x:Key="ListboxItemBorderStyle" TargetType="Border">
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#f2f2f2"/>
+                    <Setter Property="BorderBrush" Value="#FF888888"/>
+                </Trigger>                
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ListboxItemTextblockStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Roboto"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="FontFamily" Value="Roboto"/>
+            <Setter Property="Padding" Value="10"/>
+            
+        </Style>
     </UserControl.Resources>
 
     <Popup x:Name="OptionPopupList"
@@ -57,12 +82,12 @@
                 StaysOpen="False" 
                 PopupAnimation="Fade"
                 >
-        <Border Width="250" Height="100" Background="White"  BorderBrush="Black" BorderThickness="0.5" CornerRadius="5" Padding="2.5,0">
+        <Border Width="250" Height="Auto" Background="White"  BorderBrush="Transparent" BorderThickness="0.5" CornerRadius="5" Padding="5,5,5,0">
             <ItemsControl ItemsSource="{Binding OptionsList}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Height="35" MouseLeftButtonUp="OptionsList_Selected" >
-                            <TextBlock Text="{Binding OptionName}"/>
+                        <Border MouseLeftButtonUp="OptionsList_Selected" Style="{DynamicResource ListboxItemBorderStyle}">
+                            <TextBlock Text="{Binding OptionName}" Style="{DynamicResource ListboxItemTextblockStyle}"/>
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
