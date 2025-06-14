@@ -12,6 +12,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using UneoWebApplicationAutoInstaller.Models;
+using static UneoWebApplicationAutoInstaller.Utilities.Enums;
 using Process = System.Diagnostics.Process;
 
 namespace UneoWebApplicationAutoInstaller.Utilities
@@ -65,17 +66,35 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                 return AppSettingsList;
             }
         }
+        public static string GetInstallationName(int installationID)
+        { 
+            switch (installationID)
+            {
+                case (int)EInstallID.PostgreSQLDatabase:
+                    return "PostgreSQL Database";
+                case (int)EInstallID.WebAPI:
+                    return "WebAPI";
+                case (int)EInstallID.UMonitorSocketServer:
+                    return "UMonitorSocketServer";
+                case (int)EInstallID.Website:
+                    return "Website";
+                case (int)EInstallID.UMonitorService:
+                    return "UMonitorService";
+                default:
+                    return "";
+            }
+        }
         /// <summary>
         /// 詳列安裝事項
         /// </summary>
         /// <param name="installationName"></param>
         /// <returns></returns>
-        public static List<string> EnumerateInstallToDoList(string installationName)
+        public static List<string> EnumerateInstallToDoList(int installationID)
         {   
             List<string> list = new();
-            switch (installationName)
+            switch (installationID)
             {
-                case "PostgreSQL Database":
+                case (int)EInstallID.PostgreSQLDatabase:
                     list = new List<string>()
                     {
                         "Set up local database file",
@@ -85,7 +104,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                         "Check PostgreSQL container is running"
                     };
                     break;
-                case "WebAPI":
+                case (int)EInstallID.WebAPI:
                     list = new List<string>()
                     {
                         "Pull WebAPI image \"uneotw/umonitorwebapi:latest\"",
@@ -93,7 +112,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                         "Check WebAPI container is running"
                     };
                     break;
-                case "Website":
+                case (int)EInstallID.Website:
                     list = new List<string>()
                     {
                         "Pull Website image \"p2211/uext-v1:latest\"",
@@ -101,14 +120,14 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                         "Check Website container is running"
                     };
                     break;
-                case "UMonitorSocketServer":
+                case (int)EInstallID.UMonitorSocketServer:
                     list = new List<string>()
                     {
                         "Run UMonitorSocketServer",
                         "Check UMonitorSocketServer is running"
                     };
                     break;
-                case "UMonitorService":
+                case (int)EInstallID.UMonitorService:
                     list = new List<string>()
                     {
                         "Pull UMonitorService image \"p2211/umonitorservices:latest\"",

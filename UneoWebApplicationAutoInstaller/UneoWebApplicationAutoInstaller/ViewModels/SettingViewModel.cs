@@ -11,6 +11,7 @@ using static UneoWebApplicationAutoInstaller.ViewModels.MainWindowViewModel;
 using System.Diagnostics;
 using System.Windows.Media;
 using static UneoWebApplicationAutoInstaller.Utilities.Enums;
+using UneoWebApplicationAutoInstaller.Utilities;
 
 namespace UneoWebApplicationAutoInstaller.ViewModels
 {
@@ -134,7 +135,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
         public readonly SolidColorBrush grayProgressBar = new SolidColorBrush(Colors.LightGray);
 
-        private Dictionary<string, ObservableCollection<Setting>> InstallationItems = new();
+        private Dictionary<int, ObservableCollection<Setting>> InstallationItems = new();
 
         private ObservableCollection<DictionaryInput> _keyValueItems = new();
 
@@ -212,10 +213,10 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 sortedSelectedInstallation = selectedInstallation.OrderBy(s => s.InstallID).ToList();
                 foreach (var item in sortedSelectedInstallation)
                 {
-                    InstallationItems[item.InstallName] = item.SettingList;
+                    InstallationItems[item.InstallID] = item.SettingList;
                 }
                 
-                SettingTitle = InstallationItems.First().Key;
+                SettingTitle = PublicFunction.GetInstallationName(InstallationItems.First().Key);
                 SettingList = InstallationItems.First().Value;
 
                 if (selectedInstallation.Count == 1)
@@ -295,7 +296,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 {
                     ProgressBarColor = greenProgressBar,
                 };
-                SettingTitle = InstallationItems.ElementAt(nextKey).Key;
+                SettingTitle = PublicFunction.GetInstallationName(InstallationItems.ElementAt(nextKey).Key);
                 SettingList = InstallationItems.ElementAt(nextKey).Value;
                 if (nextKey == InstallationItems.Count - 1)
                 {
@@ -314,6 +315,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 //send installation items back to mainwindowviewmodel
                 delegateInstallationData?.Invoke(InstallationItems);
                 isCloseSettingModalEnable = true;
+
                 //foreach (var item in InstallationItems)
                 //{
                 //    Debug.WriteLine($"Key : {item.Key} | Value : {item.Value}");
@@ -335,7 +337,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 {
                     ProgressBarColor = grayProgressBar,
                 };
-                SettingTitle = InstallationItems.ElementAt(previousKey).Key;
+                SettingTitle = PublicFunction.GetInstallationName(InstallationItems.ElementAt(previousKey).Key);
                 SettingList = InstallationItems.ElementAt(previousKey).Value;
 
                 if (previousKey == 0)

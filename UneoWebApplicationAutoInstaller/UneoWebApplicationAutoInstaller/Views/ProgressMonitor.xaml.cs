@@ -46,9 +46,9 @@ namespace UneoWebApplicationAutoInstaller.Views
         {
             _progressMonitorVM.SetDelegateNavigate(del);
         }
-        public void GetSelectedInstallation(List<string> selectedInstallation)
+        public void GetSelectedInstallation(List<int> selectedInstallationID)
         {
-            _progressMonitorVM.GetSelectedInstallationVM(selectedInstallation);
+            _progressMonitorVM.GetSelectedInstallationVM(selectedInstallationID);
         }
         public void SendInstallationResponseToProgressMonitorPage(Dictionary<string, bool> installationResponse)
         {

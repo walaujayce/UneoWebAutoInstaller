@@ -39,16 +39,16 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         {
             this.delegateNavigate = del;
         }
-        public void GetSelectedInstallationVM(List<string> selectedInstallation)
+        public void GetSelectedInstallationVM(List<int> selectedInstallationID)
         {
             int index = 0;
 
             _progressList.Clear();
-            if (selectedInstallation != null)
+            if (selectedInstallationID != null)
             {
-                foreach (var install in selectedInstallation)
+                foreach (var installID in selectedInstallationID)
                 {
-                    List<string> list = PublicFunction.EnumerateInstallToDoList(install);
+                    List<string> list = PublicFunction.EnumerateInstallToDoList(installID);
                     foreach (var item in list)
                     {
                         _progressList.Add(new Progress()

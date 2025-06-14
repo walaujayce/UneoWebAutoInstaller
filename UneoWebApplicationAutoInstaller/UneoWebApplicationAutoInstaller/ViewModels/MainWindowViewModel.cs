@@ -56,7 +56,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         public delegate void DelegateOverlayShow(bool isShown);
         public DelegateOverlayShow delegateOverlayShow; 
         
-        public delegate void DelegateInstallationData(Dictionary<string, ObservableCollection<Setting>> installationData);
+        public delegate void DelegateInstallationData(Dictionary<int, ObservableCollection<Setting>> installationData);
         public DelegateInstallationData delegateInstallationData;
 
         public delegate void DelegateSelectedInstallation(List<Install> selectedInstallation);
@@ -139,16 +139,20 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 });
             }
         }
-        private void InstallationDataListener(Dictionary<string, ObservableCollection<Setting>> installationData)
+        private void InstallationDataListener(Dictionary<int, ObservableCollection<Setting>> installationData)
         {
-            List<string> selectedInstallationList = new List<string>();
+            List<int> selectedInstallationIDList = new List<int>();
             foreach(var item in installationData)
             {
-                selectedInstallationList.Add(item.Key);
+                selectedInstallationIDList.Add(item.Key);
                 Debug.WriteLine($"Key : {item.Key} | Value : {item.Value}");
             }
-            _progressMonitorPage.GetSelectedInstallation(selectedInstallationList);
+            
+            //Get items of installation and enumerate all To-do-list in progress monitor page
+            _progressMonitorPage.GetSelectedInstallation(selectedInstallationIDList);
+            
             NavigateToSelectedPage((int)ENavigatePage.ProgressMonitorPage);
+           
             //Dataparser to new model for installation process
 
         }
