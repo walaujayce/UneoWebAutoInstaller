@@ -191,12 +191,12 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "VITE_SOCKETSERVER_URL",
-                                    DictionaryValue = $"{PublicFunction.GetAllInterfaceName()?.FirstOrDefault().Value}",
+                                    DictionaryValue = $"{PublicFunction.GetWireless80211IPAddress()}",
                                 },                                
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "VITE_WEBAPI_URL",
-                                    DictionaryValue = $"{PublicFunction.GetAllInterfaceName()?.FirstOrDefault().Value}",
+                                    DictionaryValue = $"{PublicFunction.GetEthernetIPAddress()}",
                                 },
                             }
                         },
@@ -235,12 +235,12 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "LOCAL_IP",
-                                    DictionaryValue = $"{PublicFunction.GetAllInterfaceName()?.FirstOrDefault().Value}",
+                                    DictionaryValue = $"{PublicFunction.GetWireless80211IPAddress()}",
                                 },
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "VITE_WEBAPI_URL",
-                                    DictionaryValue = $"{PublicFunction.GetAllInterfaceName()?.FirstOrDefault().Value}",
+                                    DictionaryValue = $"{PublicFunction.GetEthernetIPAddress()}",
                                 },
                             }
                         },

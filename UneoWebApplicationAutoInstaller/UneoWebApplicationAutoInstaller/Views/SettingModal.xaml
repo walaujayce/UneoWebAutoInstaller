@@ -460,6 +460,6 @@
                 </Grid>
             </Grid>
         </Border>        
-        <local:OptionsPopup x:Name="OptionPopupList" DataContext="{Binding}" />
+        <local:OptionsPopup x:Name="OptionPopupList"/>
     </Grid>
 </Window>

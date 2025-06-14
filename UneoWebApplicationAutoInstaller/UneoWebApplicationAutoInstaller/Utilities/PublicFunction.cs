@@ -124,7 +124,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
         /// 取得所有網路介面卡名稱
         /// </summary>
         /// <returns>Return nullable value (Interface name : IP Adress)</returns>
-        public static Dictionary<string, string>? GetAllInterfaceName()
+        public static Dictionary<string, string>? GetAllInterfaceNameAndIP()
         {
             Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
             foreach (NetworkInterface networkInterface in NetworkInterface.GetAllNetworkInterfaces())
