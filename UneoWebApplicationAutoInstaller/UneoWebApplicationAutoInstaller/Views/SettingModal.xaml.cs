@@ -112,29 +112,7 @@ namespace UneoWebApplicationAutoInstaller.Views
         private void OptionBtn_Clicked(object sender, MouseButtonEventArgs e)
         {
             settingVM.ShowOptionList();
-            //var position = PointToScreen(Mouse.GetPosition(this));
-            //// Convert screen coords to WPF device-independent coords
-            //var dpiX = 1.0;
-            //var dpiY = 1.0;
-            //var source = PresentationSource.FromVisual(this);
-            //if (source != null)
-            //{
-            //    dpiX = source.CompositionTarget.TransformFromDevice.M11;
-            //    dpiY = source.CompositionTarget.TransformFromDevice.M22;
-            //}
-
-            //OptionPopup.HorizontalOffset = position.X * dpiX;
-            //OptionPopup.VerticalOffset = position.Y * dpiY;
-            OptionPopup.IsOpen = true;
-        }
-        private void OptionListBoxItem_SelectedChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (OptionsListBox.SelectedItem is ListBoxItem selectedItem)
-            {
-                Debug.WriteLine($"Selected: {selectedItem.Content}");
-            }
-            Thread.Sleep(100); //if pop up hide so fast will miss click the add key value pair items button
-            OptionPopup.IsOpen = false;
+            OptionPopupList.ShowPopup();
         }
     }
 }

@@ -14,6 +14,7 @@
         Height="520" Width="450">
 
     <Window.Resources>
+        <!-- Textblock Name -->
         <Style x:Key="TextBlock_Name" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Tahoma"/>
             <Setter Property="Foreground" Value="Black"/>
@@ -21,6 +22,8 @@
             <Setter Property="FontWeight" Value="Normal"/>
             <Setter Property="Margin" Value="0,0,0,10"/>
         </Style>
+        
+        <!-- Textblock Value -->
         <Style x:Key="TextBox_Value" TargetType="TextBox">
             <Setter Property="Foreground" Value="Black"/>
             <Setter Property="FontSize" Value="12"/>
@@ -29,11 +32,15 @@
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Padding" Value="10,5,5,5"/>            
         </Style>
+        
+        <!-- Input box -->
         <Style x:Key="Border_Short" TargetType="Border">
             <Setter Property="BorderBrush" Value="LightGray"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="5"/>
         </Style>
+
+        <!-- Add/Remove button -->
         <Style x:Key="Border_Image" TargetType="Border">
             <Setter Property="Height" Value="35"/>
             <Setter Property="Margin" Value="5,0"/>
@@ -71,6 +78,8 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        
+        <!-- Close button -->
         <Style x:Key="Border_Image_CloseBtn" TargetType="Border">
             <Setter Property="Height" Value="35"/>
             <Setter Property="Margin" Value="5,0"/>
@@ -109,6 +118,7 @@
             </Style.Triggers>
         </Style>
         
+        <!-- Back button -->
         <Style x:Key="BackBtn" TargetType="Border">
             <Setter Property="Width" Value="80"/>
             <Setter Property="Height" Value="35"/>
@@ -146,6 +156,8 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <!-- Next button -->
         <Style x:Key="NextBtn" TargetType="Border">
             <Setter Property="Width" Value="80"/>
             <Setter Property="Height" Value="35"/>
@@ -211,6 +223,8 @@
                 </MultiDataTrigger>
             </Style.Triggers>
         </Style>
+
+        <!-- Option button -->
         <Style x:Key="Border_Option_Image" TargetType="Border">
             <Setter Property="Width" Value="Auto"/>
             <Setter Property="Margin" Value="1"/>
@@ -248,44 +262,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <Style x:Key="ListBoxItemStyle" TargetType="ListBoxItem">
-            <Setter Property="Height" Value="35"/>
-            <Setter Property="Margin" Value="0,5,0,5"/>
-            <Setter Property="FontFamily" Value="Arial"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListBoxItem">
-                        <Border x:Name="Bd"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="8"
-                            SnapsToDevicePixels="true">
-                            <ContentPresenter HorizontalAlignment="Left"
-                                          VerticalAlignment="Center"
-                                          Margin="4,2"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#FFE0E0E0"/>
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="#FF888888"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#FFD0D0D0"/>
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="#FF555555"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Foreground" Value="#888888"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+       
         <!-- Single Input Template -->
         <DataTemplate x:Key="SingleInputTemplate">
             <Grid MouseLeftButtonDown="SetCurrentSettingSelected_Clicked">
@@ -297,6 +274,7 @@
                 </StackPanel>
             </Grid>
         </DataTemplate>
+        
         <!-- Multiple Input Template -->
         <DataTemplate x:Key="MultipleInputTemplate">
             <Grid MouseLeftButtonDown="SetCurrentSettingSelected_Clicked">
@@ -323,6 +301,7 @@
                 </StackPanel>
             </Grid>
         </DataTemplate>
+        
         <!-- Multiple Key Value Template -->
         <DataTemplate x:Key="MultipleKeyValueTemplate">
             <Grid MouseLeftButtonDown="SetCurrentSettingSelected_Clicked">
@@ -354,6 +333,7 @@
                 </StackPanel>
             </Grid>
         </DataTemplate>
+        
         <!-- Multiple Key Value With Reference Template -->
         <DataTemplate x:Key="MultipleKeyValueWithReferenceTemplate">
             <Grid MouseLeftButtonDown="SetCurrentSettingSelected_Clicked">
@@ -397,6 +377,7 @@
                 </StackPanel>
             </Grid>
         </DataTemplate>
+        
         <!-- The Selector -->
         <vm:SettingTemplateSelector x:Key="SettingTemplateSelector"
                        SingleInputTemplate="{StaticResource SingleInputTemplate}"
@@ -404,7 +385,6 @@
                        MultipleKeyValueTemplate="{StaticResource MultipleKeyValueTemplate}"
                        MultipleKeyValueWithReferenceTemplate="{StaticResource MultipleKeyValueWithReferenceTemplate}"
         />
-
     </Window.Resources>
     
     <Grid>
@@ -479,22 +459,7 @@
                     </Grid>
                 </Grid>
             </Grid>
-        </Border>
-        <Popup x:Name="OptionPopup"
-            AllowsTransparency="True"
-            Placement="MousePoint" 
-            IsOpen="False"
-            StaysOpen="False" 
-            PopupAnimation="Fade"
-            >
-            <Border Width="250" Height="Auto" Background="White"  BorderBrush="Black" BorderThickness="0.5" CornerRadius="5" Padding="2.5,0">
-                <ListBox x:Name="OptionsListBox" Background="Transparent" BorderThickness="0" SelectionChanged="OptionListBoxItem_SelectedChanged">
-                    <ListBoxItem Style="{DynamicResource ListBoxItemStyle}">192.9.120.154 (Wi-Fi)</ListBoxItem>
-                    <ListBoxItem Style="{DynamicResource ListBoxItemStyle}">192.168.120.154 (Ethernet)</ListBoxItem>
-                    <ListBoxItem Style="{DynamicResource ListBoxItemStyle}">123.0.1.1 (Docker Bridge Gateway)</ListBoxItem>
-                </ListBox>
-            </Border>   
-        </Popup>
+        </Border>        
+        <local:OptionsPopup x:Name="OptionPopupList" DataContext="{Binding}" />
     </Grid>
-
 </Window>
