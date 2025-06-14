@@ -21,14 +21,22 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             SingleInput = 0,
             MultipleInput = 1,
             MultipleKeyValue = 2,
+            MultipleKeyValueWithReference = 3,
         }
         public enum EInstallID
         {
-            PostgreSQL = 0,
+            PostgreSQLDatabase = 0,
             WebAPI = 1,
             UMonitorSocketServer = 2,
             Website = 3,
-            UMonitorService = 4,
+            UMonitorService = 4,            
+        }
+        public enum EInstallStatus
+        {
+            Fail = 0,
+            Success = 1,
+            Ongoing = 2,
+            Pending = 3,
         }
     }
 }

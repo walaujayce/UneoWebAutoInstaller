@@ -9,6 +9,9 @@ using System.Windows;
 using UneoWebApplicationAutoInstaller.Models;
 using static UneoWebApplicationAutoInstaller.ViewModels.MainWindowViewModel;
 using System.Diagnostics;
+using System.Windows.Media;
+using static UneoWebApplicationAutoInstaller.Utilities.Enums;
+using UneoWebApplicationAutoInstaller.Utilities;
 
 namespace UneoWebApplicationAutoInstaller.ViewModels
 {
@@ -19,6 +22,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         public required DataTemplate SingleInputTemplate { get; set; }
         public required DataTemplate MultipleInputTemplate { get; set; }
         public required DataTemplate MultipleKeyValueTemplate { get; set; }
+        public required DataTemplate MultipleKeyValueWithReferenceTemplate { get; set; }
+        
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
@@ -32,6 +37,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                         return MultipleInputTemplate;
                     case 2:
                         return MultipleKeyValueTemplate;
+                    case 3:
+                        return MultipleKeyValueWithReferenceTemplate;
                 }
             }
             return base.SelectTemplate(item, container);
@@ -41,6 +48,60 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
     public class SettingViewModel : ViewModelBase
     {
+        private string _settingTitle = "";
+        public string SettingTitle
+        {
+            get
+            {
+                return _settingTitle;
+            }
+            set
+            {
+                _settingTitle = value;
+                OnPropertyChanged(nameof(SettingTitle));
+            }
+        }
+        private string _backBtnLabel = "Back";
+        public string BackBtnLabel
+        {
+            get
+            {
+                return _backBtnLabel;
+            }
+            set
+            {
+                _backBtnLabel = value;
+                OnPropertyChanged(nameof(BackBtnLabel));
+            }
+        }
+        private string _nextBtnLabel = "Next";
+        public string NextBtnLabel
+        {
+            get
+            {
+                return _nextBtnLabel;
+            }
+            set
+            {
+                _nextBtnLabel = value;
+                OnPropertyChanged(nameof(NextBtnLabel));
+            }
+        }
+        
+        private Brush _nextBtnLabelForeground = Brushes.White;
+        public Brush NextBtnLabelForeground
+        {
+            get
+            {
+                return _nextBtnLabelForeground;
+            }
+            set
+            {
+                _nextBtnLabelForeground = value;
+                OnPropertyChanged(nameof(NextBtnLabelForeground));
+            }
+        }
+        
         private string _installationName = "";
         public string InstallationName
         {
@@ -64,93 +125,80 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             set
             {
                 _settingList = value;
-                OnPropertyChanged(nameof(SettingList));
+                OnPropertyChanged(nameof(SettingList)); 
             }
         }
 
-        public ObservableCollection<int> ProgressItems { get; set; }
+        public ObservableCollection<ProgressBarItem> ProgressItems { get; set; }
 
-        private SortedDictionary<int, ObservableCollection<Setting>> InstallationItems = new();
+        public readonly SolidColorBrush greenProgressBar = new SolidColorBrush(Color.FromRgb(0x00, 0xE5, 0x00));
 
-        private ObservableCollection<DictionaryInput> _keyValueItems;
+        public readonly SolidColorBrush grayProgressBar = new SolidColorBrush(Colors.LightGray);
+
+        private Dictionary<int, ObservableCollection<Setting>> InstallationItems = new();
+
+        private ObservableCollection<DictionaryInput> _keyValueItems = new();
+
+        private ObservableCollection<DictionaryInput> _inputList;
 
         private int currentSettingListIndex = 0;
 
-        private List<int> OrderedKeysInInstalltionSettings; 
+        private bool isCloseSettingModalEnable = false;
+        public Setting SettingSelected { get; set; }    
+        public DictionaryInput InputSelected { get; set; }
+        public DictionaryInput KeyValuePairSelected { get; set; }
 
         public SettingViewModel()
         {
-            ProgressItems = new ObservableCollection<int>();
+            isCloseSettingModalEnable = false; 
 
-            _keyValueItems = new ObservableCollection<DictionaryInput>()
-            {
-                new DictionaryInput()
-                {
-                    DictionaryKey = "DictionaryKey1",
-                    DictionaryValue = "DictionaryValue1",
-                },               
-                new DictionaryInput()
-                {
-                    DictionaryKey = "DictionaryKey2",
-                    DictionaryValue = "DictionaryValue2",
-                },               
+            ProgressItems = new ObservableCollection<ProgressBarItem>();
 
-            };
-
-            //SettingList = new ObservableCollection<Setting>()
+            //_keyValueItems = new ObservableCollection<DictionaryInput>()
             //{
-            //    new Setting() { 
-            //        SettingType = 0,
-            //        SettingName = "Container Name",
-            //        SettingValue = "Value",                    
-            //    },                    
-            //    new Setting() { 
-            //        SettingType = 1,
-            //        SettingName = "Ports",
-            //        InputList = new ObservableCollection<DictionaryInput>(){
-            //            new DictionaryInput()
-            //            {
-            //                DictionaryValue = "Value1",
-            //            },
-            //            new DictionaryInput()
-            //            {
-            //                DictionaryValue = "Value2",
-            //            }
-            //        }
-            //    },                    
-            //    new Setting() {
-            //        SettingType = 2,
-            //        SettingName = "Environment Variables",
-            //        SettingKey = "Key0",
-            //        SettingValue = "Value0",
-            //        KeyValueItems = keyValueItems
-            //    },
+            //    new DictionaryInput()
+            //    {
+            //        DictionaryKey = "DictionaryKey1",
+            //        DictionaryValue = "DictionaryValue1",
+            //    },               
+            //    new DictionaryInput()
+            //    {
+            //        DictionaryKey = "DictionaryKey2",
+            //        DictionaryValue = "DictionaryValue2",
+            //    },               
+
             //};
 
             SettingList = new ObservableCollection<Setting>();
         }
 
         #region DELEGATE METHODS
+
         private DelegateOverlayShow? delegateOverlayShow = null;
         public void SetVMDelegateOverlayShow(DelegateOverlayShow del)
         {
             this.delegateOverlayShow = del;
-        }
-        #endregion
-
-        //Remove Main Window Overlay
-        public void RemoveMainWindowOverlay()
+        }         
+        private DelegateInstallationData? delegateInstallationData = null;
+        public void SetVMDelegateInstallationData(DelegateInstallationData del)
         {
-            delegateOverlayShow?.Invoke(false);
+            this.delegateInstallationData = del;
         }
+        
+        #endregion
 
         //Deinitiate Setting Modal
         public void DeInit()
         {
             InstallationItems.Clear();
+            delegateOverlayShow?.Invoke(false);
             Debug.WriteLine("InstallationItems.count: " + InstallationItems.Count);
         }
-
+        //Close Setting Modal
+        public bool CloseSettingModal()
+        {
+            return isCloseSettingModalEnable;
+        }
         //Set the number of progress bar
         public void SelectedInstallationListener(List<Install> selectedInstallation)
         {
@@ -158,62 +206,61 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             {
                 for (int i = 0; i < selectedInstallation.Count; i++)
                 {
-                    ProgressItems.Add(i);
+                    ProgressItems.Add( i < 1 ? new ProgressBarItem() { ProgressBarColor = greenProgressBar } : new ProgressBarItem() { ProgressBarColor = grayProgressBar });
                 }
-
-                foreach (var item in selectedInstallation)
+                //sort selection installations list order by Install ID
+                List<Install> sortedSelectedInstallation = new List<Install>();
+                sortedSelectedInstallation = selectedInstallation.OrderBy(s => s.InstallID).ToList();
+                foreach (var item in sortedSelectedInstallation)
                 {
-                    //InstallationItems[item.InstallID] = new ObservableCollection<Setting>()
-                    //{
-                    //    new Setting() {
-                    //        SettingType = 0,
-                    //        SettingName = item.InstallName,
-                    //        SettingValue = "Value",
-                    //    },
-                    //    new Setting() {
-                    //        SettingType = 1,
-                    //        SettingName = "Ports",
-                    //        InputList = new ObservableCollection<DictionaryInput>(){
-                    //            new DictionaryInput()
-                    //            {
-                    //                DictionaryValue = "Value1",
-                    //            },
-                    //            new DictionaryInput()
-                    //            {
-                    //                DictionaryValue = "Value2",
-                    //            }
-                    //        }
-                    //    },
-                    //    new Setting() {
-                    //        SettingType = 2,
-                    //        SettingName = "Environment Variables",
-                    //        KeyValueItems = _keyValueItems
-                    //    },
-                    //};
                     InstallationItems[item.InstallID] = item.SettingList;
                 }
+                
+                SettingTitle = PublicFunction.GetInstallationName(InstallationItems.First().Key);
                 SettingList = InstallationItems.First().Value;
-                OrderedKeysInInstalltionSettings = InstallationItems.Keys.ToList();// already sorted because it's a SortedDictionary
-            }
 
+                if (selectedInstallation.Count == 1)
+                {
+                    NextBtnLabel = "Run";
+                    NextBtnLabelForeground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF212121")); ;
+                }
+                //OrderedKeysInInstalltionSettings = InstallationItems.Keys.ToList();// already sorted because it's a SortedDictionary
+            }
         }
 
         //Button of adding single input box to inputlist
-        public DictionaryInput InputSelected { get; set; }
-        public void AddInputItems(Setting setting)
+        //public void AddInputItems(Setting setting)
+        //{
+        //    Debug.WriteLine("count of InputList " + InputSelected.DictionaryValue);
+        //    if (setting.InputList == null)
+        //    {
+        //        setting.InputList = new ObservableCollection<DictionaryInput>();
+        //    }
+
+        //    setting.InputList.Add(new DictionaryInput() { DictionaryValue = "Value"});
+        //    Debug.WriteLine("count of InputList " + setting.InputList.Count);
+        //}
+        public void AddInputItems()
         {
-            Debug.WriteLine("count of InputList " + InputSelected.DictionaryValue);
-            if (setting.InputList == null)
+            if (!InputSelected.IsRemovable)
             {
-                setting.InputList = new ObservableCollection<DictionaryInput>();
+                InputSelected.AddBtnImageSource = "/Views/Assets/Icon_Remove_FFD3D3D3.png";
+                var targetSetting = SettingList.FirstOrDefault(s => s.SettingName == SettingSelected.SettingName);
+                _inputList = targetSetting.InputList;
+                _inputList.Add(new DictionaryInput());
+                InputSelected.IsRemovable = true;
+            }
+            else
+            {
+                var targetSetting = SettingList.FirstOrDefault(s => s.SettingName == SettingSelected.SettingName);
+                _inputList = targetSetting.InputList;
+                _inputList.Remove(InputSelected);
             }
 
-            setting.InputList.Add(new DictionaryInput() { DictionaryValue = "Value"});
-            Debug.WriteLine("count of InputList " + setting.InputList.Count);
+            Debug.WriteLine($"keyValueItems.Count : {_inputList.Count}");
         }
 
         //Button of adding key value input box to keyValueItemsList
-        public DictionaryInput KeyValuePairSelected { get; set; }
         public void AddKeyValuePair()
         {
             Debug.WriteLine($"Key : {KeyValuePairSelected.DictionaryKey} | Value : {KeyValuePairSelected.DictionaryValue}");
@@ -222,14 +269,14 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             if(!KeyValuePairSelected.IsRemovable)
             {
                 KeyValuePairSelected.AddBtnImageSource = "/Views/Assets/Icon_Remove_FFD3D3D3.png";
-                var targetSetting = SettingList.FirstOrDefault(s => s.SettingName == "Environment Variables");
+                var targetSetting = SettingList.FirstOrDefault(s => s.SettingName == SettingSelected.SettingName);
                 _keyValueItems = targetSetting.KeyValueItems;
                 _keyValueItems.Add(new DictionaryInput());
                 KeyValuePairSelected.IsRemovable = true;
             }
             else
             {
-                var targetSetting = SettingList.FirstOrDefault(s => s.SettingName == "Environment Variables");
+                var targetSetting = SettingList.FirstOrDefault(s => s.SettingName == SettingSelected.SettingName);
                 _keyValueItems = targetSetting.KeyValueItems;
                 _keyValueItems.Remove(KeyValuePairSelected);
             }
@@ -242,13 +289,32 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             if (currentSettingListIndex < InstallationItems.Count - 1)
             {
                 currentSettingListIndex++;
-                int nextKey = OrderedKeysInInstalltionSettings[currentSettingListIndex];
+                //int nextKey = OrderedKeysInInstalltionSettings[currentSettingListIndex];
+                int nextKey = currentSettingListIndex;
                 Debug.WriteLine($"NextBtn, Currrent Key: {nextKey}");
-                SettingList = InstallationItems[nextKey];
+                ProgressItems[nextKey] = new ProgressBarItem()
+                {
+                    ProgressBarColor = greenProgressBar,
+                };
+                SettingTitle = PublicFunction.GetInstallationName(InstallationItems.ElementAt(nextKey).Key);
+                SettingList = InstallationItems.ElementAt(nextKey).Value;
+                if (nextKey == InstallationItems.Count - 1)
+                {
+                    NextBtnLabel = "Run";
+                    NextBtnLabelForeground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF212121"));
+                }
+                else
+                {
+                    BackBtnLabel = "Previous";
+                }
             }
             else
             {
                 Debug.WriteLine("Already at last item.");
+
+                //send installation items back to mainwindowviewmodel
+                delegateInstallationData?.Invoke(InstallationItems);
+                isCloseSettingModalEnable = true;
 
                 //foreach (var item in InstallationItems)
                 //{
@@ -265,14 +331,36 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             if (currentSettingListIndex > 0)
             {
                 currentSettingListIndex--;
-                int previousKey = OrderedKeysInInstalltionSettings[currentSettingListIndex];
+                int previousKey = currentSettingListIndex;
                 Debug.WriteLine($"PreviousBtn, Currrent Key: {previousKey}");
-                SettingList = InstallationItems[previousKey];
+                ProgressItems[previousKey+1] = new ProgressBarItem()
+                {
+                    ProgressBarColor = grayProgressBar,
+                };
+                SettingTitle = PublicFunction.GetInstallationName(InstallationItems.ElementAt(previousKey).Key);
+                SettingList = InstallationItems.ElementAt(previousKey).Value;
+
+                if (previousKey == 0)
+                {
+                    BackBtnLabel = "Back";
+                }
+                else
+                {
+                    NextBtnLabel = "Next";
+                    NextBtnLabelForeground = Brushes.White;
+
+                }
             }
             else
             {
                 Debug.WriteLine("Already at first item.");
+                isCloseSettingModalEnable = true;
             }
+        }
+        public void CheckSelectedObject()
+        {
+            //Debug.WriteLine($"SettingName : {SettingSelected.SettingName}");
+            Debug.WriteLine($"Key : {KeyValuePairSelected.DictionaryKey} | Value : {KeyValuePairSelected.DictionaryValue}");
         }
     }
 }

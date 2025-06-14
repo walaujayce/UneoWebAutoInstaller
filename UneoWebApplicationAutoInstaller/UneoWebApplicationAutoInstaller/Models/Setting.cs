@@ -13,12 +13,25 @@ namespace UneoWebApplicationAutoInstaller.Models
 
     public class Setting : ModelBase
     {
+        /// ***IMPORTANT: If add item, also add in CloneInstall() method (InstallProcessViewModel)*** /// 
+
+        private string _settingTitle = "";
         private int _settingType = (int)ESettingType.SingleInput;
         private string _settingName = "";
-        private string _settingKey = "";
+        private string _settingDescription = "";
         private string _settingValue = "";
-        private ObservableCollection<DictionaryInput>? _inputList;
+        private ObservableCollection<DictionaryInput> _inputList = new();
+        private ObservableCollection<DictionaryInput> _keyValueItems = new();
 
+        public string SettingTitle
+        {
+            get => _settingTitle;
+            set
+            {
+                _settingTitle = value;
+                OnPropertyChanged(nameof(SettingTitle));
+            }       
+        }
         public int SettingType
         {
             get => _settingType;
@@ -27,7 +40,7 @@ namespace UneoWebApplicationAutoInstaller.Models
                 _settingType = value;
                 OnPropertyChanged(nameof(SettingType));
             }
-        }    
+        }
         public string SettingName
         {
             get => _settingName;
@@ -37,13 +50,13 @@ namespace UneoWebApplicationAutoInstaller.Models
                 OnPropertyChanged(nameof(SettingName));
             }
         }
-        public string SettingKey
+        public string SettingDescription
         {
-            get => _settingKey;
+            get => _settingDescription;
             set
             {
-                _settingKey = value;
-                OnPropertyChanged(nameof(SettingKey));
+                _settingDescription = value;
+                OnPropertyChanged(nameof(SettingDescription));
             }
         }
         public string SettingValue
@@ -61,9 +74,33 @@ namespace UneoWebApplicationAutoInstaller.Models
             set
             {
                 _inputList = value;
+                if(_inputList.Count > 1)
+                {
+                    foreach (var item in _inputList)
+                    {
+                        if (item == _inputList.Last()) continue;
+                        item.IsRemovable = true;
+                    }
+                }
                 OnPropertyChanged(nameof(InputList)); 
             }
         }
-        public ObservableCollection<DictionaryInput> KeyValueItems { get; set; }
+        public ObservableCollection<DictionaryInput> KeyValueItems
+        {
+            get => _keyValueItems;
+            set
+            {
+                _keyValueItems = value;
+                if (_keyValueItems.Count > 1)
+                {
+                    foreach (var item in _keyValueItems)
+                    {
+                        if (item == _keyValueItems.Last()) continue;
+                        item.IsRemovable = true;
+                    }
+                }
+                OnPropertyChanged(nameof(KeyValueItems));
+            }
+        }
     }
 }

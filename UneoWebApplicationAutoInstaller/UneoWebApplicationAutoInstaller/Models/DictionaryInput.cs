@@ -10,8 +10,9 @@ namespace UneoWebApplicationAutoInstaller.Models
     public class DictionaryInput : ModelBase
     {
         private string _dictionaryKey = "Key";
-        private string _dictionaryValue = "Value";
+        private object _dictionaryValue = "Value";
         private string _addBtnImageSource = "/Views/Assets/Icon_Add_FFD3D3D3.png";
+        private bool _isRemovable = false;
 
         public string DictionaryKey
         {
@@ -23,7 +24,7 @@ namespace UneoWebApplicationAutoInstaller.Models
             }
         }
 
-        public string DictionaryValue
+        public object DictionaryValue
         {
             get => _dictionaryValue;
             set
@@ -42,7 +43,15 @@ namespace UneoWebApplicationAutoInstaller.Models
                 OnPropertyChanged(nameof(AddBtnImageSource));
             }
         }
-
-        public bool IsRemovable { get; set; } = false;
+        public bool IsRemovable
+        {
+            get => _isRemovable;
+            set
+            {
+                _isRemovable = value;
+                if (_isRemovable) _addBtnImageSource = "/Views/Assets/Icon_Remove_FFD3D3D3.png";
+                OnPropertyChanged(nameof(IsRemovable));
+            }
+        }
     }
 }

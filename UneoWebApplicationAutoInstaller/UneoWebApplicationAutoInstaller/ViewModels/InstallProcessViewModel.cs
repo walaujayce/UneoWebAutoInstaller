@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using UneoWebApplicationAutoInstaller.Models;
+using UneoWebApplicationAutoInstaller.Utilities;
 using static UneoWebApplicationAutoInstaller.Utilities.Enums;
 using static UneoWebApplicationAutoInstaller.ViewModels.InstallProcessViewModel;
 using static UneoWebApplicationAutoInstaller.ViewModels.MainWindowViewModel;
@@ -17,7 +18,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 {
     public class InstallProcessViewModel : ViewModelBase
     {
-        private ObservableCollection<Install> _installSelection;
+        private ObservableCollection<Install> _installSelection = new();
         public ObservableCollection<Install> InstallSelection
         {
             get => _installSelection;
@@ -29,59 +30,67 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         }
 
         private List<Install> _installSelected;
-        private ObservableCollection<Install> temp_InstallSelection;
+
         public InstallProcessViewModel()
         {
+            ObservableCollection<DictionaryInput> UMonitorSocketServerAppSettings = Utilities.PublicFunction.LoadJsonFile();
+
             InstallSelection = new ObservableCollection<Install>()
             {
                 new Install() 
                 {
-                    InstallID = (int)EInstallID.PostgreSQL,
+                    InstallID = (int)EInstallID.PostgreSQLDatabase,
                     InstallName = "PostgreSQL Database", 
-                    IsChecked = true, 
+                    IsChecked = false, 
                     SettingList = new()
                     {
                         new Setting()
                         {
-                            SettingType = 0,
+                            SettingType = (int)ESettingType.SingleInput,
                             SettingName = "Image Name",
-                            SettingValue = "Value",
+                            SettingValue = "bitnami/postgresql:latest",
                         },
                         new Setting()
                         {
-                            SettingType = 0,
+                            SettingType = (int)ESettingType.SingleInput,
                             SettingName = "Container Name",
-                            SettingValue = "Value",
+                            SettingValue = "UNEO_DATABASE",
                         },
                         new Setting()
                         {
-                            SettingType = 1,
+                            SettingType = (int)ESettingType.MultipleInput,
                             SettingName = "Ports",
-                            SettingValue = "Value",
+                            InputList = new ObservableCollection<DictionaryInput>()
+                            {
+                                new DictionaryInput()
+                                {
+                                    DictionaryValue = "5432:5432"
+                                },
+                            }                        
                         },
                         new Setting()
                         {
-                            SettingType = 2,
+                            SettingType = (int)ESettingType.MultipleKeyValue,
                             SettingName = "Volumes",
                             KeyValueItems = new ObservableCollection<DictionaryInput>()
                             {
                                 new DictionaryInput()
                                 {
-                                    DictionaryKey = "Key0",
-                                    DictionaryValue = "Value0",
+                                    DictionaryKey = "C:\\Users\\uneo\\postgres_data",
+                                    DictionaryValue = "/bitnami/postgresql",
                                 }
                             }
                         },
                         new Setting()
                         {
-                            SettingType = 2,
+                            SettingType = (int)ESettingType.MultipleKeyValue,
                             SettingName = "Environment Variables",
                             KeyValueItems = new ObservableCollection<DictionaryInput>()
                             {
                                 new DictionaryInput()
                                 {
-                                    DictionaryKey = "Key00",
-                                    DictionaryValue = "Value00",
+                                    DictionaryKey = "POSTGRESQL_PASSWORD",
+                                    DictionaryValue = "uccc07568009",
                                 }
                             }
                         },
@@ -92,40 +101,38 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 { 
                     InstallID = (int)EInstallID.WebAPI,
                     InstallName="WebAPI", 
-                    IsChecked = true,
+                    IsChecked = false,
                     SettingList = new()
                     {
                         new Setting()
                         {
-                            SettingType = 0,
+                            SettingType = (int)ESettingType.SingleInput,
                             SettingName = "Image Name",
-                            SettingValue = "Value",
+                            SettingValue = "uneotw/umonitorwebapi:latest",
                         },
                         new Setting()
                         {
-                            SettingType = 0,
+                            SettingType = (int)ESettingType.SingleInput,
                             SettingName = "Container Name",
-                            SettingValue = "Value",
+                            SettingValue = "UNEO_WEBAPI",
                         },
                         new Setting()
                         {
-                            SettingType = 1,
+                            SettingType = (int)ESettingType.MultipleInput,
                             SettingName = "Ports",
-                            SettingValue = "Value",
-                        },
-                        new Setting()
-                        {
-                            SettingType = 2,
-                            SettingName = "Environment Variables",
-                            KeyValueItems = new ObservableCollection<DictionaryInput>()
+                            InputList = new ObservableCollection<DictionaryInput>()
                             {
                                 new DictionaryInput()
                                 {
-                                    DictionaryKey = "Key1",
-                                    DictionaryValue = "Value1",
+                                    DictionaryValue = "7286:8032",
+                                },                                
+                                new DictionaryInput()
+                                {
+                                    DictionaryValue = "7284:8080"
                                 },
                             }
-                        },
+                        }
+                        
                     }
                 },
                 new Install() 
@@ -133,54 +140,113 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     InstallID = (int)EInstallID.UMonitorSocketServer,
                     InstallName="UMonitorSocketServer",
                     IsChecked = false, 
+                    SettingList = new()
+                    {
+                        new Setting()
+                        {
+                            SettingType = (int)ESettingType.MultipleKeyValue,
+                            SettingName = "App Settings",
+                            KeyValueItems = UMonitorSocketServerAppSettings
+                        } 
+                    }
                 },
                 new Install() 
                 { 
                     InstallID = (int)EInstallID.Website,    
                     InstallName="Website", 
-                    IsChecked = false,
+                    IsChecked = true,
                     SettingList = new()
                     {
                         new Setting()
                         {
-                            SettingType = 0,
+                            SettingType = (int)ESettingType.SingleInput,
                             SettingName = "Image Name",
-                            SettingValue = "Value",
+                            SettingValue = "p2211/uext-v1:latest",
                         },
                         new Setting()
                         {
-                            SettingType = 0,
+                            SettingType = (int)ESettingType.SingleInput,
                             SettingName = "Container Name",
-                            SettingValue = "Value",
+                            SettingValue = "UNEO_WEBSITE",
                         },
                         new Setting()
                         {
-                            SettingType = 1,
+                            SettingType = (int)ESettingType.MultipleInput,
                             SettingName = "Ports",
                             SettingValue = "Value",
+                            InputList = new ObservableCollection<DictionaryInput>()
+                            {
+                                new DictionaryInput()
+                                {
+                                    DictionaryValue = "8005:5173"
+                                }
+                            }
                         },
                         new Setting()
                         {
-                            SettingType = 2,
+                            SettingType = (int)ESettingType.MultipleKeyValueWithReference,
                             SettingName = "Environment Variables",
                             KeyValueItems = new ObservableCollection<DictionaryInput>()
                             {
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "VITE_SOCKETSERVER_URL",
-                                    DictionaryValue = "Value2",
+                                    DictionaryValue = $"{PublicFunction.GetWireless80211IPAddress()}",
                                 },                                
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "VITE_WEBAPI_URL",
-                                    DictionaryValue = "Value2",
+                                    DictionaryValue = $"{PublicFunction.GetEthernetIPAddress()}",
+                                },
+                            }
+                        },
+                    }
+                },
+                new Install()
+                {
+                    InstallID = (int)EInstallID.UMonitorService,
+                    InstallName="UMonitorService",
+                    IsChecked = true,
+                    SettingList = new()
+                    {
+                        new Setting()
+                        {
+                            SettingType = (int)ESettingType.SingleInput,
+                            SettingName = "Image Name",
+                            SettingValue = "p2211/umonitorservices:latest",
+                        },
+                        new Setting()
+                        {
+                            SettingType = (int)ESettingType.SingleInput,
+                            SettingName = "Container Name",
+                            SettingValue = "UNEO_SERVICES",
+                        },
+                        new Setting()
+                        {
+                            SettingType = (int)ESettingType.MultipleKeyValueWithReference,
+                            SettingName = "Environment Variables",
+                            KeyValueItems = new ObservableCollection<DictionaryInput>()
+                            {
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "USERNAME",
+                                    DictionaryValue = "NTU",
+                                },
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "LOCAL_IP",
+                                    DictionaryValue = $"{PublicFunction.GetWireless80211IPAddress()}",
+                                },
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "VITE_WEBAPI_URL",
+                                    DictionaryValue = $"{PublicFunction.GetEthernetIPAddress()}",
                                 },
                             }
                         },
                     }
                 },
             };
-            //InstallSelection = temp_InstallSelection;
         }
 
         private DelegateNavigate? delegateNavigate = null;
@@ -201,27 +267,58 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
         public void ProceedToInstallation()
         {
-            delegateOverlayShow?.Invoke(true);
             _installSelected = new();
+
             foreach (var item in InstallSelection)
             {
                 if (item.IsChecked == true)
                 {
-                    _installSelected.Add(item);
+                    
+                    _installSelected.Add(CloneInstall(item));
                     Debug.WriteLine(item.InstallName);
                 }
             }
-            Debug.WriteLine("");
-            //List<Install> oldList = _installSelected.Select(item => new Install
-            //{
-            //    InstallID = item.InstallID,
-            //    InstallName = item.InstallName,
-            //    InstallDescription = item.InstallDescription,
-            //    IsChecked = item.IsChecked,
-            //    SettingList = item.SettingList
-            //}).ToList();
-
+            if(_installSelected.Count < 1)
+            {
+                MessageBox.Show("At least one application should be selected.", "Alert", MessageBoxButton.OK);
+                return;
+            }
+            delegateOverlayShow?.Invoke(true);
             delegateSelectedInstallation?.Invoke(_installSelected);
         }
+        private Install CloneInstall(Install original)
+        {
+            return new Install
+            {
+                InstallID = original.InstallID,
+                InstallName = original.InstallName,
+                InstallDescription = original.InstallDescription,
+                IsChecked = original.IsChecked,
+                SettingList = new ObservableCollection<Setting>(
+                    original.SettingList.Select(s => new Setting
+                    {
+                        SettingType = s.SettingType,
+                        SettingName = s.SettingName,
+                        SettingValue = s.SettingValue,
+                        InputList = new ObservableCollection<DictionaryInput>(
+                            s.InputList.Select(i => new DictionaryInput
+                            {
+                                DictionaryKey = i.DictionaryKey,
+                                DictionaryValue = i.DictionaryValue,
+                                IsRemovable = i.IsRemovable,
+                                AddBtnImageSource = i.AddBtnImageSource,
+                            })),
+                        KeyValueItems = new ObservableCollection<DictionaryInput>(
+                            s.KeyValueItems.Select(kv => new DictionaryInput
+                            {
+                                DictionaryKey = kv.DictionaryKey,
+                                DictionaryValue = kv.DictionaryValue,
+                                IsRemovable = kv.IsRemovable,
+                                AddBtnImageSource = kv.AddBtnImageSource,
+                            }))
+                    }))
+            };
+        }
+
     }
 }

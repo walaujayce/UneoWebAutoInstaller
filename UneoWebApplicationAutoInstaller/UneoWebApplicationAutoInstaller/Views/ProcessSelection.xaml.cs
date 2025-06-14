@@ -44,6 +44,5 @@ namespace UneoWebApplicationAutoInstaller.Views
         {
             _processSelectionVM.ProcessToNextStage();
         }
-
     }
 }

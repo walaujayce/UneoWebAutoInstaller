@@ -8,12 +8,13 @@
         mc:Ignorable="d"
         WindowStyle="None"
         ResizeMode="NoResize"        
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterOwner"
         Background="Transparent"
         AllowsTransparency="True"
-        Height="500" Width="450">
+        Height="520" Width="450">
 
     <Window.Resources>
+        <!-- Textblock Name -->
         <Style x:Key="TextBlock_Name" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Tahoma"/>
             <Setter Property="Foreground" Value="Black"/>
@@ -21,97 +22,369 @@
             <Setter Property="FontWeight" Value="Normal"/>
             <Setter Property="Margin" Value="0,0,0,10"/>
         </Style>
+        
+        <!-- Textblock Value -->
         <Style x:Key="TextBox_Value" TargetType="TextBox">
             <Setter Property="Foreground" Value="Black"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Padding" Value="10,0,0,0"/>            
+            <Setter Property="Padding" Value="10,5,5,5"/>            
         </Style>
+        
+        <!-- Input box -->
         <Style x:Key="Border_Short" TargetType="Border">
             <Setter Property="BorderBrush" Value="LightGray"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="5"/>
         </Style>
+
+        <!-- Add/Remove button -->
         <Style x:Key="Border_Image" TargetType="Border">
             <Setter Property="Height" Value="35"/>
             <Setter Property="Margin" Value="5,0"/>
-            <Setter Property="Padding" Value="5"/>
-            <Setter Property="BorderBrush" Value="Black"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="17.5"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="Transparent"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                To="#E9E9E9"
+                                Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>    
+                                <ColorAnimation
+                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                To="Transparent"
+                                Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
         </Style>
+        
+        <!-- Close button -->
+        <Style x:Key="Border_Image_CloseBtn" TargetType="Border">
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="Margin" Value="5,0,0,0"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="17.5"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="Transparent"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                            To="#ff4747"
+                            Duration="0:0:0.3"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                            To="Transparent"
+                            Duration="0:0:0.3"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <!-- Back button -->
+        <Style x:Key="BackBtn" TargetType="Border">
+            <Setter Property="Width" Value="80"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="BorderBrush" Value="#0078D3"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="Transparent"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                    Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                    To="#eaeaea"
+                    Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                    Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                    To="Transparent"
+                    Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Next button -->
+        <Style x:Key="NextBtn" TargetType="Border">
+            <Setter Property="Width" Value="80"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="#0078D3"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                    To="#0C49C2"
+                                    Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                    To="#0078D3"
+                                    Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            
+                <DataTrigger Binding="{Binding NextBtnLabel}" Value="Run">
+                    <Setter Property="Background" Value="#00E500"/>
+                </DataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding NextBtnLabel}" Value="Run"/>
+                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                    </MultiDataTrigger.Conditions>
+                    <MultiDataTrigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation
+                                    Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                    To="#00d600"
+                                    Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </MultiDataTrigger.EnterActions>
+                    <MultiDataTrigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                                    Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                    To="#00E500"
+                                    Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </MultiDataTrigger.ExitActions>
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Option button -->
+        <Style x:Key="Border_Option_Image" TargetType="Border">
+            <Setter Property="Width" Value="Auto"/>
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="17.5"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="Transparent"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                        Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                        To="#f2f2f2"
+                        Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                        Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                        To="Transparent"
+                        Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+       
         <!-- Single Input Template -->
         <DataTemplate x:Key="SingleInputTemplate">
-            <StackPanel Orientation="Vertical" Margin="0,0,0,15">
-                <TextBlock Text="{Binding SettingName}" Style="{DynamicResource TextBlock_Name}"/>
-                <Border Height="35" Style="{DynamicResource Border_Short}">
-                    <TextBox Text="{Binding SettingValue}" Style="{DynamicResource TextBox_Value}"/>
-                </Border>
-            </StackPanel>
+            <Grid MouseLeftButtonDown="SetCurrentSettingSelected_Clicked">
+                <StackPanel Orientation="Vertical" Margin="0,0,0,15">
+                    <TextBlock Text="{Binding SettingName}" Style="{DynamicResource TextBlock_Name}"/>
+                    <Border Height="35" Style="{DynamicResource Border_Short}">
+                        <TextBox Text="{Binding SettingValue}" Style="{DynamicResource TextBox_Value}" TextChanged="SettingValue_TextChanged"/>
+                    </Border>
+                </StackPanel>
+            </Grid>
         </DataTemplate>
+        
         <!-- Multiple Input Template -->
         <DataTemplate x:Key="MultipleInputTemplate">
-            <StackPanel Orientation="Vertical" Margin="0,0,0,0">
-                <TextBlock Text="{Binding SettingName}" Style="{DynamicResource TextBlock_Name}"/>
-                <ItemsControl ItemsSource="{Binding InputList}">                    
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Height="35" Margin="0,0,0,15">
-                                <Grid.ColumnDefinitions>    
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Style="{DynamicResource Border_Short}">
-                                    <TextBox Text="{Binding DictionaryValue}" Style="{DynamicResource TextBox_Value}"/>
-                                </Border>
-                                <Border Grid.Column="1" Style="{DynamicResource Border_Image}" MouseLeftButtonUp="AddInputBtn_Clicked">
-                                    <Image Width="Auto" Source="/Views/Assets/Icon_Add_FFD3D3D3.png" />
-                                </Border>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>                
-            </StackPanel>
+            <Grid MouseLeftButtonDown="SetCurrentSettingSelected_Clicked">
+                <StackPanel Orientation="Vertical" Margin="0,0,0,0">
+                    <TextBlock Text="{Binding SettingName}" Style="{DynamicResource TextBlock_Name}"/>
+                    <ItemsControl ItemsSource="{Binding InputList}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Height="35" Margin="0,0,0,15">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Style="{DynamicResource Border_Short}">
+                                        <TextBox Text="{Binding DictionaryValue}" Style="{DynamicResource TextBox_Value}" TextChanged="DictionaryValue_TextChanged"/>
+                                    </Border>
+                                    <Border Grid.Column="1" Style="{DynamicResource Border_Image}" Cursor="Hand" MouseLeftButtonUp="AddInputBtn_Clicked">
+                                        <Image Width="Auto" Source="{Binding AddBtnImageSource}" />
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
         </DataTemplate>
+        
         <!-- Multiple Key Value Template -->
         <DataTemplate x:Key="MultipleKeyValueTemplate">
-            <StackPanel Orientation="Vertical" Margin="0,0,0,0">
-                <TextBlock Text="{Binding SettingName}" Style="{DynamicResource TextBlock_Name}"/>
-                <ItemsControl ItemsSource="{Binding KeyValueItems}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Height="35" Margin="0,0,0,15">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="10"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Border Grid.Column="0" Style="{DynamicResource Border_Short}">
-                                    <TextBox Text="{Binding DictionaryKey}" Style="{DynamicResource TextBox_Value}"/>
-                                </Border>
-                                <Border Grid.Column="2" Style="{DynamicResource Border_Short}">
-                                    <TextBox Text="{Binding DictionaryValue}" Style="{DynamicResource TextBox_Value}"/>
-                                </Border>
-                                <Border Grid.Column="3" Style="{DynamicResource Border_Image}" Cursor="Hand" MouseLeftButtonUp="AddKeyValuePairBtn_Clicked">
-                                    <Image Width="Auto" Source="{Binding AddBtnImageSource}" />
-                                </Border>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                
-            </StackPanel>
+            <Grid MouseLeftButtonDown="SetCurrentSettingSelected_Clicked">
+                <StackPanel Orientation="Vertical" Margin="0,0,0,0">
+                    <TextBlock Text="{Binding SettingName}" Style="{DynamicResource TextBlock_Name}"/>
+                    <ItemsControl ItemsSource="{Binding KeyValueItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Height="35" Margin="0,0,0,15">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Style="{DynamicResource Border_Short}">
+                                        <TextBox Text="{Binding DictionaryKey}" Style="{DynamicResource TextBox_Value}" TextChanged="DictionaryKey_TextChanged"/>
+                                    </Border>
+                                    <Border Grid.Column="2" Style="{DynamicResource Border_Short}">
+                                        <TextBox Text="{Binding DictionaryValue}" Style="{DynamicResource TextBox_Value}" TextChanged="DictionaryValue_TextChanged"/>
+                                    </Border>
+                                    <Border Grid.Column="3" Style="{DynamicResource Border_Image}" Cursor="Hand" MouseLeftButtonUp="AddKeyValuePairBtn_Clicked">
+                                        <Image Width="Auto" Source="{Binding AddBtnImageSource}" />
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
         </DataTemplate>
-
+        
+        <!-- Multiple Key Value With Reference Template -->
+        <DataTemplate x:Key="MultipleKeyValueWithReferenceTemplate">
+            <Grid MouseLeftButtonDown="SetCurrentSettingSelected_Clicked">
+                <StackPanel Orientation="Vertical" Margin="0,0,0,0">
+                    <TextBlock Text="{Binding SettingName}" Style="{DynamicResource TextBlock_Name}"/>
+                    <ItemsControl ItemsSource="{Binding KeyValueItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>                                    
+                                    <Grid Height="35" Margin="0,0,0,15" VerticalAlignment="Top">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="10"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0" Style="{DynamicResource Border_Short}">
+                                            <TextBox Text="{Binding DictionaryKey}" Style="{DynamicResource TextBox_Value}" TextChanged="DictionaryKey_TextChanged"/>
+                                        </Border>
+                                        <Border Grid.Column="2" Style="{DynamicResource Border_Short}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBox Grid.Column="0" Text="{Binding DictionaryValue}" Style="{DynamicResource TextBox_Value}" TextChanged="DictionaryValue_TextChanged"/>
+                                                <Border Grid.Column="1" Style="{DynamicResource Border_Option_Image}" Cursor="Hand" MouseLeftButtonUp="OptionBtn_Clicked" >
+                                                    <Image Source="/Views/Assets/Icon_Option_FFD3D3D3.png"/>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                        <Border Grid.Column="3" Style="{DynamicResource Border_Image}" Cursor="Hand" MouseLeftButtonUp="AddKeyValuePairBtn_Clicked">
+                                            <Image Width="Auto" Source="{Binding AddBtnImageSource}" />
+                                        </Border>
+                                    </Grid>
+                                    
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+        
         <!-- The Selector -->
         <vm:SettingTemplateSelector x:Key="SettingTemplateSelector"
                        SingleInputTemplate="{StaticResource SingleInputTemplate}"
                        MultipleInputTemplate="{StaticResource MultipleInputTemplate}"
-                       MultipleKeyValueTemplate="{StaticResource MultipleKeyValueTemplate}"/>
-
+                       MultipleKeyValueTemplate="{StaticResource MultipleKeyValueTemplate}"
+                       MultipleKeyValueWithReferenceTemplate="{StaticResource MultipleKeyValueWithReferenceTemplate}"
+        />
     </Window.Resources>
     
     <Grid>
@@ -130,12 +403,14 @@
                 <!--Title-->
                 <Grid Grid.Row="0">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" FontFamily="Verdana" FontWeight="Bold" Text="Settings" FontSize="14" Padding="0" Margin="0,5"/>
-                    <Border Grid.Column="1" Style="{DynamicResource Border_Image}">
-                        <Image Cursor="Hand" MouseLeftButtonDown="CloseBtn_Clicked" Source="/Views/Assets/Icon_Close_FFD3D3D3.png"/>
+                    <Border Grid.Column="0" Width="35"/>
+                    <TextBlock Grid.Column="1" FontFamily="Roboto" FontWeight="Bold" Text="{Binding SettingTitle}" FontSize="16" Padding="0" Margin="0,0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <Border Grid.Column="2" Style="{DynamicResource Border_Image_CloseBtn}" Cursor="Hand" MouseLeftButtonUp="CloseBtn_Clicked">
+                        <Image Source="/Views/Assets/Icon_Close_FFD3D3D3.png"/>
                     </Border>
                 </Grid>
                 <!--Progress Bar-->
@@ -147,19 +422,20 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Height="3" Background="Black" CornerRadius="1.5"/>
+                            <Border Height="3" Background="{Binding ProgressBarColor}" CornerRadius="1.5" Margin="1,0"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
                 <!--Setting List-->
-                <Grid Grid.Row="2" Margin="0,5">
+                <Grid Grid.Row="2" Margin="0,5,0,10">
                     <Border BorderBrush="Black" BorderThickness="0" CornerRadius="5">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <Grid>
                                 <ItemsControl ItemsSource="{Binding SettingList}" ItemTemplateSelector="{StaticResource SettingTemplateSelector}" VerticalAlignment="Top">
                                 </ItemsControl>
-                            </Grid>
+                                <!-- Test Area -->                            
+                            </Grid>                            
                         </ScrollViewer>
                     </Border>
                 </Grid>
@@ -171,17 +447,18 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <Grid Grid.Column="0">
-                        <Border Width="100" Height="40" CornerRadius="8" Background="LightGray" Cursor="Hand" MouseLeftButtonUp="BackToPrevious_SettingModal_Clicked">
-                            <Label FontSize="18" Content="Back" Foreground="Gray" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                        <Border Style="{DynamicResource BackBtn}" MouseLeftButtonUp="BackToPrevious_SettingModal_Clicked">
+                            <Label FontSize="14" Content="{Binding BackBtnLabel}" FontFamily="Tahoma" Foreground="#0078D3" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                         </Border>
                     </Grid>
                     <Grid Grid.Column="2">
-                        <Border  Width="100" Height="40" CornerRadius="8" Background="#0078D3" Cursor="Hand" MouseLeftButtonUp="ProceedToNextStage_SettingModal_Clicked">
-                            <Label FontSize="18" Content="Next" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                        <Border Style="{DynamicResource NextBtn}" MouseLeftButtonUp="ProceedToNextStage_SettingModal_Clicked">
+                            <Label FontSize="14" Content="{Binding NextBtnLabel}" FontFamily="Tahoma" Foreground="{Binding NextBtnLabelForeground}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                         </Border>
                     </Grid>
                 </Grid>
             </Grid>
-        </Border>
+        </Border>        
+        <local:OptionsPopup x:Name="OptionPopupList"/>
     </Grid>
 </Window>

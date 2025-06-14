@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using static UneoWebApplicationAutoInstaller.Utilities.Enums;
 
 namespace UneoWebApplicationAutoInstaller.Models
 {
@@ -13,9 +14,10 @@ namespace UneoWebApplicationAutoInstaller.Models
     {
         private int _installID;
         private string _installName = "";
-        private string _installDescription = "";
+        private string _installDescription = ""; 
         private bool _isChecked = false;
         private ObservableCollection<Setting> _settingList = new();
+        private int _installStatus = (int)EInstallStatus.Ongoing; 
 
         public int InstallID
         {
@@ -62,6 +64,14 @@ namespace UneoWebApplicationAutoInstaller.Models
                 OnPropertyChanged("SettingList");
             }
         }
-
+        public int InstallStatus
+        {
+            get => _installStatus;
+            set
+            {
+                _installStatus = value;
+                OnPropertyChanged("InstallStatus");
+            }
+        }
     }
 }

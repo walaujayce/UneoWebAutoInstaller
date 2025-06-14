@@ -54,7 +54,10 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         public DelegateSettingModalShow delegateSettingModalShow;
 
         public delegate void DelegateOverlayShow(bool isShown);
-        public DelegateOverlayShow delegateOverlayShow;
+        public DelegateOverlayShow delegateOverlayShow; 
+        
+        public delegate void DelegateInstallationData(Dictionary<int, ObservableCollection<Setting>> installationData);
+        public DelegateInstallationData delegateInstallationData;
 
         public delegate void DelegateSelectedInstallation(List<Install> selectedInstallation);
         public DelegateSelectedInstallation delegateSelectedInstallation;
@@ -77,6 +80,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             _installProcessPage.SetDelegateSelectedInstallation(new DelegateSelectedInstallation(SettingModalListener));
 
             _progressMonitorPage.SetDelegate(new DelegateNavigate(NavigateToSelectedPage));
+
         }
         private void NavigateToSelectedPage(int pageNumber)
         {
@@ -105,11 +109,17 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         private void SettingModalListener(List<Install> selectedInstallation)
         {
             if (selectedInstallation.Count > 0)
-            {              
-                SettingModal settingModal = new SettingModal();
+            {
+                SettingModal settingModal = new SettingModal()
+                {
+                    Owner = Application.Current.MainWindow,
+                };
+
                 settingModal.SetDelegateOverlayShow(new DelegateOverlayShow(OverlayShowListener));
+                settingModal.SetDelegateInstallationData(new DelegateInstallationData(InstallationDataListener));
                 settingModal.SetSelectedInstallation(selectedInstallation);
-                settingModal.Show();
+
+                settingModal.ShowDialog();
             }
         }
         private void OverlayShowListener(bool isShown)
@@ -128,6 +138,28 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     OverlayVisibility = Visibility.Collapsed;
                 });
             }
+        }
+        private void InstallationDataListener(Dictionary<int, ObservableCollection<Setting>> installationData)
+        {
+            List<int> selectedInstallationIDList = new List<int>();
+            foreach(var item in installationData)
+            {
+                selectedInstallationIDList.Add(item.Key);
+                Debug.WriteLine($"Key : {item.Key} | Value : {item.Value}");
+            }
+            
+            //Get items of installation and enumerate all To-do-list in progress monitor page
+            _progressMonitorPage.GetSelectedInstallation(selectedInstallationIDList);
+            
+            NavigateToSelectedPage((int)ENavigatePage.ProgressMonitorPage);
+           
+            //Dataparser to new model for installation process
+
+        }
+
+        private void InstallationStatusListener(Dictionary<string, bool> installationResponse)
+        {
+            _progressMonitorPage.SendInstallationResponseToProgressMonitorPage(installationResponse);
         }
 
     }

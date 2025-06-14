@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using UneoWebApplicationAutoInstaller.Models;
+using UneoWebApplicationAutoInstaller.Utilities;
+using static UneoWebApplicationAutoInstaller.Utilities.Enums;
 using static UneoWebApplicationAutoInstaller.ViewModels.MainWindowViewModel;
 using static UneoWebApplicationAutoInstaller.ViewModels.ProgressMonitorViewModel;
 
@@ -15,32 +17,78 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 {
     public class ProgressMonitorViewModel : ViewModelBase
     {
-        public ObservableCollection<Progress> ProgressList { get; set; }
-
+        private ObservableCollection<Progress> _progressList;
+        public ObservableCollection<Progress> ProgressList
+        {
+            get => _progressList;
+            set
+            {
+                _progressList = value;
+                OnPropertyChanged(nameof(ProgressList));
+            }
+        }
         public delegate void DelegateInstallStatus(string message);
         public DelegateInstallStatus? delegateInstallStatus = null;
 
         public ProgressMonitorViewModel()
         {
-        //    ProgressList = new ObservableCollection<Progress>()
-        //    {
-        //        new Progress() { ProgressName="PostgreSQL Database", ProgressDescription="I don't have the application installed on my computer and I want to install it."},
-        //        new Progress() { ProgressName="WebAPI", ProgressDescription="My application is not working correctly and I want to reinstall it."}
-        //    };
+            _progressList = new ObservableCollection<Progress>();
         }
         private DelegateNavigate? delegateNavigate = null;
         public void SetDelegateNavigate(DelegateNavigate del)
         {
             this.delegateNavigate = del;
         }
-        private void ProcessStatusListener(string message)
+        public void GetSelectedInstallationVM(List<int> selectedInstallationID)
         {
-            Debug.WriteLine("message in listener: " + message);
-            Application.Current.Dispatcher.Invoke(() =>
+            int index = 0;
+
+            _progressList.Clear();
+            if (selectedInstallationID != null)
             {
-                ProgressList.Clear();
-                ProgressList.Add(new Progress() { ProgressName = $"{message}" });               
-            });
+                foreach (var installID in selectedInstallationID)
+                {
+                    List<string> list = PublicFunction.EnumerateInstallToDoList(installID);
+                    foreach (var item in list)
+                    {
+                        _progressList.Add(new Progress()
+                        {
+                            ProgressID = index,
+                            ProgressName = $"{item}",
+                        });
+                        index++;
+                    }
+                }
+            }    
+  
         }
+        public void InstallationResponseListener(Dictionary<string, bool> installationResponse)
+        {
+            
+        }
+        public void Test_Click()
+        {
+            Test_1();
+        }
+        private async void Test_1()
+        {
+            await Task.Delay(100);
+            foreach (var item in _progressList.ToList())
+            {
+                item.StatusState = (int)EInstallStatus.Ongoing;
+                item.TextOpacity = 1.0;
+                await Task.Delay(1500);
+                if (item.ProgressID % 2 != 0)
+                {
+                    item.StatusState = (int)EInstallStatus.Success;
+                }
+                else
+                {
+                    item.StatusState = (int)EInstallStatus.Fail;
+                }
+                await Task.Delay(500);
+            }
+        }
+
     }
 }
