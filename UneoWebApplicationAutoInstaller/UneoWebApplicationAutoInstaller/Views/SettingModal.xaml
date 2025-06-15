@@ -11,7 +11,8 @@
         WindowStartupLocation="CenterOwner"
         Background="Transparent"
         AllowsTransparency="True"
-        Height="520" Width="450">
+        Height="520" Width="450"
+        Focusable="True" PreviewKeyUp="SettingModal_PreviewKeyUp">
 
     <Window.Resources>
         <!-- Textblock Name -->

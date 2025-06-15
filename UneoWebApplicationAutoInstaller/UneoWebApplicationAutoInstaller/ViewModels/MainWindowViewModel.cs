@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -11,11 +12,13 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Navigation;
+using Newtonsoft.Json.Linq;
 using UneoWebApplicationAutoInstaller.Command;
 using UneoWebApplicationAutoInstaller.Models;
 using UneoWebApplicationAutoInstaller.Utilities;
 using UneoWebApplicationAutoInstaller.Views;
 using static UneoWebApplicationAutoInstaller.Utilities.Enums;
+using ProcessOrigin = System.Diagnostics.Process;
 
 namespace UneoWebApplicationAutoInstaller.ViewModels
 {
@@ -58,13 +61,13 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         public delegate void DelegateOverlayShow(bool isShown);
         public DelegateOverlayShow delegateOverlayShow; 
         
-        public delegate void DelegateInstallationData(Dictionary<int, ObservableCollection<Setting>> installationData);
+        public delegate void DelegateInstallationData(Dictionary<int, List<Setting>> installationData);
         public DelegateInstallationData delegateInstallationData;
 
         public delegate void DelegateSelectedInstallation(List<Install> selectedInstallation);
         public DelegateSelectedInstallation delegateSelectedInstallation;
 
-        public delegate void DelegateProgressResult(Dictionary<int, int> progressResult);
+        public delegate void DelegateProgressResult(Progress progressResult);
 
         private ProcessSelection _processSelectionPage = new();
         private InstallProcess _installProcessPage = new();
@@ -122,28 +125,26 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 settingModal.SetDelegateOverlayShow(new DelegateOverlayShow(OverlayShowListener));
                 settingModal.SetDelegateInstallationData(new DelegateInstallationData(InstallationDataListener));
                 settingModal.SetSelectedInstallation(selectedInstallation);
-
                 settingModal.ShowDialog();
             }
         }
         private void OverlayShowListener(bool isShown)
         {
-            if (isShown)
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                if (isShown)
                 {
                     OverlayVisibility = Visibility.Visible;
-                });
-            }
-            else
-            {
-                Application.Current.Dispatcher.Invoke(() =>
+
+                }
+                else
                 {
+
                     OverlayVisibility = Visibility.Collapsed;
-                });
-            }
+                }
+            });
         }
-        private void InstallationDataListener(Dictionary<int, ObservableCollection<Setting>> installationData)
+        private async void InstallationDataListener(Dictionary<int, List<Setting>> installationData)
         {
             //Get items of installation and enumerate all To-do-list in progress monitor page
             int index = 0;
@@ -167,6 +168,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             
             NavigateToSelectedPage((int)ENavigatePage.ProgressMonitorPage);
 
+            //Check Docker Is Running And Auto Restart Enabled 
+            //if (!await CheckDockerIsRunningAndAutoRestartEnabled()) return;
+
             //Dataparser to new model for installation process
             if (installationData.Count > 0)
             {
@@ -176,9 +180,71 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             }
         }
 
-        private void ProgressResultListener(Dictionary<int, int> progressResult)
+        private void ProgressResultListener(Progress progressResult)
         {
             _progressMonitorPage.SendInstallationResponseToProgressMonitorPage(progressResult);
+        }
+        public async Task<bool> CheckDockerIsRunningAndAutoRestartEnabled()
+        {
+            ///Check Docker Is Running
+            Debug.WriteLine("STEP 1");
+            bool isDockerRunning = false;
+            do
+            {
+                isDockerRunning = ProcessOrigin.GetProcessesByName("com.docker.backend").Any();
+                if (!isDockerRunning)
+                {
+                    MessageBoxResult result = MessageBox.Show(Application.Current.MainWindow, "Please run Docker before proceed to next step.\n\nPress \"No\" to cancel installation.", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    if(result == MessageBoxResult.No)
+                    {
+                        NavigateToSelectedPage((int)ENavigatePage.ProcessSelectionPage);
+                        return isDockerRunning;
+                    }
+                    await Task.Delay(10);
+                }
+                else
+                {
+                    Debug.WriteLine("Docker Desktop is running.");
+                }
+
+            }while (!isDockerRunning);
+
+            //Check Docker Auto Restart Enabled
+            Debug.WriteLine("STEP 2");
+
+            if (!isDockerRunning) return isDockerRunning; // Docker is not running, go back
+
+            bool autoRestart = false;
+            do
+            {
+                string settingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Docker", "settings-store.json");
+
+                if (File.Exists(settingsFilePath))
+                {
+                    string jsonContent = await File.ReadAllTextAsync(settingsFilePath);
+                    JObject settings = JObject.Parse(jsonContent);
+
+                    autoRestart = settings["AutoStart"]?.ToObject<bool>() ?? false;
+
+                    if (!autoRestart)
+                    {
+                        MessageBoxResult result = MessageBox.Show(Application.Current.MainWindow, "1) Go to Docker Desktop -> Settings -> General\n2) Enable \"Start Docker Desktop when you sign in to your computer\".\n\nPress \"Ok\" after Docker Desktop's setting has changed or press \"Cancel\" to ignore.", "Run Docker Desktop automatically when you sign in to your computer", MessageBoxButton.OKCancel, MessageBoxImage.Information);
+                        if(result == MessageBoxResult.Cancel)
+                        {
+                            Debug.WriteLine("Docker Desktop is NOT set to start on login.");
+                            break;
+                        }
+                        await Task.Delay(10);
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Docker Desktop is set to start on login.");
+                    }
+                }
+            } while (!autoRestart);
+
+            return isDockerRunning; // Docker is not running, go back
+
         }
 
     }

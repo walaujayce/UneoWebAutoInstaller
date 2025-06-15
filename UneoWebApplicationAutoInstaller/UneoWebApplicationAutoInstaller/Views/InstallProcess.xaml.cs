@@ -29,6 +29,7 @@ namespace UneoWebApplicationAutoInstaller.Views
             InitializeComponent();
             installProcessVM = new InstallProcessViewModel();
             DataContext = installProcessVM;
+            this.Focus();
         }
         public void SetDelegate(DelegateNavigate del)
         {
@@ -51,5 +52,13 @@ namespace UneoWebApplicationAutoInstaller.Views
             installProcessVM.ProceedToInstallation();
         }
 
+        private void InstallProcess_PreviewKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                installProcessVM.ProceedToInstallation();
+                e.Handled = true;
+            }
+        }
     }
 }

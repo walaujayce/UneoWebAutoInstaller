@@ -48,16 +48,18 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             }  
   
         }
-        public void InstallationResponseListener(Dictionary<int, int> progressResult)
+        public void InstallationResponseListener(Progress progressResult)
         {
-            foreach (var item in progressResult)
+            var progressItem = _progressList.FirstOrDefault(p => p.ProgressID == progressResult.ProgressID);
+            if (progressItem != null)
             {
-                _progressList.FirstOrDefault(p => p.ProgressID == item.Key).StatusState = item.Value;
+                progressItem.TextOpacity = 1.0;
+                progressItem.StatusState = progressResult.StatusState;
             }
         }
         public void Test_Click()
         {
-            Test_1();
+            //Test_1();
         }
         private async void Test_1()
         {

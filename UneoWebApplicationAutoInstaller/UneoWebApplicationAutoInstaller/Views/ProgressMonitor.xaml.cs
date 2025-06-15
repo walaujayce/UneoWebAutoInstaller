@@ -51,7 +51,7 @@ namespace UneoWebApplicationAutoInstaller.Views
         {
             _progressMonitorVM.GetSelectedInstallationTodoListVM(progressList);
         }
-        public void SendInstallationResponseToProgressMonitorPage(Dictionary<int, int> progressResponse)
+        public void SendInstallationResponseToProgressMonitorPage(Progress progressResponse)
         {
             _progressMonitorVM.InstallationResponseListener(progressResponse);
         }

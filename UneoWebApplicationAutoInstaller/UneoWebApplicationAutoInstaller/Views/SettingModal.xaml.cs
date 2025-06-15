@@ -143,5 +143,21 @@ namespace UneoWebApplicationAutoInstaller.Views
             OptionPopupList.ShowPopup();
         }
 
+        private void SettingModal_PreviewKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                settingVM.GoToNextInstallationSettings();
+                if (settingVM.CloseSettingModal())
+                {
+                    this.Close();
+                    settingVM.DeInit();
+                }
+            }else if (e.Key == Key.Escape)
+            {
+                this.Close();
+                settingVM.DeInit();
+            }
+        }
     }
 }
