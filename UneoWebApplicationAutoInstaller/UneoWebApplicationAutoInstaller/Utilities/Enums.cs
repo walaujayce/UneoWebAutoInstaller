@@ -34,7 +34,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
         public enum EInstallStatus
         {
             Fail = 0,
-            Success = 1,
+            Pass = 1,
             Ongoing = 2,
             Pending = 3,
         }

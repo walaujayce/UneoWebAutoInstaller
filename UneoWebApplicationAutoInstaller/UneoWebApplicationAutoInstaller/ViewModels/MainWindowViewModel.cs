@@ -4,12 +4,14 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Navigation;
+using UneoWebApplicationAutoInstaller.Command;
 using UneoWebApplicationAutoInstaller.Models;
 using UneoWebApplicationAutoInstaller.Utilities;
 using UneoWebApplicationAutoInstaller.Views;
@@ -61,6 +63,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
         public delegate void DelegateSelectedInstallation(List<Install> selectedInstallation);
         public DelegateSelectedInstallation delegateSelectedInstallation;
+
+        public delegate void DelegateProgressResult(Dictionary<int, int> progressResult);
 
         private ProcessSelection _processSelectionPage = new();
         private InstallProcess _installProcessPage = new();
@@ -141,25 +145,40 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         }
         private void InstallationDataListener(Dictionary<int, ObservableCollection<Setting>> installationData)
         {
-            List<int> selectedInstallationIDList = new List<int>();
-            foreach(var item in installationData)
-            {
-                selectedInstallationIDList.Add(item.Key);
-                Debug.WriteLine($"Key : {item.Key} | Value : {item.Value}");
-            }
-            
             //Get items of installation and enumerate all To-do-list in progress monitor page
-            _progressMonitorPage.GetSelectedInstallation(selectedInstallationIDList);
+            int index = 0;
+            List<Progress> progressList = new List<Progress>();
+            foreach (var item in installationData)
+            {
+                Debug.WriteLine($"Key : {item.Key} | Value : {item.Value}");
+                List<string> toDoLsit = PublicFunction.EnumerateInstallToDoList(item.Key);
+                foreach (var toDo in toDoLsit)
+                {
+                    progressList.Add(new Progress()
+                    {
+                        ProgressID = index,
+                        ProgressName = $"{toDo}",
+                    });
+                    index++;
+                }
+            }
+
+            _progressMonitorPage.GetSelectedInstallationTodoList(progressList);
             
             NavigateToSelectedPage((int)ENavigatePage.ProgressMonitorPage);
-           
-            //Dataparser to new model for installation process
 
+            //Dataparser to new model for installation process
+            if (installationData.Count > 0)
+            {
+                CmdDataParser cmdDataParser = new CmdDataParser();
+                cmdDataParser.DataParser(installationData);
+                cmdDataParser.SetDelegateProgressResult(new DelegateProgressResult(ProgressResultListener));
+            }
         }
 
-        private void InstallationStatusListener(Dictionary<string, bool> installationResponse)
+        private void ProgressResultListener(Dictionary<int, int> progressResult)
         {
-            _progressMonitorPage.SendInstallationResponseToProgressMonitorPage(installationResponse);
+            _progressMonitorPage.SendInstallationResponseToProgressMonitorPage(progressResult);
         }
 
     }

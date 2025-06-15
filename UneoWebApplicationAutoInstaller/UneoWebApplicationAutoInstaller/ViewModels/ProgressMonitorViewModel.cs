@@ -39,32 +39,21 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         {
             this.delegateNavigate = del;
         }
-        public void GetSelectedInstallationVM(List<int> selectedInstallationID)
+        public void GetSelectedInstallationTodoListVM(List<Progress> progressList)
         {
-            int index = 0;
-
             _progressList.Clear();
-            if (selectedInstallationID != null)
+            foreach (var progress in progressList)
             {
-                foreach (var installID in selectedInstallationID)
-                {
-                    List<string> list = PublicFunction.EnumerateInstallToDoList(installID);
-                    foreach (var item in list)
-                    {
-                        _progressList.Add(new Progress()
-                        {
-                            ProgressID = index,
-                            ProgressName = $"{item}",
-                        });
-                        index++;
-                    }
-                }
-            }    
+                _progressList.Add(progress);
+            }  
   
         }
-        public void InstallationResponseListener(Dictionary<string, bool> installationResponse)
+        public void InstallationResponseListener(Dictionary<int, int> progressResult)
         {
-            
+            foreach (var item in progressResult)
+            {
+                _progressList.FirstOrDefault(p => p.ProgressID == item.Key).StatusState = item.Value;
+            }
         }
         public void Test_Click()
         {
@@ -80,7 +69,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 await Task.Delay(1500);
                 if (item.ProgressID % 2 != 0)
                 {
-                    item.StatusState = (int)EInstallStatus.Success;
+                    item.StatusState = (int)EInstallStatus.Pass;
                 }
                 else
                 {
