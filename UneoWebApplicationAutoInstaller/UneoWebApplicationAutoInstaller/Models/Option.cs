@@ -8,7 +8,7 @@ namespace UneoWebApplicationAutoInstaller.Models
 {
     public class Option : ModelBase
     {
-        private string _optionName { get; set; } = "";
+        private string _optionName = "";
         public string OptionName
         {
             get
@@ -19,6 +19,19 @@ namespace UneoWebApplicationAutoInstaller.Models
             {
                 _optionName = value;
                 OnPropertyChanged(nameof(OptionName));
+            }
+        }
+        private string _optionValue = "";
+        public string OptionValue
+        {
+            get
+            {
+                return _optionValue;
+            }
+            set
+            {
+                _optionValue = value;
+                OnPropertyChanged(nameof(OptionValue));
             }
         }
     }

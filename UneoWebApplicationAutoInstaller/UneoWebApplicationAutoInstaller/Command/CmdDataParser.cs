@@ -160,7 +160,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 Log.I(TAG, "Start to containerize image");
 
 #if DEBUG
-                await CommandExecutor.Instance.RunCommandAsAdminAsync($"docker run -d --restart unless-stopped -e -p 5430:5432 -v {POSTGRESQL_FOLDER}:/bitnami/postgresql --name {POSTGRESQL_CONTAINER_NAME} {POSTGRESQL_IMAGE}", "Containerized postgresql image");
+                await CommandExecutor.Instance.RunCommandAsAdminAsync($"docker run -d --restart unless-stopped -e ALLOW_EMPTY_PASSWORD=yes -p 5430:5432 -v {POSTGRESQL_FOLDER}:/bitnami/postgresql --name {POSTGRESQL_CONTAINER_NAME} {POSTGRESQL_IMAGE}", "Containerized postgresql image");
 #else
                 await CommandExecutor.Instance.RunCommandAsAdminAsync($"docker run -d --restart unless-stopped -e POSTGRESQL_PASSWORD={POSTGRESQL_PASSWORD} -p 5432:5432 -v {POSTGRESQL_FOLDER}:/bitnami/postgresql --name {POSTGRESQL_CONTAINER_NAME} {POSTGRESQL_IMAGE}", "Containerized postgresql image");
 #endif

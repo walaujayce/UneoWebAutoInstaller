@@ -151,8 +151,8 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             {
                 // Ignore vEthernet interfaces
                 if (networkInterface.Name.StartsWith("vEthernet")) continue;
-                //if (networkInterface.Name.StartsWith("Loopback")) continue; 
-                //if (networkInterface.Name.StartsWith("Wi-Fi")) continue; 
+                if (networkInterface.Name.StartsWith("Loopback")) continue; 
+                //if (networkInterface.Name.StartsWith("Wi-Fi")) continue; z
 
                 // Only check interfaces that are up
                 if (networkInterface.OperationalStatus == OperationalStatus.Up)

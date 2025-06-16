@@ -4,12 +4,14 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UneoWebApplicationAutoInstaller.Utilities;
 using ProcessOrigin = System.Diagnostics.Process;
 
 namespace UneoWebApplicationAutoInstaller.Command
 {
     public class CommandExecutor
     {
+        private const string TAG = "CMD";
         private static readonly Lazy<CommandExecutor> _instance = new Lazy<CommandExecutor>(() => new CommandExecutor());
 
         private bool success = false;
@@ -30,6 +32,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
             try
             {
+                Log.I(TAG, msg);
                 var processStartInfo = new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
@@ -44,7 +47,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 {
                     if (process == null)
                     {
-                        Console.WriteLine("Failed to start the process.");
+                        Debug.WriteLine("Failed to start the process.");
                         return false;
                     }
 
@@ -66,6 +69,7 @@ namespace UneoWebApplicationAutoInstaller.Command
         {
             try
             {
+                Log.I(TAG, msg);
                 var processStartInfo = new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
