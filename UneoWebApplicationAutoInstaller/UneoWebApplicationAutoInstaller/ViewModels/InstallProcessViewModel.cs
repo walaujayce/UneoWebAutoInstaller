@@ -41,7 +41,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 {
                     InstallID = (int)EInstallID.PostgreSQLDatabase,
                     InstallName = "PostgreSQL Database", 
-                    IsChecked = true, 
+                    IsChecked = false, 
                     SettingList = new()
                     {
                         new Setting()
@@ -100,7 +100,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 new Install() 
                 { 
                     InstallID = (int)EInstallID.WebAPI,
-                    InstallName="WebAPI", 
+                    InstallName = "WebAPI", 
                     IsChecked = false,
                     SettingList = new()
                     {
@@ -138,7 +138,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 new Install() 
                 {
                     InstallID = (int)EInstallID.UMonitorSocketServer,
-                    InstallName="UMonitorSocketServer",
+                    InstallName = "UMonitorSocketServer",
                     IsChecked = false, 
                     SettingList = new()
                     {
@@ -153,8 +153,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 new Install() 
                 { 
                     InstallID = (int)EInstallID.Website,    
-                    InstallName="Website", 
-                    IsChecked = false,
+                    InstallName = "Website", 
+                    IsChecked = true,
                     SettingList = new()
                     {
                         new Setting()
@@ -205,7 +205,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 new Install()
                 {
                     InstallID = (int)EInstallID.UMonitorService,
-                    InstallName="UMonitorService",
+                    InstallName = "UMonitorService",
                     IsChecked = false,
                     SettingList = new()
                     {
@@ -247,6 +247,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     }
                 },
             };
+            Debug.WriteLine($"VITE_WEBAPI_URL = {InstallSelection.FirstOrDefault(x => x.InstallID == (int)EInstallID.Website).SettingList.FirstOrDefault(s => s.SettingName == "Environment Variables").KeyValueItems.FirstOrDefault(kv => kv.DictionaryKey == "VITE_WEBAPI_URL").DictionaryValue.ToString()}");
+            Debug.WriteLine($"VITE_SOCKETSERVER_URL = {InstallSelection.FirstOrDefault(x => x.InstallID == (int)EInstallID.Website).SettingList.FirstOrDefault(s => s.SettingName == "Environment Variables").KeyValueItems.FirstOrDefault(kv => kv.DictionaryKey == "VITE_SOCKETSERVER_URL").DictionaryValue.ToString()}");
+
         }
 
         private DelegateNavigate? delegateNavigate = null;

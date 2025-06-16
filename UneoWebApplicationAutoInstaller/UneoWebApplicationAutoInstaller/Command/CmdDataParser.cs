@@ -28,10 +28,10 @@ namespace UneoWebApplicationAutoInstaller.Command
         private string POSTGRESQL_PASSWORD;
         private string POSTGRESQL_CONTAINER_NAME;
         private string UNEO_WEB;
-        private const string WEBAPI_IMAGE = "uneotw/umonitorwebapi:latest";
-        private const string WEBAPI_CONTAINER_NAME = "UNEO_WEBAPI";
-        private const string WEBSITE_IMAGE = "p2211/uext-v1:latest";
-        private const string WEBSITE_CONTAINER_NAME = "UNEO_WEBSITE";
+        private string WEBAPI_IMAGE = "uneotw/umonitorwebapi:latest";
+        private string WEBAPI_CONTAINER_NAME = "UNEO_WEBAPI";
+        private string WEBSITE_IMAGE = "p2211/uext-v1:latest";
+        private string WEBSITE_CONTAINER_NAME = "UNEO_WEBSITE";
 
         private List<int> OngoingPass;
         private List<int> OngoingFail;
@@ -272,7 +272,17 @@ namespace UneoWebApplicationAutoInstaller.Command
             }
         }
         private async void WebAPIInstallProcess(List<Setting> settingList)
-        {          
+        {
+            WEBAPI_IMAGE = settingList.FirstOrDefault(s => s.SettingName == "Image Name").SettingValue;
+            
+            List<DictionaryInput> portList = settingList.FirstOrDefault(s => s.SettingName == "Ports").InputList.ToList();
+            string portScript = "";
+            foreach (var port in portList)
+            {
+                portScript += $"-p {port.DictionaryValue} ";
+            }
+            WEBAPI_CONTAINER_NAME = settingList.FirstOrDefault(s => s.SettingName == "Container Name").SettingValue;
+
             //6. docker pull uneotw/umonitorwebapi:latest 
             bool is_WEBAPI_IMAGE_Exists = await CommandExecutor.Instance.RunCommandAsAdminAsync($"docker image inspect {WEBAPI_IMAGE}", $"check if {WEBAPI_IMAGE} has already exist.");
             if (is_WEBAPI_IMAGE_Exists)
@@ -299,14 +309,26 @@ namespace UneoWebApplicationAutoInstaller.Command
             {
                 Log.I(TAG, "Container UmonitorWebAPI does NOT exist locally.");
                 Log.I(TAG, "Start to containerize image");
-                await CommandExecutor.Instance.RunCommandAsAdminAsync($"docker run -d --restart unless-stopped -p 7286:8032 -p 7284:8080 --name {WEBAPI_CONTAINER_NAME} {WEBAPI_IMAGE}", "Containerize UmonitorWEBAPI image");
+                await CommandExecutor.Instance.RunCommandAsAdminAsync($"docker run -d --restart unless-stopped {portScript}--name {WEBAPI_CONTAINER_NAME} {WEBAPI_IMAGE}", "Containerize UmonitorWEBAPI image");
             }
         }
         private async void WebsiteInstallProcess(List<Setting> settingList)
-        {        
-            
+        {
+            WEBSITE_IMAGE = settingList.FirstOrDefault(s => s.SettingName == "Image Name").SettingValue;
+            WEBSITE_CONTAINER_NAME = settingList.FirstOrDefault(s => s.SettingName == "Container Name").SettingValue;
+            List<DictionaryInput> portsList = settingList.FirstOrDefault(s => s.SettingName == "Ports").InputList.ToList();
+            string portScript = "";
+            foreach (var item in portsList)
+            {
+                portScript += $"-p {item.DictionaryValue} ";
+            }
+            List<DictionaryInput> environmentVariablesList = settingList.FirstOrDefault(s => s.SettingName == "Environment Variables").KeyValueItems.ToList();
+            string environmentVariableScript = "";
+            foreach (var item in environmentVariablesList)
+            {
+                environmentVariableScript += $"-e {item.DictionaryKey}={item.DictionaryValue} ";
+            }
             //8. docker pull p2211/uext-v1:latest
-
             bool is_WEBSITE_Image_Exists = await CommandExecutor.Instance.RunCommandAsAdminAsync($"docker image inspect {WEBSITE_IMAGE}", $"check if {WEBSITE_IMAGE} has already exist.");
             if (is_WEBSITE_Image_Exists)
             {
@@ -337,9 +359,10 @@ namespace UneoWebApplicationAutoInstaller.Command
                 Log.I(TAG, "Start to containerize image");
 
 #if DEBUG
-                await CommandExecutor.Instance.RunCommandAsAdminAsync($"docker run -d --restart unless-stopped -p 8005:5173 -e VITE_WEBAPI_URL={PublicFunction.GetEthernetIPAddress()} -e VITE_SOCKETSERVER_URL={PublicFunction.GetWireless80211IPAddress()} --name {WEBSITE_CONTAINER_NAME} {WEBSITE_IMAGE}", "Containerize Website image");
+                Debug.WriteLine("script: " + $"docker run -d --restart unless-stopped {portScript}{environmentVariableScript}--name {WEBSITE_CONTAINER_NAME} {WEBSITE_IMAGE}");
+                await CommandExecutor.Instance.RunCommandAsAdminAsync($"docker run -d --restart unless-stopped {portScript}{environmentVariableScript}--name {WEBSITE_CONTAINER_NAME} {WEBSITE_IMAGE}", "Containerize Website image");
 #else
-                await CommandExecutor.Instance.RunCommandAsAdminAsync($"docker run -d --restart unless-stopped -p 8005:5173 -e VITE_WEBAPI_URL={Utility.Utility.GetServerIPAddress()} -e VITE_SOCKETSERVER_URL={Utility.Utility.GetLocalIPv4()} --name {WEBSITE_CONTAINER_NAME} {WEBSITE_IMAGE}", "Containerize Website image");
+                await CommandExecutor.Instance.RunCommandAsAdminAsync($"docker run -d --restart unless-stopped {portScript} {environmentVariableScript}--name {WEBSITE_CONTAINER_NAME} {WEBSITE_IMAGE}", "Containerize Website image");
 #endif
             }
 
@@ -355,7 +378,7 @@ namespace UneoWebApplicationAutoInstaller.Command
         {
 
         }
-        public static async Task RunUMonitorSocketServerAsync()
+        public async Task RunUMonitorSocketServerAsync()
         {
             string processName = "UMonitorSocketServer";
             string checkProcessCommand = $"tasklist /FI \"IMAGENAME eq {processName}.exe\" | findstr /I {processName}";
@@ -389,7 +412,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                         "Check if WebAPI container is running");
 
                     isRunning = !string.IsNullOrEmpty(webAPIContainerID); // Check if output is NOT empty
-                    Console.WriteLine(webAPIContainerID);
+                    Debug.WriteLine(webAPIContainerID);
                     if (!isRunning)
                     {
                         Log.I(TAG, "The WebAPI container isn't running yet.");
