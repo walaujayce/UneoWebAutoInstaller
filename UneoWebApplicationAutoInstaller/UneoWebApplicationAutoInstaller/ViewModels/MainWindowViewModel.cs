@@ -168,8 +168,11 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             
             NavigateToSelectedPage((int)ENavigatePage.ProgressMonitorPage);
 
-            //Check Docker Is Running And Auto Restart Enabled 
-            //if (!await CheckDockerIsRunningAndAutoRestartEnabled()) return;
+            //Check Docker Is Running And Auto Restart Enabled
+            if (Config.EnableDockerCheck)
+            {
+                if (!await CheckDockerIsRunningAndAutoRestartEnabled()) return;
+            }
 
             //Dataparser to new model for installation process
             if (installationData.Count > 0)

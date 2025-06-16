@@ -55,7 +55,7 @@ namespace UneoWebApplicationAutoInstaller.Command
         /// installID, setting list
         /// </summary>
         /// <param name="installationData"></param>
-        public void DataParser(Dictionary<int, List<Setting>> installationData)
+        public async void DataParser(Dictionary<int, List<Setting>> installationData)
         {
 
             foreach (var installation in installationData.OrderBy(i => i.Key))
@@ -79,27 +79,30 @@ namespace UneoWebApplicationAutoInstaller.Command
                         UMonitorServiceInstallProcess(settingList);
                         break;
                 }
+
+                // Wait a moment before go to next step
+                await Task.Delay(100);
             }
         }
         
         private async void PostgreSQLDatabaseInstallProcess(List<Setting> settingList)
         {
-            var task = Task.Run(async () =>
-            {
-                foreach(var item in Test_Progress)
-                {
-                    foreach(var progress in item.Value)
-                    {
-                        delegateProgressResult?.Invoke(new Progress()
-                        {
-                            ProgressID = item.Key,
-                            StatusState = progress
-                        });
-                        await Task.Delay(1000);
-                    }
-                }
-            });
-            await task;
+            //var task = Task.Run(async () =>
+            //{
+            //    foreach(var item in Test_Progress)
+            //    {
+            //        foreach(var progress in item.Value)
+            //        {
+            //            delegateProgressResult?.Invoke(new Progress()
+            //            {
+            //                ProgressID = item.Key,
+            //                StatusState = progress
+            //            });
+            //            await Task.Delay(1000);
+            //        }
+            //    }
+            //});
+            //await task;
         }
         private void WebAPIInstallProcess(List<Setting> settingList)
         {

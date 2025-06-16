@@ -17,6 +17,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 {
     public class ProgressMonitorViewModel : ViewModelBase
     {
+        #region GET SET
         private ObservableCollection<Progress> _progressList;
         public ObservableCollection<Progress> ProgressList
         {
@@ -27,6 +28,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 OnPropertyChanged(nameof(ProgressList));
             }
         }
+        #endregion
+
         public delegate void DelegateInstallStatus(string message);
         public DelegateInstallStatus? delegateInstallStatus = null;
 
