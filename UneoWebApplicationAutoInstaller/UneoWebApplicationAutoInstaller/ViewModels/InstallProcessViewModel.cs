@@ -101,7 +101,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 { 
                     InstallID = (int)EInstallID.WebAPI,
                     InstallName = "WebAPI", 
-                    IsChecked = false,
+                    IsChecked = true,
                     SettingList = new()
                     {
                         new Setting()
@@ -154,7 +154,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 { 
                     InstallID = (int)EInstallID.Website,    
                     InstallName = "Website", 
-                    IsChecked = true,
+                    IsChecked = false,
                     SettingList = new()
                     {
                         new Setting()
@@ -239,7 +239,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 },
                                 new DictionaryInput()
                                 {
-                                    DictionaryKey = "VITE_WEBAPI_URL",
+                                    DictionaryKey = "WEBAPI_URL",
                                     DictionaryValue = $"{PublicFunction.GetEthernetIPAddress()}",
                                 },
                             }

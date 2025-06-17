@@ -37,6 +37,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             Pass = 1,
             Ongoing = 2,
             Pending = 3,
+            Warning = 4,
         }
     }
 }

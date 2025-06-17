@@ -67,7 +67,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         public delegate void DelegateSelectedInstallation(List<Install> selectedInstallation);
         public DelegateSelectedInstallation delegateSelectedInstallation;
 
-        public delegate void DelegateProgressResult(Progress progressResult);
+        public delegate void DelegateProgressResult(ProgressDetail progressResult);
 
         private ProcessSelection _processSelectionPage = new();
         private InstallProcess _installProcessPage = new();
@@ -147,21 +147,34 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         private async void InstallationDataListener(Dictionary<int, List<Setting>> installationData)
         {
             //Get items of installation and enumerate all To-do-list in progress monitor page
-            int index = 0;
             List<Progress> progressList = new List<Progress>();
+            //ObservableCollection<ProgressDetail> progressDetailList = new ObservableCollection<ProgressDetail>()
+            //{
+            //    new ProgressDetail()
+            //    {
+            //        ProgressDescription = "AAAA"
+            //    },
+
+            //    new ProgressDetail()
+            //    {
+            //        ProgressDescription = "BBBBB"
+            //    },
+
+            //    new ProgressDetail()
+            //    {
+            //        ProgressDescription = "CCCCC"
+            //    },
+            //};
             foreach (var item in installationData)
             {
                 Debug.WriteLine($"Key : {item.Key} | Value : {item.Value}");
-                List<string> toDoLsit = PublicFunction.EnumerateInstallToDoList(item.Key);
-                foreach (var toDo in toDoLsit)
+
+                progressList.Add(new Progress()
                 {
-                    progressList.Add(new Progress()
-                    {
-                        ProgressID = index,
-                        ProgressName = $"{toDo}",
-                    });
-                    index++;
-                }
+                    ProgressID = item.Key,
+                    ProgressName = PublicFunction.GetInstallationName(item.Key),
+                });
+
             }
 
             _progressMonitorPage.GetSelectedInstallationTodoList(progressList);
@@ -183,7 +196,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             }
         }
 
-        private void ProgressResultListener(Progress progressResult)
+        private void ProgressResultListener(ProgressDetail progressResult)
         {
             _progressMonitorPage.SendInstallationResponseToProgressMonitorPage(progressResult);
         }

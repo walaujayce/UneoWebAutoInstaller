@@ -51,11 +51,16 @@ namespace UneoWebApplicationAutoInstaller.Views
         {
             _progressMonitorVM.GetSelectedInstallationTodoListVM(progressList);
         }
-        public void SendInstallationResponseToProgressMonitorPage(Progress progressResponse)
+        public void SendInstallationResponseToProgressMonitorPage(ProgressDetail progressResponse)
         {
-            _progressMonitorVM.InstallationResponseListener(progressResponse);
+            _progressMonitorVM.ProgressResponseListener(progressResponse);
         }
 
-        
+        private void ExpandDetail_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            var button = (Border)sender;
+            _progressMonitorVM.ProgressSelected = (Progress)button.DataContext;
+            _progressMonitorVM.ToggleDetailedListVisibility();
+        }
     }
 }
