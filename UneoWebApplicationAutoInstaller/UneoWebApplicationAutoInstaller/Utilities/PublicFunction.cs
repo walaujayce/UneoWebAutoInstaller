@@ -20,28 +20,21 @@ namespace UneoWebApplicationAutoInstaller.Utilities
     public class PublicFunction
     {
         private const string TAG = "Public function";
+        public static string USocketServer_AppSettings_JSON_FilePath { get; set; } = "";
         /// <summary>
         /// Read JSON file
         /// </summary>
+        /// <param name="folderPath"></param>
         /// <returns></returns>
-        public static ObservableCollection<DictionaryInput> LoadJsonFile()
+        public static ObservableCollection<DictionaryInput> LoadJsonFile(string folderPath)
         {
-            ObservableCollection<DictionaryInput> AppSettingsList = new()
-            {
-                new DictionaryInput()
-                {
-                    DictionaryKey = "Null",
-                    DictionaryValue = "Null"
-                }
-            };
+            ObservableCollection<DictionaryInput> AppSettingsList = new();
             try
             {
-                
-                string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UMonitorSocketServer", "publish", "appsettings.json");
-
-                if (File.Exists(path))
+                if (File.Exists(folderPath))
                 {
-                    string json = File.ReadAllText(path);
+                    Debug.WriteLine("appsetting.json FOUND.");
+                    string json = File.ReadAllText(folderPath);
                     Dictionary<string, object>? AppSettingsJSON = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
                     if (AppSettingsJSON == null) return AppSettingsList;
                     AppSettingsList.Clear();
@@ -57,14 +50,41 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                 }
                 else
                 {
-                    Debug.WriteLine("appsetting.json not found.");
+                    Debug.WriteLine("appsetting.json NOT FOUND.");
                     return AppSettingsList;
                 }
+
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("Error reading appsetting.json: " + ex.Message);
                 return AppSettingsList;
+            }
+        }
+        /// <summary>
+        /// Write Json File
+        /// </summary>
+        /// <param name="appSettingsList"></param>
+        /// <param name="folderPath"></param>
+        public static void WriteJsonFile(ObservableCollection<DictionaryInput> appSettingsList, string folderPath)
+        {
+            try
+            {
+                var dictToSave = appSettingsList.ToDictionary(
+                    item => item.DictionaryKey,
+                    item => (object)item.DictionaryValue ?? ""); // avoid null values
+
+                var json = JsonSerializer.Serialize(dictToSave, new JsonSerializerOptions
+                {
+                    WriteIndented = true // pretty formatting
+                });
+
+                File.WriteAllText(folderPath, json);
+                Debug.WriteLine("Successfully wrote appsetting.json.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error writing appsetting.json: " + ex.Message);
             }
         }
         public static string GetInstallationName(int installationID)

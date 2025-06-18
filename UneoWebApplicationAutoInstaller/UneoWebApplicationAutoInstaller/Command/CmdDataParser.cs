@@ -72,6 +72,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 // Wait a moment before go to next step
                 await Task.Delay(100);
             }
+            Debug.WriteLine("End of installation process!");
         }        
         private async Task PostgreSQLDatabaseInstallProcess(List<Setting> settingList)
         {
@@ -333,12 +334,19 @@ namespace UneoWebApplicationAutoInstaller.Command
                     {
                         int searchPostgreSQLPathAttempTimes = 0;
                         DirectoryInfo di = Directory.GetParent(AppContext.BaseDirectory).Parent;
-                        while (!File.Exists(postgreSQLPath) && searchPostgreSQLPathAttempTimes < OVERALL_ATTEMPT_TIMES)
+                        while (!File.Exists(postgreSQLPath) && searchPostgreSQLPathAttempTimes <= 10)
                         {
-                            string projectRoot = di.FullName;
-                            postgreSQLPath = Path.Combine(projectRoot, "PostgreSQL", "dump-postgres.sql");
-                            di = di.Parent;
-                            searchPostgreSQLPathAttempTimes++;
+                            if (di == null || di.Parent == null)
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                string projectRoot = di.FullName;
+                                postgreSQLPath = Path.Combine(projectRoot, "PostgreSQL", "dump-postgres.sql");
+                                di = di.Parent;
+                                searchPostgreSQLPathAttempTimes++;
+                            }                            
                         }
                         if (!File.Exists(postgreSQLPath))
                         {
@@ -696,7 +704,148 @@ namespace UneoWebApplicationAutoInstaller.Command
         }
         private async Task UMonitorSocketServerInstallProcess(List<Setting> settingList)
         {
-            await RunUMonitorSocketServerAsync();
+            // Init progress result and send to progress monitor
+            ProgressDetail progressDetail_UMonitorSocketServer = new ProgressDetail();
+            progressDetail_UMonitorSocketServer.ProgressParentID = (int)EInstallID.UMonitorSocketServer;
+
+            // Initialize UMonitorSocketServer appsettings
+            await Task.Delay(100); // system run too fast, need to wait it delegate
+            progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
+            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Ongoing;
+            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+
+            // load and 
+            ObservableCollection<DictionaryInput> appSettingList = new ObservableCollection<DictionaryInput>();
+            List<DictionaryInput> temp_appSettingList = settingList.First(s => s.SettingName == "App Settings").KeyValueItems.ToList();
+            foreach (var appSetting in temp_appSettingList)
+            {
+                appSettingList.Add(appSetting);
+            }
+            PublicFunction.WriteJsonFile(appSettingList, PublicFunction.USocketServer_AppSettings_JSON_FilePath);
+
+            // Check UMonitorSocketServer has run
+            string processName = "UMonitorSocketServer";
+            bool isUMonitorSocketServerRunning = await CheckUMonitorSocketServerIsRunning(processName);
+            if (!isUMonitorSocketServerRunning) // Process not found
+            {
+
+                bool isRunning;
+                int count = 0;
+                do
+                {
+                    isRunning = await CheckContainerRunningUsingImage(imageName_WebAPI);
+                    if (!isRunning)
+                    {
+                        Log.I(TAG, "The WebAPI container isn't running yet.");
+                        Log.I(TAG, "Waiting for 5 seconds...");
+                        await Task.Delay(1000);
+                        count++;
+                    }
+
+                    if (count >= 30)
+                    {
+                        Log.E(TAG, "Failed to start WebAPI container, please check Docker.");
+
+                        progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
+                        progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
+                        progressDetail_UMonitorSocketServer.IsFinish = true;
+                        delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+                        return;
+                    }
+
+                } while (!isRunning);
+
+                if (isRunning)
+                {
+                    progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
+                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
+                    delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+                }
+
+                // START umonitorsocketserver
+                progressDetail_UMonitorSocketServer.ProgressDescription = "Start UMonitorSocketServer";
+                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Ongoing;
+                delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+
+                string uMonitorSocketServerExeFilePath = Path.Combine(AppContext.BaseDirectory, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
+
+                if (!File.Exists(uMonitorSocketServerExeFilePath))
+                {
+                    string projectRoot = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
+                    uMonitorSocketServerExeFilePath = Path.Combine(projectRoot, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
+                }
+                if (!File.Exists(uMonitorSocketServerExeFilePath))
+                {
+                    try
+                    {
+                        int searchUMonitorSocketServerPathAttempTimes = 0;
+                        DirectoryInfo di = Directory.GetParent(AppContext.BaseDirectory).Parent;
+                        while (!File.Exists(uMonitorSocketServerExeFilePath) && searchUMonitorSocketServerPathAttempTimes <= 10)
+                        {
+                            if (di == null || di.Parent == null)
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                string projectRoot = di.FullName;
+                                uMonitorSocketServerExeFilePath = Path.Combine(projectRoot, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
+                                di = di.Parent;
+                                searchUMonitorSocketServerPathAttempTimes++;
+                            }
+                        }
+                        if (!File.Exists(uMonitorSocketServerExeFilePath))
+                        {
+                            progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
+                            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
+                            progressDetail_UMonitorSocketServer.IsFinish = true;
+                            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+                            return;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.E(TAG, "Cant find dump-UMonitorSocketServer file path.");
+                        progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
+                        progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
+                        progressDetail_UMonitorSocketServer.IsFinish = true;
+                        delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+                        return;
+                    }
+                }
+
+                await Task.Delay(5000);
+                await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
+                        $"cmd.exe /c \"powershell -ExecutionPolicy Bypass -WindowStyle Hidden -Command Start-Process '{uMonitorSocketServerExeFilePath}' -WindowStyle Minimized\"",
+                        "Run UMonitorSocketServer.exe bypassing SmartScreen");
+
+
+                if (await CheckUMonitorSocketServerIsRunning(processName))
+                {
+                    progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
+                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
+                    delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+                }
+                else
+                {
+                    progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
+                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_UMonitorSocketServer.IsFinish = true;
+                    delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+                    return;
+                }
+            }
+            else
+            {
+                Log.I(TAG, "UMonitorSocketServer is already running. Skipping execution.");
+                progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
+                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_UMonitorSocketServer.ProgressDescription = "Start UMonitorSocketServer";
+                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
+                delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+            }
+            progressDetail_UMonitorSocketServer.IsFinish = true;
+            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
         }
         private async Task UMonitorServiceInstallProcess(List<Setting> settingList)
         {
@@ -834,136 +983,6 @@ namespace UneoWebApplicationAutoInstaller.Command
             // invoke progress monitor that all process finish
             progressDetail_UMonitorServices.IsFinish = true;
             delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
-        }
-        public async Task RunUMonitorSocketServerAsync()
-        {
-            // Init progress result and send to progress monitor
-            ProgressDetail progressDetail_UMonitorSocketServer = new ProgressDetail();
-            progressDetail_UMonitorSocketServer.ProgressParentID = (int)EInstallID.UMonitorSocketServer;
-
-            // Initialize UMonitorSocketServer appsettings
-            await Task.Delay(100); // system run too fast, need to wait it delegate
-            progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
-            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Ongoing;
-            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
-
-            // Check UMonitorSocketServer has run
-
-            string processName = "UMonitorSocketServer";
-            bool isUMonitorSocketServerRunning = await CheckUMonitorSocketServerIsRunning(processName);
-            if (!isUMonitorSocketServerRunning) // Process not found
-            {              
-
-                bool isRunning;
-                int count = 0;
-                do
-                {
-                    isRunning = await CheckContainerRunningUsingImage(imageName_WebAPI);
-                    if (!isRunning)
-                    {
-                        Log.I(TAG, "The WebAPI container isn't running yet.");
-                        Log.I(TAG, "Waiting for 5 seconds...");
-                        await Task.Delay(1000);
-                        count++;
-                    }
-
-                    if (count >= 30)
-                    {
-                        Log.E(TAG, "Failed to start WebAPI container, please check Docker.");
-
-                        progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
-                        progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
-                        progressDetail_UMonitorSocketServer.IsFinish = true;
-                        delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
-                        return ;
-                    }
-
-                } while (!isRunning);
-
-                if(isRunning)
-                {
-                    progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
-                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
-                    delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
-                }
-
-                // START umonitorsocketserver
-                progressDetail_UMonitorSocketServer.ProgressDescription = "Start UMonitorSocketServer";
-                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Ongoing;
-                delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
-
-                string uMonitorSocketServerExeFilePath = Path.Combine(AppContext.BaseDirectory, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
-                
-                if (!File.Exists(uMonitorSocketServerExeFilePath))
-                {
-                    string projectRoot = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
-                    uMonitorSocketServerExeFilePath = Path.Combine(projectRoot, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
-                }
-                if (!File.Exists(uMonitorSocketServerExeFilePath))
-                {
-                    try
-                    {
-                        int searchUMonitorSocketServerPathAttempTimes = 0;
-                        DirectoryInfo di = Directory.GetParent(AppContext.BaseDirectory).Parent;
-                        while (!File.Exists(uMonitorSocketServerExeFilePath) && searchUMonitorSocketServerPathAttempTimes < 10)
-                        {
-                            string projectRoot = di.FullName;
-                            uMonitorSocketServerExeFilePath = Path.Combine(projectRoot, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
-                            di = di.Parent;
-                            searchUMonitorSocketServerPathAttempTimes++;
-                        }
-                        if (!File.Exists(uMonitorSocketServerExeFilePath))
-                        {
-                            progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
-                            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
-                            progressDetail_UMonitorSocketServer.IsFinish = true;
-                            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
-                            return;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.E(TAG, "Cant find dump-UMonitorSocketServer file path.");
-                        progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
-                        progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
-                        progressDetail_UMonitorSocketServer.IsFinish = true;
-                        delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
-                        return;
-                    }
-                }
-
-                await Task.Delay(5000);
-                await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
-                        $"cmd.exe /c \"powershell -ExecutionPolicy Bypass -WindowStyle Hidden -Command Start-Process '{uMonitorSocketServerExeFilePath}' -WindowStyle Minimized\"",
-                        "Run UMonitorSocketServer.exe bypassing SmartScreen");
-
-                
-                if (await CheckUMonitorSocketServerIsRunning(processName))
-                {
-                    progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
-                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
-                    delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
-                }
-                else
-                {
-                    progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
-                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
-                    progressDetail_UMonitorSocketServer.IsFinish= true;
-                    delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
-                    return;
-                }
-            }
-            else
-            {
-                Log.I(TAG, "UMonitorSocketServer is already running. Skipping execution.");
-                progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
-                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
-                progressDetail_UMonitorSocketServer.ProgressDescription = "Start UMonitorSocketServer";
-                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
-                delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
-            }
-            progressDetail_UMonitorSocketServer.IsFinish = true;
-            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
         }
         public static async Task StopUMonitorSocketServerAsync()
         {

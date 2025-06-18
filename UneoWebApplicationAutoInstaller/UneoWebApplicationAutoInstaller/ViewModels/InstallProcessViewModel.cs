@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,7 +34,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
         public InstallProcessViewModel()
         {
-            ObservableCollection<DictionaryInput> UMonitorSocketServerAppSettings = Utilities.PublicFunction.LoadJsonFile();
+            // Initialize UMonitorSocketServer Appsettings JSON file
+            PublicFunction.USocketServer_AppSettings_JSON_FilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UMonitorSocketServer", "publish", "appsettings.json");
+            ObservableCollection<DictionaryInput> UMonitorSocketServerAppSettings = PublicFunction.LoadJsonFile(PublicFunction.USocketServer_AppSettings_JSON_FilePath);
 
             // Init IP Address of both wifi and thernet
             string ipAddress_WIFI = PublicFunction.GetWireless80211IPAddress();
@@ -151,7 +154,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 {
                     InstallID = (int)EInstallID.UMonitorSocketServer,
                     InstallName = "UMonitorSocketServer",
-                    IsChecked = false, 
+                    IsChecked = true, 
                     SettingList = new()
                     {
                         new Setting()
@@ -166,7 +169,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 { 
                     InstallID = (int)EInstallID.Website,    
                     InstallName = "Website", 
-                    IsChecked = true,
+                    IsChecked = false,
                     SettingList = new()
                     {
                         new Setting()
@@ -259,9 +262,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     }
                 },
             };
-            Debug.WriteLine($"VITE_WEBAPI_URL = {InstallSelection.FirstOrDefault(x => x.InstallID == (int)EInstallID.Website).SettingList.FirstOrDefault(s => s.SettingName == "Environment Variables").KeyValueItems.FirstOrDefault(kv => kv.DictionaryKey == "VITE_WEBAPI_URL").DictionaryValue.ToString()}");
-            Debug.WriteLine($"VITE_SOCKETSERVER_URL = {InstallSelection.FirstOrDefault(x => x.InstallID == (int)EInstallID.Website).SettingList.FirstOrDefault(s => s.SettingName == "Environment Variables").KeyValueItems.FirstOrDefault(kv => kv.DictionaryKey == "VITE_SOCKETSERVER_URL").DictionaryValue.ToString()}");
-
         }
 
         private DelegateNavigate? delegateNavigate = null;
