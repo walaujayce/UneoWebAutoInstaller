@@ -8,5 +8,6 @@ namespace UneoWebApplicationAutoInstaller.Utilities
 {
     public class Config
     {
+        public static bool EnableDockerCheck { get; set; } = false;
     }
 }

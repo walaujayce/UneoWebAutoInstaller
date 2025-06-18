@@ -313,7 +313,11 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 Debug.WriteLine("Already at last item.");
 
                 //send installation items back to mainwindowviewmodel
-                delegateInstallationData?.Invoke(InstallationItems);
+                var plainDict = InstallationItems.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.ToList()
+                );
+                delegateInstallationData?.Invoke(plainDict);
                 isCloseSettingModalEnable = true;
 
                 //foreach (var item in InstallationItems)

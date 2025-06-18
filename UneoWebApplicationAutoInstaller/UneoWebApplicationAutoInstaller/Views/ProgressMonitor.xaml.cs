@@ -13,6 +13,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UneoWebApplicationAutoInstaller.Models;
 using UneoWebApplicationAutoInstaller.ViewModels;
 using static UneoWebApplicationAutoInstaller.ViewModels.MainWindowViewModel;
 
@@ -46,15 +47,20 @@ namespace UneoWebApplicationAutoInstaller.Views
         {
             _progressMonitorVM.SetDelegateNavigate(del);
         }
-        public void GetSelectedInstallation(List<int> selectedInstallationID)
+        public void GetSelectedInstallationTodoList(List<Progress> progressList)
         {
-            _progressMonitorVM.GetSelectedInstallationVM(selectedInstallationID);
+            _progressMonitorVM.GetSelectedInstallationTodoListVM(progressList);
         }
-        public void SendInstallationResponseToProgressMonitorPage(Dictionary<string, bool> installationResponse)
+        public void SendInstallationResponseToProgressMonitorPage(ProgressDetail progressResponse)
         {
-            _progressMonitorVM.InstallationResponseListener(installationResponse);
+            _progressMonitorVM.ProgressResponseListener(progressResponse);
         }
 
-        
+        private void ExpandDetail_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            var button = (Border)sender;
+            _progressMonitorVM.ProgressSelected = (Progress)button.DataContext;
+            _progressMonitorVM.ToggleDetailedListVisibility();
+        }
     }
 }

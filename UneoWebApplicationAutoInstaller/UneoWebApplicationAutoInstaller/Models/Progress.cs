@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 using static UneoWebApplicationAutoInstaller.Utilities.Enums;
 
@@ -13,11 +15,13 @@ namespace UneoWebApplicationAutoInstaller.Models
     {
         private int _progressID;
         private string _progressName = "";
-        private string _progressDescription = "";
         private int _statusState = (int)EInstallStatus.Pending;
         private string _statusImage = "";
-        private double _textOpacity = 0.5;
-        
+        private double _progressNameTextOpacity = 0.5;
+        private Visibility _isDetailedListVisible = Visibility.Collapsed; 
+        private string _expandImage = "/Views/Assets/Icon_Contract.png";
+        private ObservableCollection<ProgressDetail> _progressDescriptionList = new();
+
         public bool IsRotating => StatusState == (int)EInstallStatus.Ongoing;
         public int ProgressID
         {
@@ -35,15 +39,6 @@ namespace UneoWebApplicationAutoInstaller.Models
             {
                 _progressName = value;
                 OnPropertyChanged(nameof(ProgressName));
-            }
-        }
-        public string ProgressDescription
-        {
-            get => _progressDescription;
-            set
-            {
-                _progressDescription = value;
-                OnPropertyChanged(nameof(ProgressDescription));
             }
         }
         public int StatusState
@@ -66,14 +61,42 @@ namespace UneoWebApplicationAutoInstaller.Models
                 OnPropertyChanged(nameof(StatusImage));
             }
         }
-        public double TextOpacity
+        public double ProgressNameTextOpacity
         {
-            get => _textOpacity;
+            get => _progressNameTextOpacity;
             set
             {
-                _textOpacity = value;
-                OnPropertyChanged(nameof(TextOpacity));
+                _progressNameTextOpacity = value;
+                OnPropertyChanged(nameof(ProgressNameTextOpacity));
+            }
+        }        
+        public Visibility IsDetailedListVisible
+        {
+            get => _isDetailedListVisible;
+            set
+            {
+                _isDetailedListVisible = value;
+                OnPropertyChanged(nameof(IsDetailedListVisible));
+            }
+        }        
+        public string ExpandImage
+        {
+            get => _expandImage;
+            set
+            {
+                _expandImage = value;
+                OnPropertyChanged(nameof(ExpandImage));
+            }
+        }
+        public ObservableCollection<ProgressDetail> ProgressDescriptionList
+        {
+            get => _progressDescriptionList;
+            set
+            {
+                _progressDescriptionList = value;
+                OnPropertyChanged(nameof(ProgressDescriptionList));
             }
         }
     }
 }
+

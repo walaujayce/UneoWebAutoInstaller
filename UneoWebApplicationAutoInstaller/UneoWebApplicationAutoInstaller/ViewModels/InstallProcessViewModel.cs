@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,7 +34,21 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
         public InstallProcessViewModel()
         {
-            ObservableCollection<DictionaryInput> UMonitorSocketServerAppSettings = Utilities.PublicFunction.LoadJsonFile();
+            // Initialize UMonitorSocketServer Appsettings JSON file
+            PublicFunction.USocketServer_AppSettings_JSON_FilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UMonitorSocketServer", "publish", "appsettings.json");
+            ObservableCollection<DictionaryInput> UMonitorSocketServerAppSettings = PublicFunction.LoadJsonFile(PublicFunction.USocketServer_AppSettings_JSON_FilePath);
+
+            // Init IP Address of both wifi and thernet
+            string ipAddress_WIFI = PublicFunction.GetWireless80211IPAddress();
+            string ipAddress_Ethernet = PublicFunction.GetEthernetIPAddress();
+            if(ipAddress_WIFI == null || ipAddress_WIFI == "")
+            {
+                ipAddress_WIFI = ipAddress_Ethernet;
+            }
+            if (ipAddress_Ethernet == null || ipAddress_Ethernet == "")
+            {
+                ipAddress_Ethernet = ipAddress_WIFI;
+            }
 
             InstallSelection = new ObservableCollection<Install>()
             {
@@ -68,19 +83,19 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 },
                             }                        
                         },
-                        new Setting()
-                        {
-                            SettingType = (int)ESettingType.MultipleKeyValue,
-                            SettingName = "Volumes",
-                            KeyValueItems = new ObservableCollection<DictionaryInput>()
-                            {
-                                new DictionaryInput()
-                                {
-                                    DictionaryKey = "C:\\Users\\uneo\\postgres_data",
-                                    DictionaryValue = "/bitnami/postgresql",
-                                }
-                            }
-                        },
+                        //new Setting()
+                        //{
+                        //    SettingType = (int)ESettingType.MultipleKeyValue,
+                        //    SettingName = "Volumes",
+                        //    KeyValueItems = new ObservableCollection<DictionaryInput>()
+                        //    {
+                        //        new DictionaryInput()
+                        //        {
+                        //            DictionaryKey = "C:\\Users\\uneo\\postgres_data",
+                        //            DictionaryValue = "/bitnami/postgresql",
+                        //        }
+                        //    }
+                        //},
                         new Setting()
                         {
                             SettingType = (int)ESettingType.MultipleKeyValue,
@@ -100,7 +115,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 new Install() 
                 { 
                     InstallID = (int)EInstallID.WebAPI,
-                    InstallName="WebAPI", 
+                    InstallName = "WebAPI", 
                     IsChecked = false,
                     SettingList = new()
                     {
@@ -138,8 +153,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 new Install() 
                 {
                     InstallID = (int)EInstallID.UMonitorSocketServer,
-                    InstallName="UMonitorSocketServer",
-                    IsChecked = false, 
+                    InstallName = "UMonitorSocketServer",
+                    IsChecked = true, 
                     SettingList = new()
                     {
                         new Setting()
@@ -153,8 +168,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 new Install() 
                 { 
                     InstallID = (int)EInstallID.Website,    
-                    InstallName="Website", 
-                    IsChecked = true,
+                    InstallName = "Website", 
+                    IsChecked = false,
                     SettingList = new()
                     {
                         new Setting()
@@ -191,12 +206,12 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "VITE_SOCKETSERVER_URL",
-                                    DictionaryValue = $"{PublicFunction.GetWireless80211IPAddress()}",
+                                    DictionaryValue = ipAddress_WIFI,
                                 },                                
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "VITE_WEBAPI_URL",
-                                    DictionaryValue = $"{PublicFunction.GetEthernetIPAddress()}",
+                                    DictionaryValue = ipAddress_Ethernet,
                                 },
                             }
                         },
@@ -205,8 +220,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 new Install()
                 {
                     InstallID = (int)EInstallID.UMonitorService,
-                    InstallName="UMonitorService",
-                    IsChecked = true,
+                    InstallName = "UMonitorService",
+                    IsChecked = false,
                     SettingList = new()
                     {
                         new Setting()
@@ -235,12 +250,12 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "LOCAL_IP",
-                                    DictionaryValue = $"{PublicFunction.GetWireless80211IPAddress()}",
+                                    DictionaryValue = ipAddress_WIFI,
                                 },
                                 new DictionaryInput()
                                 {
-                                    DictionaryKey = "VITE_WEBAPI_URL",
-                                    DictionaryValue = $"{PublicFunction.GetEthernetIPAddress()}",
+                                    DictionaryKey = "WEBAPI_URL",
+                                    DictionaryValue = ipAddress_Ethernet,
                                 },
                             }
                         },

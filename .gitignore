@@ -1,3 +1,6 @@
 UneoWebApplicationAutoInstaller/.vs/
 UneoWebApplicationAutoInstaller/UneoWebApplicationAutoInstaller/bin/
 UneoWebApplicationAutoInstaller/UneoWebApplicationAutoInstaller/obj/
+UneoWebApplicationAutoInstaller/UneoWebApplicationAutoInstaller.Tests/bin/
+UneoWebApplicationAutoInstaller/UneoWebApplicationAutoInstaller.Tests/obj/
+UneoWebApplicationAutoInstaller/UneoWebApplicationSetupInstaller/Release/

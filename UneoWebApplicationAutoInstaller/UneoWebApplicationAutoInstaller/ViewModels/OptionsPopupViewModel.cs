@@ -47,7 +47,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 // Raise event
                 OptionSelectedChanged?.Invoke(this, new OptionSelectedEventArgs
                 {
-                    SelectedValue = _optionSelected?.OptionName ?? string.Empty
+                    SelectedValue = _optionSelected?.OptionValue ?? string.Empty
                 });
 
             }
@@ -64,7 +64,10 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             {
                 foreach (var item in tempIPList)
                 {
-                    _optionsList.Add(new Option() { OptionName = item.Value});
+                    _optionsList.Add(new Option() { 
+                        OptionName = $"{item.Value} ({item.Key})",
+                        OptionValue = item.Value
+                    });
                 }
             }
             else

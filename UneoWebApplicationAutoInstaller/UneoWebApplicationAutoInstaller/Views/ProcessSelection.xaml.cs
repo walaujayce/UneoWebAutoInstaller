@@ -29,6 +29,7 @@ namespace UneoWebApplicationAutoInstaller.Views
             InitializeComponent();
             _processSelectionVM = new ProcessSelectionViewModel();
             DataContext = _processSelectionVM;
+            this.Focus();
         }
         private void SelectProcess_Clicked(object sender, MouseButtonEventArgs e)
         {
@@ -43,6 +44,15 @@ namespace UneoWebApplicationAutoInstaller.Views
         private void ProceedToNextStage_Clicked(object sender, MouseButtonEventArgs e)
         {
             _processSelectionVM.ProcessToNextStage();
+        }
+
+        private void ProcessSelection_PreviewKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                _processSelectionVM.ProcessToNextStage();
+                e.Handled = true;
+            }
         }
     }
 }

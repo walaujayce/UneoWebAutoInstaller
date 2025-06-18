@@ -19,28 +19,22 @@ namespace UneoWebApplicationAutoInstaller.Utilities
 {
     public class PublicFunction
     {
+        private const string TAG = "Public function";
+        public static string USocketServer_AppSettings_JSON_FilePath { get; set; } = "";
         /// <summary>
         /// Read JSON file
         /// </summary>
+        /// <param name="folderPath"></param>
         /// <returns></returns>
-        public static ObservableCollection<DictionaryInput> LoadJsonFile()
+        public static ObservableCollection<DictionaryInput> LoadJsonFile(string folderPath)
         {
-            ObservableCollection<DictionaryInput> AppSettingsList = new()
-            {
-                new DictionaryInput()
-                {
-                    DictionaryKey = "Null",
-                    DictionaryValue = "Null"
-                }
-            };
+            ObservableCollection<DictionaryInput> AppSettingsList = new();
             try
             {
-                
-                string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UMonitorSocketServer", "publish", "appsettings.json");
-
-                if (File.Exists(path))
+                if (File.Exists(folderPath))
                 {
-                    string json = File.ReadAllText(path);
+                    Debug.WriteLine("appsetting.json FOUND.");
+                    string json = File.ReadAllText(folderPath);
                     Dictionary<string, object>? AppSettingsJSON = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
                     if (AppSettingsJSON == null) return AppSettingsList;
                     AppSettingsList.Clear();
@@ -56,14 +50,41 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                 }
                 else
                 {
-                    Debug.WriteLine("appsetting.json not found.");
+                    Debug.WriteLine("appsetting.json NOT FOUND.");
                     return AppSettingsList;
                 }
+
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("Error reading appsetting.json: " + ex.Message);
                 return AppSettingsList;
+            }
+        }
+        /// <summary>
+        /// Write Json File
+        /// </summary>
+        /// <param name="appSettingsList"></param>
+        /// <param name="folderPath"></param>
+        public static void WriteJsonFile(ObservableCollection<DictionaryInput> appSettingsList, string folderPath)
+        {
+            try
+            {
+                var dictToSave = appSettingsList.ToDictionary(
+                    item => item.DictionaryKey,
+                    item => (object)item.DictionaryValue ?? ""); // avoid null values
+
+                var json = JsonSerializer.Serialize(dictToSave, new JsonSerializerOptions
+                {
+                    WriteIndented = true // pretty formatting
+                });
+
+                File.WriteAllText(folderPath, json);
+                Debug.WriteLine("Successfully wrote appsetting.json.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error writing appsetting.json: " + ex.Message);
             }
         }
         public static string GetInstallationName(int installationID)
@@ -150,8 +171,8 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             {
                 // Ignore vEthernet interfaces
                 if (networkInterface.Name.StartsWith("vEthernet")) continue;
-                //if (networkInterface.Name.StartsWith("Loopback")) continue; 
-                //if (networkInterface.Name.StartsWith("Wi-Fi")) continue; 
+                if (networkInterface.Name.StartsWith("Loopback")) continue; 
+                //if (networkInterface.Name.StartsWith("Wi-Fi")) continue; z
 
                 // Only check interfaces that are up
                 if (networkInterface.OperationalStatus == OperationalStatus.Up)
@@ -163,7 +184,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                         if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
                         {
                             // Console all interface names and IPs
-                            Debug.WriteLine($"Interface: {networkInterface.Name}, IP: {ip.Address}");
+                            //Debug.WriteLine($"Interface: {networkInterface.Name}, IP: {ip.Address}");
                             keyValuePairs[networkInterface.Name] = ip.Address.ToString();
                         }
                     }
@@ -323,7 +344,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
 
             if (isDockerRunning)
             {
-                //Log.S(TAG, "Docker Desktop is running.");
+                Log.S(TAG, "Docker Desktop is running.");
                 return true;
             }
             else
@@ -345,59 +366,78 @@ namespace UneoWebApplicationAutoInstaller.Utilities
 
                 if (autoStart)
                 {
-                    //Log.S(TAG, "Docker Desktop is set to start on login.");
+                    Log.S(TAG, "Docker Desktop is set to start on login.");
                     return true;
                 }
                 else
                 {
-                    //Log.S(TAG, "Docker Desktop is NOT set to start on login.");
+                    Log.S(TAG, "Docker Desktop is NOT set to start on login.");
                     return false;
                 }
             }
             else
             {
-                //Log.E(TAG, "Docker settings file not found.");
+                Log.E(TAG, "Docker settings file not found.");
                 return true;
             }
         }
         //public static async Task IsTaskScheduledAsync(string taskName)
         //{
-            //string checkTaskCommand = $"schtasks /query /tn \"{taskName}\"";
+        //string checkTaskCommand = $"schtasks /query /tn \"{taskName}\"";
 
-            //string result = await CommandExecutor.Instance.RunCommandAsAdminReturnStringWithoutPrintingAsync(checkTaskCommand, "Checking if Auto Detect IP task exists");
-            //try
-            //{
-            //    if (!result.Contains(taskName, StringComparison.OrdinalIgnoreCase))// If result is not empty, the task exists
-            //    {
-            //        string exePath = Process.GetCurrentProcess().MainModule.FileName;
+        //string result = await CommandExecutor.Instance.RunCommandAsAdminReturnStringWithoutPrintingAsync(checkTaskCommand, "Checking if Auto Detect IP task exists");
+        //try
+        //{
+        //    if (!result.Contains(taskName, StringComparison.OrdinalIgnoreCase))// If result is not empty, the task exists
+        //    {
+        //        string exePath = Process.GetCurrentProcess().MainModule.FileName;
 
-            //        string cmdCommand = $"schtasks /create /tn \"{taskName}\" /tr \"{exePath}\" /sc onlogon /rl highest /f";
+        //        string cmdCommand = $"schtasks /create /tn \"{taskName}\" /tr \"{exePath}\" /sc onlogon /rl highest /f";
 
-            //        await CommandExecutor.Instance.RunCommandAsAdminAsync(cmdCommand, "Creating Windows Task Scheduler Task for Auto Detect IP");
+        //        await CommandExecutor.Instance.RunCommandAsAdminAsync(cmdCommand, "Creating Windows Task Scheduler Task for Auto Detect IP");
 
 
-            //        Log.I(TAG, $"Task Scheduler '{taskName}' has been created.");
-            //    }
-            //    else
-            //    {
-            //        Log.I(TAG, $"Task Scheduler '{taskName}' is already scheduled.");
-            //        return;
-            //    }
+        //        Log.I(TAG, $"Task Scheduler '{taskName}' has been created.");
+        //    }
+        //    else
+        //    {
+        //        Log.I(TAG, $"Task Scheduler '{taskName}' is already scheduled.");
+        //        return;
+        //    }
 
-            //}
-            //catch (Exception ex)
-            //{
-            //    Log.E(TAG, $"{ex.Message}");
-            //}
+        //}
+        //catch (Exception ex)
+        //{
+        //    Log.E(TAG, $"{ex.Message}");
+        //}
         //}
 
 
         //public static async Task DeleteAutoDetectIPTaskAsync(string taskName)
         //{
-            //await CommandExecutor.Instance.RunCommandAsAdminAsync($"powershell -Command \"Unregister-ScheduledTask -TaskName '{taskName}' -Confirm:$false\"", "Removing Windows Task Scheduler Task for Auto Detect IP");
+        //await CommandExecutor.Instance.RunCommandAsAdminAsync($"powershell -Command \"Unregister-ScheduledTask -TaskName '{taskName}' -Confirm:$false\"", "Removing Windows Task Scheduler Task for Auto Detect IP");
 
-            //Console.WriteLine($"Task '{taskName}' has been deleted.");
+        //Console.WriteLine($"Task '{taskName}' has been deleted.");
         //}
-        
+
+        /// <summary>
+        /// 檢查檔案是否存在
+        /// </summary>
+        /// <param name="folderPath"></param>
+        /// <returns>bool</returns>
+        public static bool CheckFileExist(string folderPath)
+        {
+            if (Directory.Exists(folderPath))
+            {
+                Log.I(TAG, "Folder already exists.");
+                return true;
+            }
+            else
+            {
+                Log.I(TAG, "Folder is not exist.");
+                return false;
+            }
+        }
+
     }
 }

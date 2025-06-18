@@ -6,15 +6,18 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Views\Assets\Icon_Close.png" />
     <None Remove="Views\Assets\Icon_Close_FFD3D3D3.png" />
+    <None Remove="Views\Assets\Icon_Contract.png" />
     <None Remove="Views\Assets\Icon_Fail_FFFF0000.png" />
     <None Remove="Views\Assets\Icon_Option_FFD3D3D3.png" />
     <None Remove="Views\Assets\Icon_Pass_FF7CFC00.png" />
     <None Remove="Views\Assets\Icon_Remove_FFD3D3D3.png" />
+    <None Remove="Views\Assets\Icon_Warning_FFFCD700.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +35,12 @@
     <Resource Include="Views\Assets\Icon_Close_FFD3D3D3.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Views\Assets\Icon_Contract.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Views\Assets\Icon_Expand.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Views\Assets\Icon_Fail_FFFF0000.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
@@ -47,9 +56,15 @@
     <Resource Include="Views\Assets\Icon_Remove_FFD3D3D3.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Views\Assets\Icon_Warning_FFFCD700.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="PostgreSQL\dump-postgres.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="UMonitorSocketServer\publish\appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
