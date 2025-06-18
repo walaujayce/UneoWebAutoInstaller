@@ -87,6 +87,24 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                 Debug.WriteLine("Error writing appsetting.json: " + ex.Message);
             }
         }
+        public static object TryParseValue(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return "";
+            
+            input = input.ToLower();
+
+            if (bool.TryParse(input, out bool b))
+                return b;
+
+            if (int.TryParse(input, out int i))
+                return i;
+
+            if (double.TryParse(input, out double d))
+                return d;
+
+            return input; // fallback to string
+        }
         public static string GetInstallationName(int installationID)
         { 
             switch (installationID)

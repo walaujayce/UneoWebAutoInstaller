@@ -11,6 +11,7 @@
         WindowStyle="None"
         ResizeMode="NoResize"
         Background="Transparent"
+        AllowsTransparency="True"
         >
 
     <Window.Resources>
@@ -54,30 +55,32 @@
     </Window.Resources>
     
     <Grid Background="Transparent">
-        <Border CornerRadius="10" BorderBrush="Black" BorderThickness="1" Background="White"/>
-        <Grid Margin="15,15,15,0">
+        <Border CornerRadius="10" BorderBrush="Black" BorderThickness="0.5" Background="White"/>
+        <Grid Margin="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <!--Title Bar-->
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Grid Grid.Column="0">
-                    <Label Content="{Binding MainWindowTitle}" Foreground="Orange" FontFamily="roboto" FontSize="18" FontWeight="ExtraBold" VerticalAlignment="Center" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Padding="0"/>
+            <Border Grid.Row="0" MouseLeftButtonDown="DragWindow_Click" Background="Transparent" Padding="15,15,15,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0">
+                        <Label Content="{Binding MainWindowTitle}" Foreground="Orange" FontFamily="roboto" FontSize="18" FontWeight="ExtraBold" VerticalAlignment="Center" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Padding="0"/>
+                    </Grid>
+                    <Grid Grid.Column="1">
+                        <Border Style="{DynamicResource Border_Image_CloseBtn}" MouseLeftButtonUp="CloseWindow_Clicked" Cursor="Hand" MouseLeftButtonDown="AvoidDragWindow_Clicked">
+                            <Image Source="/Views/Assets/Icon_Close.png"/>
+                        </Border>
+                    </Grid>
                 </Grid>
-                <Grid Grid.Column="1">
-                    <Border Style="{DynamicResource Border_Image_CloseBtn}" MouseLeftButtonUp="CloseWindow_Clicked" Cursor="Hand">
-                        <Image Source="/Views/Assets/Icon_Close.png"/>
-                    </Border>
-                </Grid>
-            </Grid>
+            </Border>
             <!--Main Content-->
-            <Grid Grid.Row="1" Margin="0,10,0,0">
+            <Grid Grid.Row="1" Margin="15,10,15,0">
                 <Border BorderBrush="Transparent" BorderThickness="1" CornerRadius="10">
                     <Grid>
                         <Frame x:Name="Navigation"
@@ -92,6 +95,6 @@
                 <Label Padding="0" FontSize="12" Content="Copyright" Foreground="Black" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
             </Grid>
         </Grid>
-        <Border x:Name="Overlay" Visibility="{Binding OverlayVisibility}" BorderBrush="Transparent" BorderThickness="1" CornerRadius="10" Background="Black" Opacity="0.3" Panel.ZIndex="99"/>
+        <Border x:Name="Overlay" Visibility="{Binding OverlayVisibility}" BorderBrush="Black" BorderThickness="1" CornerRadius="10" Background="Black" Opacity="0.3" Panel.ZIndex="99"/>
     </Grid>
 </Window>

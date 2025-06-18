@@ -34,7 +34,17 @@ namespace UneoWebApplicationAutoInstaller
         }
         private void CloseWindow_Clicked(object sender, MouseButtonEventArgs e)
         {
-             this.Close();
+            this.Close();
+        }
+
+        private void DragWindow_Click(object sender, MouseButtonEventArgs e)
+        {
+            DragMove();
+        }
+
+        private void AvoidDragWindow_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true; // Prevents the drag from being triggered
         }
     }
 }
