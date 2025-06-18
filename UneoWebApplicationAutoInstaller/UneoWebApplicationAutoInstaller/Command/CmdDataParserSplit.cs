@@ -299,7 +299,6 @@ namespace UneoWebApplicationAutoInstaller.Command
                 }
             }
 
-
             // Check if WebAPI container already exist, if No, then containerize the image
             progressDetail_WebAPI.ProgressDescription = "Containerize WebAPI image";
             progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Ongoing;

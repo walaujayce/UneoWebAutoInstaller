@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 using UneoWebApplicationAutoInstaller.Models;
 using UneoWebApplicationAutoInstaller.Utilities;
 using static UneoWebApplicationAutoInstaller.Utilities.Enums;
@@ -42,12 +43,22 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
         #endregion
 
+        private const string TAG = "PM";
+        private int errorCount = 0;
+        private ProgressDetail temp_progressDetailed;
         public delegate void DelegateInstallStatus(string message);
         public DelegateInstallStatus? delegateInstallStatus = null;
 
         public ProgressMonitorViewModel()
         {
             _progressList = new ObservableCollection<Progress>();
+
+            // init temp progress detail
+            temp_progressDetailed = new ProgressDetail()
+            {
+                ProgressDescription = "Waiting...",
+                ProgressDescriptionTextOpacity = 0.5
+            };
         }
         private DelegateNavigate? delegateNavigate = null;
         public void SetDelegateNavigate(DelegateNavigate del)
@@ -59,12 +70,11 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             _progressList.Clear();
             foreach (var progress in progressList)
             {
-                _progressList.Add(progress);                
+                progress.ProgressDescriptionList.Add(temp_progressDetailed);                    
+                _progressList.Add(progress);   
+
             }    
         }
-        private const string TAG = "PM";
-        private int errorCount = 0;
-        private List<ProgressDetail> temp_progressDetailedList = new List<ProgressDetail>();
         public void ProgressResponseListener(ProgressDetail progressResult)
         {
             Log.D(TAG, $"ProgressDescription: {progressResult.ProgressDescription} | StatusStatePD: {progressResult.StatusStatePD}");
@@ -79,6 +89,11 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             
             var existingDetailList = parentProgress.ProgressDescriptionList
                 .FirstOrDefault(d => d.ProgressDescription == progressResult.ProgressDescription);
+
+            // remove waiting temp in progress init
+            var tempPD = parentProgress.ProgressDescriptionList
+                .FirstOrDefault(d => d.ProgressDescription == "Waiting...");
+            if(tempPD != null) parentProgress.ProgressDescriptionList.Remove(tempPD);
 
             if (existingDetailList == null)
             {
@@ -113,7 +128,21 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 errorCount = 0;
             }
         }
+        public void ToggleDetailedListVisibility()
+        {
+            if (ProgressSelected.IsDetailedListVisible == Visibility.Visible)
+            {
+                ProgressSelected.IsDetailedListVisible = Visibility.Collapsed;
+                ProgressSelected.ExpandImage = "/Views/Assets/Icon_Contract.png";
+            }
+            else
+            {
+                ProgressSelected.IsDetailedListVisible = Visibility.Visible;
+                ProgressSelected.ExpandImage = "/Views/Assets/Icon_Expand.png";
+            }
+        }
 
+        #region TEST AREA
         public void Test_Click()
         {
             //Test_1();
@@ -137,19 +166,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 await Task.Delay(500);
             }
         }
-        public void ToggleDetailedListVisibility()
-        {
-            if(ProgressSelected.IsDetailedListVisible == Visibility.Visible)
-            {
-                ProgressSelected.IsDetailedListVisible = Visibility.Collapsed;
-                ProgressSelected.ExpandImage = "/Views/Assets/Icon_Contract.png";
-            }
-            else
-            {
-                ProgressSelected.IsDetailedListVisible = Visibility.Visible;
-                ProgressSelected.ExpandImage = "/Views/Assets/Icon_Expand.png";
-            }
-        }
+        #endregion     
 
     }
 }

@@ -148,23 +148,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         {
             //Get items of installation and enumerate all To-do-list in progress monitor page
             List<Progress> progressList = new List<Progress>();
-            //ObservableCollection<ProgressDetail> progressDetailList = new ObservableCollection<ProgressDetail>()
-            //{
-            //    new ProgressDetail()
-            //    {
-            //        ProgressDescription = "AAAA"
-            //    },
-
-            //    new ProgressDetail()
-            //    {
-            //        ProgressDescription = "BBBBB"
-            //    },
-
-            //    new ProgressDetail()
-            //    {
-            //        ProgressDescription = "CCCCC"
-            //    },
-            //};
+            
             foreach (var item in installationData)
             {
                 Debug.WriteLine($"Key : {item.Key} | Value : {item.Value}");

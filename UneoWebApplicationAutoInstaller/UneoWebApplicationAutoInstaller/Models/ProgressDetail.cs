@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static UneoWebApplicationAutoInstaller.Utilities.Enums;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace UneoWebApplicationAutoInstaller.Models
 {
@@ -72,7 +73,7 @@ namespace UneoWebApplicationAutoInstaller.Models
                 _isFinish = value;
                 OnPropertyChanged(nameof(IsFinish));
             }
-        }
+        }       
     }
 
 }

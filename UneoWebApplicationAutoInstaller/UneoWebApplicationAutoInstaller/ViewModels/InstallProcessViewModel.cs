@@ -80,19 +80,19 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 },
                             }                        
                         },
-                        new Setting()
-                        {
-                            SettingType = (int)ESettingType.MultipleKeyValue,
-                            SettingName = "Volumes",
-                            KeyValueItems = new ObservableCollection<DictionaryInput>()
-                            {
-                                new DictionaryInput()
-                                {
-                                    DictionaryKey = "C:\\Users\\uneo\\postgres_data",
-                                    DictionaryValue = "/bitnami/postgresql",
-                                }
-                            }
-                        },
+                        //new Setting()
+                        //{
+                        //    SettingType = (int)ESettingType.MultipleKeyValue,
+                        //    SettingName = "Volumes",
+                        //    KeyValueItems = new ObservableCollection<DictionaryInput>()
+                        //    {
+                        //        new DictionaryInput()
+                        //        {
+                        //            DictionaryKey = "C:\\Users\\uneo\\postgres_data",
+                        //            DictionaryValue = "/bitnami/postgresql",
+                        //        }
+                        //    }
+                        //},
                         new Setting()
                         {
                             SettingType = (int)ESettingType.MultipleKeyValue,

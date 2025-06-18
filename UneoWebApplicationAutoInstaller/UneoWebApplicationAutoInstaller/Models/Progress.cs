@@ -20,7 +20,6 @@ namespace UneoWebApplicationAutoInstaller.Models
         private double _progressNameTextOpacity = 0.5;
         private Visibility _isDetailedListVisible = Visibility.Collapsed; 
         private string _expandImage = "/Views/Assets/Icon_Contract.png";
-        //private ObservableCollection<ProgressDetail> _progressDescriptionList = new();
         private ObservableCollection<ProgressDetail> _progressDescriptionList = new();
 
         public bool IsRotating => StatusState == (int)EInstallStatus.Ongoing;
