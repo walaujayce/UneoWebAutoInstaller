@@ -696,10 +696,7 @@ namespace UneoWebApplicationAutoInstaller.Command
         }
         private async Task UMonitorSocketServerInstallProcess(List<Setting> settingList)
         {
-            //10. run UMONITORSOCKETSERVER after ALL docker images containerize
             await RunUMonitorSocketServerAsync();
-
-            Debug.WriteLine("\nEND OF PROCESS!!!");
         }
         private async Task UMonitorServiceInstallProcess(List<Setting> settingList)
         {
@@ -840,61 +837,133 @@ namespace UneoWebApplicationAutoInstaller.Command
         }
         public async Task RunUMonitorSocketServerAsync()
         {
+            // Init progress result and send to progress monitor
+            ProgressDetail progressDetail_UMonitorSocketServer = new ProgressDetail();
+            progressDetail_UMonitorSocketServer.ProgressParentID = (int)EInstallID.UMonitorSocketServer;
+
+            // Initialize UMonitorSocketServer appsettings
+            await Task.Delay(100); // system run too fast, need to wait it delegate
+            progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
+            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Ongoing;
+            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+
+            // Check UMonitorSocketServer has run
+
             string processName = "UMonitorSocketServer";
-            string checkProcessCommand = $"tasklist /FI \"IMAGENAME eq {processName}.exe\" | findstr /I {processName}";
-
-            // Check if the process is running
-            string result = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkProcessCommand, "Check if UMonitorSocketServer is already running");
-
-            if (!result.Contains(processName, StringComparison.OrdinalIgnoreCase)) // Process not found
+            bool isUMonitorSocketServerRunning = await CheckUMonitorSocketServerIsRunning(processName);
+            if (!isUMonitorSocketServerRunning) // Process not found
             {              
 
                 bool isRunning;
                 int count = 0;
                 do
                 {
-                    string webAPIContainerID = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(
-                        $"docker ps -q -f \"ancestor={imageName_WebAPI}\"",
-                        "Check if WebAPI container is running");
-
-                    isRunning = !string.IsNullOrEmpty(webAPIContainerID); // Check if output is NOT empty
-                    Debug.WriteLine(webAPIContainerID);
+                    isRunning = await CheckContainerRunningUsingImage(imageName_WebAPI);
                     if (!isRunning)
                     {
                         Log.I(TAG, "The WebAPI container isn't running yet.");
                         Log.I(TAG, "Waiting for 5 seconds...");
-                        await Task.Delay(5000);
+                        await Task.Delay(1000);
                         count++;
                     }
 
-                    if (count >= 5)
+                    if (count >= 30)
                     {
                         Log.E(TAG, "Failed to start WebAPI container, please check Docker.");
-                        break;
+
+                        progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
+                        progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
+                        progressDetail_UMonitorSocketServer.IsFinish = true;
+                        delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+                        return ;
                     }
 
                 } while (!isRunning);
 
+                if(isRunning)
+                {
+                    progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
+                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
+                    delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+                }
+
+                // START umonitorsocketserver
+                progressDetail_UMonitorSocketServer.ProgressDescription = "Start UMonitorSocketServer";
+                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Ongoing;
+                delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+
                 string uMonitorSocketServerExeFilePath = Path.Combine(AppContext.BaseDirectory, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
+                
                 if (!File.Exists(uMonitorSocketServerExeFilePath))
                 {
                     string projectRoot = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
                     uMonitorSocketServerExeFilePath = Path.Combine(projectRoot, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
                 }
-
-                for (int i = 10; i > 0; i--)
+                if (!File.Exists(uMonitorSocketServerExeFilePath))
                 {
-                    Log.I(TAG, $"Executing UMonitorSocketServer in {i} seconds...");
-                    await Task.Delay(1000);
+                    try
+                    {
+                        int searchUMonitorSocketServerPathAttempTimes = 0;
+                        DirectoryInfo di = Directory.GetParent(AppContext.BaseDirectory).Parent;
+                        while (!File.Exists(uMonitorSocketServerExeFilePath) && searchUMonitorSocketServerPathAttempTimes < 10)
+                        {
+                            string projectRoot = di.FullName;
+                            uMonitorSocketServerExeFilePath = Path.Combine(projectRoot, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
+                            di = di.Parent;
+                            searchUMonitorSocketServerPathAttempTimes++;
+                        }
+                        if (!File.Exists(uMonitorSocketServerExeFilePath))
+                        {
+                            progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
+                            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
+                            progressDetail_UMonitorSocketServer.IsFinish = true;
+                            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+                            return;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.E(TAG, "Cant find dump-UMonitorSocketServer file path.");
+                        progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
+                        progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
+                        progressDetail_UMonitorSocketServer.IsFinish = true;
+                        delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+                        return;
+                    }
                 }
+
+                await Task.Delay(5000);
                 await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
                         $"cmd.exe /c \"powershell -ExecutionPolicy Bypass -WindowStyle Hidden -Command Start-Process '{uMonitorSocketServerExeFilePath}' -WindowStyle Minimized\"",
                         "Run UMonitorSocketServer.exe bypassing SmartScreen");
+
+                
+                if (await CheckUMonitorSocketServerIsRunning(processName))
+                {
+                    progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
+                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
+                    delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+                }
+                else
+                {
+                    progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
+                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_UMonitorSocketServer.IsFinish= true;
+                    delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+                    return;
+                }
             }
             else
             {
                 Log.I(TAG, "UMonitorSocketServer is already running. Skipping execution.");
+                progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
+                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_UMonitorSocketServer.ProgressDescription = "Start UMonitorSocketServer";
+                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
+                delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
             }
+            progressDetail_UMonitorSocketServer.IsFinish = true;
+            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
         }
         public static async Task StopUMonitorSocketServerAsync()
         {
@@ -912,6 +981,12 @@ namespace UneoWebApplicationAutoInstaller.Command
                     $"taskkill /F /IM {processName}.exe",
                     "Stopping UMonitorSocketServer.exe");
             }
+        }
+        private async Task<bool> CheckUMonitorSocketServerIsRunning(string processName)
+        {
+            string checkProcessCommand = $"tasklist /FI \"IMAGENAME eq {processName}.exe\" | findstr /I {processName}";
+            string result = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkProcessCommand, "Check if UMonitorSocketServer is already running");
+            return result.Contains(processName, StringComparison.OrdinalIgnoreCase);
         }
         private async Task<bool> CheckImageExistence(string imageName)
         {
