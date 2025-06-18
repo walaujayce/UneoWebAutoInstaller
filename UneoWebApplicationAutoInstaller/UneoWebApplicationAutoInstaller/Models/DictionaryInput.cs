@@ -9,8 +9,8 @@ namespace UneoWebApplicationAutoInstaller.Models
 {
     public class DictionaryInput : ModelBase
     {
-        private string _dictionaryKey = "Key";
-        private object _dictionaryValue = "Value";
+        private string _dictionaryKey = "";
+        private object _dictionaryValue = "";
         private string _addBtnImageSource = "/Views/Assets/Icon_Add_FFD3D3D3.png";
         private bool _isRemovable = false;
 

@@ -763,6 +763,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 }
 
                 // START umonitorsocketserver
+                /*
                 progressDetail_UMonitorSocketServer.ProgressDescription = "Start UMonitorSocketServer";
                 progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
@@ -834,6 +835,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
                     return;
                 }
+                */
             }
             else
             {

@@ -62,8 +62,6 @@
 
         <!-- Expand Border Image -->
         <Style x:Key="Expand_Border_Image" TargetType="Border">
-            <Setter Property="Width" Value="Auto"/>
-            <Setter Property="Margin" Value="5"/>
             <Setter Property="Padding" Value="3"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -98,6 +96,12 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <!-- Expand Button Image -->
+        <Style x:Key="Expand_Button_Image" TargetType="Border">
+            <Setter Property="Width" Value="Auto"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="3"/>            
+        </Style>
     </Page.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -116,14 +120,14 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Margin="0,0,0,10">
-                                <Border Cursor="Hand" MouseLeftButtonUp="ExpandDetail_Clicked" >
+                                <Border Cursor="Hand" MouseLeftButtonUp="ExpandDetail_Clicked" Style="{DynamicResource Expand_Border_Image}">
                                     <Grid Height="35" Margin="0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <Border Grid.Column="0" Style="{DynamicResource Expand_Border_Image}">
+                                        <Border Grid.Column="0" Style="{DynamicResource Expand_Button_Image}">
                                             <Image Source="{Binding ExpandImage}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0"/>
                                         </Border>
                                         <TextBlock Grid.Column="1" Text="{Binding ProgressName}" FontSize="14" FontFamily="Times New Roman" VerticalAlignment="Center" Opacity="{Binding ProgressNameTextOpacity}" Padding="0,0,0,0"/>
