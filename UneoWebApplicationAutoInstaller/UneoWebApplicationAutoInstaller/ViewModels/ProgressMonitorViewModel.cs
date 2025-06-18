@@ -111,7 +111,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     parentProgress.StatusState = (int)EInstallStatus.Pass;
                 }
                 errorCount = 0;
-
             }
         }
 

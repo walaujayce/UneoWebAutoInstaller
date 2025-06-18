@@ -191,7 +191,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             if (installationData.Count > 0)
             {
                 CmdDataParser cmdDataParser = new CmdDataParser();
-                _= cmdDataParser.DataParser(installationData);
+                cmdDataParser.DataParser(installationData);
                 cmdDataParser.SetDelegateProgressResult(new DelegateProgressResult(ProgressResultListener));
             }
         }

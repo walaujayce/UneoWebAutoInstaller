@@ -35,6 +35,18 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         {
             ObservableCollection<DictionaryInput> UMonitorSocketServerAppSettings = Utilities.PublicFunction.LoadJsonFile();
 
+            // Init IP Address of both wifi and thernet
+            string ipAddress_WIFI = PublicFunction.GetWireless80211IPAddress();
+            string ipAddress_Ethernet = PublicFunction.GetEthernetIPAddress();
+            if(ipAddress_WIFI == null || ipAddress_WIFI == "")
+            {
+                ipAddress_WIFI = ipAddress_Ethernet;
+            }
+            if (ipAddress_Ethernet == null || ipAddress_Ethernet == "")
+            {
+                ipAddress_Ethernet = ipAddress_WIFI;
+            }
+
             InstallSelection = new ObservableCollection<Install>()
             {
                 new Install() 
@@ -101,7 +113,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 { 
                     InstallID = (int)EInstallID.WebAPI,
                     InstallName = "WebAPI", 
-                    IsChecked = true,
+                    IsChecked = false,
                     SettingList = new()
                     {
                         new Setting()
@@ -154,7 +166,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 { 
                     InstallID = (int)EInstallID.Website,    
                     InstallName = "Website", 
-                    IsChecked = false,
+                    IsChecked = true,
                     SettingList = new()
                     {
                         new Setting()
@@ -191,12 +203,12 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "VITE_SOCKETSERVER_URL",
-                                    DictionaryValue = $"{PublicFunction.GetWireless80211IPAddress()}",
+                                    DictionaryValue = ipAddress_WIFI,
                                 },                                
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "VITE_WEBAPI_URL",
-                                    DictionaryValue = $"{PublicFunction.GetEthernetIPAddress()}",
+                                    DictionaryValue = ipAddress_Ethernet,
                                 },
                             }
                         },
@@ -235,12 +247,12 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "LOCAL_IP",
-                                    DictionaryValue = $"{PublicFunction.GetWireless80211IPAddress()}",
+                                    DictionaryValue = ipAddress_WIFI,
                                 },
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "WEBAPI_URL",
-                                    DictionaryValue = $"{PublicFunction.GetEthernetIPAddress()}",
+                                    DictionaryValue = ipAddress_Ethernet,
                                 },
                             }
                         },

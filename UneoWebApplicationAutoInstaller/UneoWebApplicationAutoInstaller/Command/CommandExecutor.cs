@@ -23,7 +23,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             // Private constructor prevents external instantiation
         }
 
-        public async Task<bool> RunCommandAsAdminAsync(string command, string msg)
+        public async Task<bool> RunCommandAsAdminReturnBoolAsync(string command, string msg)
         {
             lock (_lock)
             {

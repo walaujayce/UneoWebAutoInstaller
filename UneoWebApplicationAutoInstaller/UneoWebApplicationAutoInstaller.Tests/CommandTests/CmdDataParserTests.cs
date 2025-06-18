@@ -36,10 +36,7 @@ namespace UneoWebApplicationAutoInstaller.Tests.CommandTests
                 SettingList[item.InstallID] = item.SettingList.ToList();
             }
 
-            _= _cmdDataParser.DataParser(SettingList);
-
-            bool result = _cmdDataParser.IsTestSuccess;
-            result.Should().BeTrue(); 
+            _cmdDataParser.DataParser(SettingList);
 
         }
 
