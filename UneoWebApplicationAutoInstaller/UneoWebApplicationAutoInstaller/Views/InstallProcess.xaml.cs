@@ -51,7 +51,6 @@ namespace UneoWebApplicationAutoInstaller.Views
         {
             installProcessVM.ProceedToInstallation();
         }
-
         private void InstallProcess_PreviewKeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)

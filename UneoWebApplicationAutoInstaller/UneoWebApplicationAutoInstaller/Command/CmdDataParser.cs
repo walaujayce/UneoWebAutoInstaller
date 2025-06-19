@@ -12,6 +12,7 @@ using ProcessOrigin = System.Diagnostics.Process;
 using System.IO;
 using UneoWebApplicationAutoInstaller.Utilities;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace UneoWebApplicationAutoInstaller.Command
 {
@@ -719,10 +720,6 @@ namespace UneoWebApplicationAutoInstaller.Command
             List<DictionaryInput> temp_appSettingList = settingList.First(s => s.SettingName == "App Settings").KeyValueItems.ToList();
             foreach (var appSetting in temp_appSettingList)
             {
-                // make sure dictionary value is changeback to object
-                object parsedValue = PublicFunction.TryParseValue(appSetting.DictionaryValue.ToString());
-                appSetting.DictionaryValue = parsedValue;
-
                 appSettingList.Add(appSetting);
             }
             PublicFunction.WriteJsonFile(appSettingList, PublicFunction.USocketServer_AppSettings_JSON_FilePath);
