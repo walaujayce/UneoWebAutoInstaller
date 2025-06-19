@@ -113,7 +113,6 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             // Fallback to string
             return value;
         }
-
         public static string GetInstallationName(int installationID)
         { 
             switch (installationID)
@@ -129,7 +128,31 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                 case (int)EInstallID.UMonitorService:
                     return "UMonitorService";
                 default:
-                    return "";
+                    return "Undefined";
+            }
+        }
+        public static string GetUpdateName(int updateID)
+        {
+            switch (updateID)
+            {
+                case (int)EUpdateID.Website_CONTAINER:
+                    return "更新 IP Address";
+                case (int)EUpdateID.Website_IMAGE:
+                    return "更新網頁版本";
+                case (int)EUpdateID.UMonitorSocketServer_APPSETTINGS:
+                    return "變更 USocketServer 設定檔";
+                case (int)EUpdateID.UMonitorSocketServer_ALL:
+                    return "更新 USocketServer 版本";
+                case (int)EUpdateID.WebAPI_CONTAINER:
+                    return "重新設定 WebAPI 容器";
+                case (int)EUpdateID.WebAPI_IMAGE:
+                    return "更新 WebAPI 版本";
+                case (int)EUpdateID.UMonitorService_CONTAINER:
+                    return "重新設定 UMonitorService 容器";
+                case (int)EUpdateID.UMonitorService_IMAGE:
+                    return "更新 UMonitorService 版本";
+                default:
+                    return "Undefined";
             }
         }
         /// <summary>

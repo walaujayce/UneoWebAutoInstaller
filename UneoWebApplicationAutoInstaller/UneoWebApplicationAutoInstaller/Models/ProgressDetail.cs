@@ -13,11 +13,11 @@ namespace UneoWebApplicationAutoInstaller.Models
     {
         private int _progressParentID;
         private string _progressDescription = "";
-        private int _statusStatePD = (int)EInstallStatus.Pending;
+        private int _statusStatePD = (int)EProgressStatus.Pending;
         private string _statusImagePD = "";
         private double __progressDescriptionTextOpacity = 1.0;
         private bool _isFinish = false;
-        public bool IsRotating => StatusStatePD == (int)EInstallStatus.Ongoing;
+        public bool IsRotating => StatusStatePD == (int)EProgressStatus.Ongoing;
         public int ProgressParentID
         {
             get => _progressParentID;

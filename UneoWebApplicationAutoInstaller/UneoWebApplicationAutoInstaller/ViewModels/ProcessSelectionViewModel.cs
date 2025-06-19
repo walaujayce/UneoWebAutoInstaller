@@ -26,7 +26,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 new Process() { ProcessID = (int)ENavigatePage.UpdateProcessPage, ProcessName="Update", ProcessDescription="My application is not working correctly and I want to reinstall it.", IsChecked = false, BorderBrush = new SolidColorBrush(Colors.LightGray), ProcessNameForeground =new SolidColorBrush(Colors.Gray)},
                 new Process() { ProcessID = (int)ENavigatePage.UninstallPage, ProcessName="Uninstall", ProcessDescription="I want to delete the application completely.", IsChecked = false, BorderBrush = new SolidColorBrush(Colors.LightGray), ProcessNameForeground =new SolidColorBrush(Colors.Gray)}
             };
-            ProcessSelected = ProcessSelection[0]; //default selection - Install
+            ProcessSelected = ProcessSelection[1]; //default selection - Install
+            SelectChange(ProcessSelected);
+
         }
         /// <summary>
         /// 目前選到的process

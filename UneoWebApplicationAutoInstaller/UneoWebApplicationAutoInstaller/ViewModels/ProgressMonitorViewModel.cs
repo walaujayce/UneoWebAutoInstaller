@@ -46,8 +46,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         private const string TAG = "PM";
         private int errorCount = 0;
         private ProgressDetail temp_progressDetailed;
-        public delegate void DelegateInstallStatus(string message);
-        public DelegateInstallStatus? delegateInstallStatus = null;
+        public delegate void DelegatEProgressStatus(string message);
+        public DelegatEProgressStatus? delegatEProgressStatus = null;
 
         public ProgressMonitorViewModel()
         {
@@ -84,7 +84,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             if (parentProgress == null) return;
 
             // start processing
-            parentProgress.StatusState = (int)EInstallStatus.Ongoing;
+            parentProgress.StatusState = (int)EProgressStatus.Ongoing;
             parentProgress.ProgressNameTextOpacity = 1.0;
             
             var existingDetailList = parentProgress.ProgressDescriptionList
@@ -109,7 +109,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             }
 
             // check if any error exist
-            if(progressResult.StatusStatePD == (int)EInstallStatus.Fail)
+            if(progressResult.StatusStatePD == (int)EProgressStatus.Fail)
             {
                 errorCount++;
             }
@@ -119,11 +119,11 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             {
                 if (errorCount > 0)
                 {
-                    parentProgress.StatusState = (int)EInstallStatus.Warning;
+                    parentProgress.StatusState = (int)EProgressStatus.Warning;
                 }
                 else
                 {
-                    parentProgress.StatusState = (int)EInstallStatus.Pass;
+                    parentProgress.StatusState = (int)EProgressStatus.Pass;
                 }
                 errorCount = 0;
             }
@@ -152,16 +152,16 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             await Task.Delay(100);
             foreach (var item in _progressList.ToList())
             {
-                item.StatusState = (int)EInstallStatus.Ongoing;
+                item.StatusState = (int)EProgressStatus.Ongoing;
                 item.ProgressNameTextOpacity = 1.0;
                 await Task.Delay(1500);
                 if (item.ProgressID % 2 != 0)
                 {
-                    item.StatusState = (int)EInstallStatus.Pass;
+                    item.StatusState = (int)EProgressStatus.Pass;
                 }
                 else
                 {
-                    item.StatusState = (int)EInstallStatus.Fail;
+                    item.StatusState = (int)EProgressStatus.Fail;
                 }
                 await Task.Delay(500);
             }

@@ -9,14 +9,118 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="UpdateProcess">
 
+    <Page.Resources>
+        <!-- Title Textblock Style -->
+        <Style x:Key="TitleTextblockStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="Tahoma"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        <!-- Description Textblock Style -->
+        <Style x:Key="DescriptionTextblockStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontFamily" Value="Arial"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="FontFamily" Value="Arial"/>
+            <Setter Property="Padding" Value="5,0"/>
+        </Style>
+        <!-- Select button border style -->
+        <Style x:Key="SelectBtnBorderStyle" TargetType="Border">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="15"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="#fccb3a"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                    Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                    To="Orange"
+                    Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                    Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                    To="#fccb3a"
+                    Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <!-- Select button textblock style -->
+        <Style x:Key="SelectBtnTextblockStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="Arial"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+    </Page.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/> 
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <!--Process Selection Radio Button-->
-        <Grid Grid.Row="0">
-            <Label Content="Update"/>
+        <!--Update Selection CArds-->
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+                <ItemsControl ItemsSource="{Binding UpdateSelection}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="2" Columns="4"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>                        
+                        <DataTemplate>
+                            <Border Margin="10" BorderBrush="Black" BorderThickness="0.2" CornerRadius="10" Padding="5">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="5.5*"/>
+                                        <RowDefinition Height="2*"/>
+                                        <RowDefinition Height="2.5*"/>
+                                    </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <TextBlock Text="{Binding UpdateName}" Style="{DynamicResource TitleTextblockStyle}"/>
+                                    </Grid>
+                                <Grid Grid.Row="1">
+                                        <TextBlock Text="{Binding UpdateDescription}" Style="{DynamicResource DescriptionTextblockStyle}"/>
+                                    </Grid>
+                                <Grid Grid.Row="2">
+                                    <Border x:Name="SelectButton" Style="{DynamicResource SelectBtnBorderStyle}" MouseLeftButtonUp="SelectBtn_Clicked" >
+                                        <TextBlock Text="Select" Style="{DynamicResource SelectBtnTextblockStyle}"/>
+                                        </Border>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
         </Grid>
 
         <!--Control Button-->

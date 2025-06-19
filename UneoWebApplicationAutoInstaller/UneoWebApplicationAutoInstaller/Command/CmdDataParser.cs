@@ -74,7 +74,83 @@ namespace UneoWebApplicationAutoInstaller.Command
                 await Task.Delay(100);
             }
             Debug.WriteLine("End of installation process!");
-        }        
+        }
+        public async void DataParserUpdateProcess(Update updateData)
+        {
+            List<Setting> settingList = updateData.SettingList.ToList();
+            switch (updateData.UpdateID)
+            {
+                case (int)EUpdateID.Website_CONTAINER:
+                    await RemakeWebsiteContainer(settingList);
+                    break;
+                case (int)EUpdateID.Website_IMAGE:
+                    await UpdateWebsiteImage(settingList);
+                    break;
+                case (int)EUpdateID.UMonitorSocketServer_APPSETTINGS:
+                    await ModifySocketServerAppSettings(settingList);
+                    break;
+                case (int)EUpdateID.UMonitorSocketServer_ALL:
+                    await UpdateSocketServer(settingList);
+                    break;
+                case (int)EUpdateID.WebAPI_CONTAINER:
+                    await RemakeWebAPI(settingList);
+                    break;
+                case (int)EUpdateID.WebAPI_IMAGE:
+                    await UpdateWebApiImage(settingList);
+                    break;
+                case (int)EUpdateID.UMonitorService_CONTAINER:
+                    await RemakeMonitorService(settingList);
+                    break;
+                case (int)EUpdateID.UMonitorService_IMAGE:
+                    await UpdateMonitorService(settingList);
+                    break;
+            }
+            // Wait a moment before go to next step
+            await Task.Delay(100);
+
+            Debug.WriteLine("End of update process!");
+        }
+        private async Task RemakeWebsiteContainer(List<Setting> settingList)
+        {
+            // remove container only
+        }
+        private async Task UpdateWebsiteImage(List<Setting> settingList)
+        {
+            // remove container and image
+
+            // then reuse this method
+            await WebsiteInstallProcess(settingList);
+        }
+        private async Task ModifySocketServerAppSettings(List<Setting> settingList)
+        {
+            // call setting modal to read json then write again
+        }
+        private async Task UpdateSocketServer(List<Setting> settingList)
+        {
+
+        }
+        private async Task RemakeWebAPI(List<Setting> settingList)
+        {
+            // remove container only
+
+        }
+        private async Task UpdateWebApiImage(List<Setting> settingList)
+        {
+            // remove webapi container and image , then reuse install method
+
+            await WebAPIInstallProcess(settingList);
+        }
+        private async Task RemakeMonitorService(List<Setting> settingList)
+        {
+            // remove container only
+
+        }
+        private async Task UpdateMonitorService(List<Setting> settingList)
+        {
+            // remove webapi container and image , then reuse install method
+
+             await UMonitorServiceInstallProcess(settingList);
+        }
         private async Task PostgreSQLDatabaseInstallProcess(List<Setting> settingList)
         {
             // Init progress result and send to progress monitor
@@ -104,7 +180,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             // Set local database file "postgres_data" in C:\Users\uneo\
             await Task.Delay(100); // system run too fast, need to wait it delegate
             progressDetail_PostgreSQL.ProgressDescription = "Create local folder for database";
-            progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
             bool isDatabaseLocalFolderExists = PublicFunction.CheckFileExist(databaseLocalFolder);
@@ -131,7 +207,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 {
                     Log.E(TAG, "Create local folder for database FAIL");
                     progressDetail_PostgreSQL.ProgressDescription = "Create local folder for database";
-                    progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_PostgreSQL.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                     // failed then return
@@ -140,13 +216,13 @@ namespace UneoWebApplicationAutoInstaller.Command
             }
 
             progressDetail_PostgreSQL.ProgressDescription = "Create local folder for database";
-            progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Pass;
+            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
             delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
             // Check if PostgreSQL image already exist, if NO, then pull image
             await Task.Delay(100);
             progressDetail_PostgreSQL.ProgressDescription = "Pull PostgreSQL image";
-            progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
             bool isImageExists_PostgreSQL = await CheckImageExistence(imageName_PostgreSQL);
@@ -154,7 +230,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             {
                 Log.I(TAG, $"Image {imageName_PostgreSQL} has already exist.");
                 progressDetail_PostgreSQL.ProgressDescription = "Pull PostgreSQL image";
-                progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
             }
             else
@@ -162,7 +238,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 Log.I(TAG, $"Image {imageName_PostgreSQL} doesn't exist.");
                 Log.I(TAG, "Start to pull image");
                 progressDetail_PostgreSQL.ProgressDescription = "Pull PostgreSQL image";
-                progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Ongoing;
+                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                 PullImage(imageName_PostgreSQL);
 
@@ -181,14 +257,14 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                     Log.I(TAG, "Pull PostgreSQL image PASS");
                     progressDetail_PostgreSQL.ProgressDescription = "Pull PostgreSQL image";
-                    progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                 }
                 else
                 {
                     Log.E(TAG, "Pull PostgreSQL image FAIL");
                     progressDetail_PostgreSQL.ProgressDescription = "Pull PostgreSQL image";
-                    progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_PostgreSQL.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                     // failed then return
@@ -199,7 +275,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             // Check if PostgreSQL container already exist, if No, then containerize the image
             Log.I(TAG, "Check if PostgreSQL container already exist, if No, then containerize the image");
             progressDetail_PostgreSQL.ProgressDescription = "Containerize PostgreSQL image";
-            progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
             bool isContainerExists_PostgreSQL = await CheckContainerExistenceUsingImageName(imageName_PostgreSQL);
@@ -222,7 +298,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                 Log.I(TAG, "Container PostgreSQL exists locally.");
                 progressDetail_PostgreSQL.ProgressDescription = "Containerize PostgreSQL image";
-                progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
             }
             else
@@ -248,14 +324,14 @@ namespace UneoWebApplicationAutoInstaller.Command
                 {
                     Log.I(TAG, "Containerize PostgreSQL image PASS");
                     progressDetail_PostgreSQL.ProgressDescription = "Containerize PostgreSQL image";
-                    progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                 }
                 else
                 {
                     Log.E(TAG, "Containerize PostgreSQL image FAIL");
                     progressDetail_PostgreSQL.ProgressDescription = "Containerize PostgreSQL image";
-                    progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_PostgreSQL.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                     // failed then return
@@ -266,7 +342,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                 // Create database "uneo_web"
                 progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
-                progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Ongoing;
+                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
                 //Get container ID from image name
@@ -306,7 +382,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                         databaseExistAttemtpTimes = 0;
                         // Fail to create database then return
                         progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
-                        progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Fail;
+                        progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
                         progressDetail_PostgreSQL.IsFinish = true;
                         delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                         return;
@@ -315,7 +391,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                 // database "uneo_web" exist, then delegate pass
                 progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
-                progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
                 // Cleanup the temp file
@@ -323,7 +399,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                 // Init database tables by dump-postgres file
                 progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
-                progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Ongoing;
+                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
                 string containerSqlFilePath = "/tmp/dump.sql";
@@ -352,7 +428,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                         if (!File.Exists(postgreSQLPath))
                         {
                             progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
-                            progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Fail;
+                            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
                             progressDetail_PostgreSQL.IsFinish = true;
                             delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                             return;
@@ -362,7 +438,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     {
                         Log.E(TAG, "Cant find dump-postgreSQL file path.");
                         progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
-                        progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Fail;
+                        progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
                         progressDetail_PostgreSQL.IsFinish = true;
                         delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                         return;
@@ -401,7 +477,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     if(table_existed_count > 0)
                     {
                         progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
-                        progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Pass;
+                        progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
                         delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                     }
 
@@ -410,7 +486,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 {
                     Log.E(TAG, $"Database {DATABASE_NAME} with tables has already existed, delete it first before restore process continue to execute.");
                     progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
-                    progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_PostgreSQL.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                     return;
@@ -442,7 +518,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             // Check if WebAPI image already exist, if NO, then pull image
             await Task.Delay(100); // system run too fast, need to wait it delegate
             progressDetail_WebAPI.ProgressDescription = "Pull WebAPI image";
-            progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_WebAPI);
 
             bool isImageExists_WebAPI = await CheckImageExistence(imageName_WebAPI);
@@ -450,7 +526,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             {
                 Log.I(TAG, $"Image {imageName_WebAPI} has already exist.");
                 progressDetail_WebAPI.ProgressDescription = "Pull WebAPI image";
-                progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_WebAPI);
             }
             else
@@ -458,7 +534,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 Log.I(TAG, $"Image {imageName_WebAPI} doesn't exist.");
                 Log.I(TAG, "Start to pull image");
                 progressDetail_WebAPI.ProgressDescription = "Pull WebAPI image";
-                progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Ongoing;
+                progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_WebAPI);
                 PullImage(imageName_WebAPI);
 
@@ -477,14 +553,14 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                     Log.I(TAG, "Pull WebAPI image PASS");
                     progressDetail_WebAPI.ProgressDescription = "Pull WebAPI image";
-                    progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_WebAPI);
                 }
                 else
                 {
                     Log.E(TAG, "Pull WebAPI image FAIL");
                     progressDetail_WebAPI.ProgressDescription = "Pull WebAPI image";
-                    progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_WebAPI.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_WebAPI);
                     // failed then return
@@ -495,7 +571,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
             // Check if WebAPI container already exist, if No, then containerize the image
             progressDetail_WebAPI.ProgressDescription = "Containerize WebAPI image";
-            progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_WebAPI);
 
             bool isContainerExists_WEBAPI = await CheckContainerExistenceUsingImageName(imageName_WebAPI);
@@ -518,7 +594,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                 Log.I(TAG, "Container UmonitorWebAPI exists locally.");
                 progressDetail_WebAPI.ProgressDescription = "Containerize WebAPI image";
-                progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_WebAPI);
             }
             else
@@ -541,14 +617,14 @@ namespace UneoWebApplicationAutoInstaller.Command
                 {
                     Log.I(TAG, "Containerize WebAPI image PASS");
                     progressDetail_WebAPI.ProgressDescription = "Containerize WebAPI image";
-                    progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_WebAPI);
                 }
                 else
                 {
                     Log.E(TAG, "Containerize WebAPI image FAIL");
                     progressDetail_WebAPI.ProgressDescription = "Containerize WebAPI image";
-                    progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_WebAPI.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_WebAPI);
                     // failed then return
@@ -585,7 +661,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             // Check if Website image already exist, if NO, then pull image
             await Task.Delay(100); // system run too fast, need to wait it delegate
             progressDetail_Website.ProgressDescription = "Pull Website image";
-            progressDetail_Website.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_Website.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_Website);
             
             bool isImageExists_Website = await CheckImageExistence(imageName_Website);
@@ -593,7 +669,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             {
                 Log.I(TAG, $"Image {imageName_Website} has already exist.");
                 progressDetail_Website.ProgressDescription = "Pull Website image";
-                progressDetail_Website.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_Website.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_Website);
             }
             else
@@ -601,7 +677,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 Log.I(TAG, $"Image {imageName_Website} doesn't exist.");
                 Log.I(TAG, "Start to pull image");
                 progressDetail_Website.ProgressDescription = "Pull Website image";
-                progressDetail_Website.StatusStatePD = (int)EInstallStatus.Ongoing;
+                progressDetail_Website.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_Website);
                 PullImage(imageName_Website);
 
@@ -620,14 +696,14 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                     Log.I(TAG, "Pull Website image PASS");
                     progressDetail_Website.ProgressDescription = "Pull Website image";
-                    progressDetail_Website.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_Website.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_Website);
                 }
                 else
                 {
                     Log.E(TAG, "Pull Website image FAIL");
                     progressDetail_Website.ProgressDescription = "Pull Website image";
-                    progressDetail_Website.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_Website.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_Website.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_Website);
                     // failed then return
@@ -638,7 +714,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
             // Check if WebAPI container already exist, if No, then containerize the image
             progressDetail_Website.ProgressDescription = "Containerize Website image";
-            progressDetail_Website.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_Website.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_Website);
 
             bool isContainerExists_Website = await CheckContainerExistenceUsingImageName(imageName_Website);
@@ -661,7 +737,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                 Log.I(TAG, "Container Website exists locally.");
                 progressDetail_Website.ProgressDescription = "Containerize Website image";
-                progressDetail_Website.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_Website.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_Website);
             }
             else
@@ -684,14 +760,14 @@ namespace UneoWebApplicationAutoInstaller.Command
                 {
                     Log.I(TAG, "Containerize Website image PASS");
                     progressDetail_Website.ProgressDescription = "Containerize Website image";
-                    progressDetail_Website.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_Website.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_Website);
                 }
                 else
                 {
                     Log.E(TAG, "Containerize Website image FAIL");
                     progressDetail_Website.ProgressDescription = "Containerize Website image";
-                    progressDetail_Website.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_Website.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_Website.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_Website);
                     // failed then return
@@ -712,7 +788,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             // Initialize UMonitorSocketServer appsettings
             await Task.Delay(100); // system run too fast, need to wait it delegate
             progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
-            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
 
             // load and 
@@ -748,7 +824,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                         Log.E(TAG, "Failed to start WebAPI container, please check Docker.");
 
                         progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
-                        progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
+                        progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Fail;
                         progressDetail_UMonitorSocketServer.IsFinish = true;
                         delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
                         return;
@@ -759,14 +835,14 @@ namespace UneoWebApplicationAutoInstaller.Command
                 if (isRunning)
                 {
                     progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
-                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
                 }
 
                 // START umonitorsocketserver
                 /*
                 progressDetail_UMonitorSocketServer.ProgressDescription = "Start UMonitorSocketServer";
-                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Ongoing;
+                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
 
                 string uMonitorSocketServerExeFilePath = Path.Combine(AppContext.BaseDirectory, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
@@ -799,7 +875,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                         if (!File.Exists(uMonitorSocketServerExeFilePath))
                         {
                             progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
-                            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
+                            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Fail;
                             progressDetail_UMonitorSocketServer.IsFinish = true;
                             delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
                             return;
@@ -809,7 +885,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     {
                         Log.E(TAG, "Cant find dump-UMonitorSocketServer file path.");
                         progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
-                        progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
+                        progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Fail;
                         progressDetail_UMonitorSocketServer.IsFinish = true;
                         delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
                         return;
@@ -825,13 +901,13 @@ namespace UneoWebApplicationAutoInstaller.Command
                 if (await CheckUMonitorSocketServerIsRunning(processName))
                 {
                     progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
-                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
                 }
                 else
                 {
                     progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
-                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_UMonitorSocketServer.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
                     return;
@@ -842,9 +918,9 @@ namespace UneoWebApplicationAutoInstaller.Command
             {
                 Log.I(TAG, "UMonitorSocketServer is already running. Skipping execution.");
                 progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
-                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Pass;
                 progressDetail_UMonitorSocketServer.ProgressDescription = "Start UMonitorSocketServer";
-                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
             }
             progressDetail_UMonitorSocketServer.IsFinish = true;
@@ -870,7 +946,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             // Check if UMonitorServices image already exist, if NO, then pull image
             await Task.Delay(100); // system run too fast, need to wait it delegate
             progressDetail_UMonitorServices.ProgressDescription = "Pull UMonitorServices image";
-            progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
 
             bool isImageExists_Website = await CheckImageExistence(imageName_UMonitorServices);
@@ -878,7 +954,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             {
                 Log.I(TAG, $"Image {imageName_UMonitorServices} has already exist.");
                 progressDetail_UMonitorServices.ProgressDescription = "Pull UMonitorServices image";
-                progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
             }
             else
@@ -886,7 +962,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 Log.I(TAG, $"Image {imageName_UMonitorServices} doesn't exist.");
                 Log.I(TAG, "Start to pull image");
                 progressDetail_UMonitorServices.ProgressDescription = "Pull UMonitorServices image";
-                progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Ongoing;
+                progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
                 PullImage(imageName_UMonitorServices);
 
@@ -905,14 +981,14 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                     Log.I(TAG, "Pull UMonitorServices image PASS");
                     progressDetail_UMonitorServices.ProgressDescription = "Pull UMonitorServices image";
-                    progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
                 }
                 else
                 {
                     Log.E(TAG, "Pull UMonitorServices image FAIL");
                     progressDetail_UMonitorServices.ProgressDescription = "Pull UMonitorServices image";
-                    progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_UMonitorServices.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
                     // failed then return
@@ -923,7 +999,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
             // Check if WebAPI container already exist, if No, then containerize the image
             progressDetail_UMonitorServices.ProgressDescription = "Containerize UMonitorServices image";
-            progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
 
             bool isContainerExists_Website = await CheckContainerExistenceUsingImageName(imageName_UMonitorServices);
@@ -946,7 +1022,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                 Log.I(TAG, "Container UMonitorServices exists locally.");
                 progressDetail_UMonitorServices.ProgressDescription = "Containerize UMonitorServices image";
-                progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
             }
             else
@@ -969,14 +1045,14 @@ namespace UneoWebApplicationAutoInstaller.Command
                 {
                     Log.I(TAG, "Containerize UMonitorServices image PASS");
                     progressDetail_UMonitorServices.ProgressDescription = "Containerize UMonitorServices image";
-                    progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
                 }
                 else
                 {
                     Log.E(TAG, "Containerize UMonitorServices image FAIL");
                     progressDetail_UMonitorServices.ProgressDescription = "Containerize UMonitorServices image";
-                    progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_UMonitorServices.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
                     // failed then return

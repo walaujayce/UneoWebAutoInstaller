@@ -17,8 +17,6 @@ namespace UneoWebApplicationAutoInstaller.Models
         private string _installDescription = ""; 
         private bool _isChecked = false;
         private ObservableCollection<Setting> _settingList = new();
-        private int _installStatus = (int)EInstallStatus.Ongoing; 
-
         public int InstallID
         {
             get => _installID;
@@ -62,15 +60,6 @@ namespace UneoWebApplicationAutoInstaller.Models
             {
                 _settingList = value;
                 OnPropertyChanged("SettingList");
-            }
-        }
-        public int InstallStatus
-        {
-            get => _installStatus;
-            set
-            {
-                _installStatus = value;
-                OnPropertyChanged("InstallStatus");
             }
         }
     }

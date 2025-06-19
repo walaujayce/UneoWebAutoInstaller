@@ -100,7 +100,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                             }
                         },
                     }
-
                 },
                 new Install() 
                 { 
@@ -136,8 +135,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                     DictionaryValue = "7284:8080"
                                 },
                             }
-                        }
-                        
+                        }                        
                     }
                 },
                 new Install() 
@@ -259,11 +257,11 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         {
             this.delegateNavigate = del;
         }
-        private DelegateOverlayShow? delegateOverlayShow = null;
-        public void SetVMDelegateOverlayShow(DelegateOverlayShow del)
-        {
-            this.delegateOverlayShow = del;
-        }
+        //private DelegateOverlayShow? delegateOverlayShow = null;
+        //public void SetVMDelegateOverlayShow(DelegateOverlayShow del)
+        //{
+        //    this.delegateOverlayShow = del;
+        //}
         private DelegateSelectedInstallation? delegateSelectedInstallation = null;
         public void SetVMDelegateSelectedInstallation(DelegateSelectedInstallation del)
         {
@@ -288,7 +286,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 MessageBox.Show("At least one application should be selected.", "Alert", MessageBoxButton.OK);
                 return;
             }
-            delegateOverlayShow?.Invoke(true);
+            //delegateOverlayShow?.Invoke(true);
             delegateSelectedInstallation?.Invoke(_installSelected);
         }
         private Install CloneInstall(Install original)

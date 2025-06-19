@@ -67,6 +67,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         public delegate void DelegateSelectedInstallation(List<Install> selectedInstallation);
         public DelegateSelectedInstallation delegateSelectedInstallation;
 
+        public delegate void DelegateSelectedUpdate(Update selectedUpdate);
+        public DelegateSelectedInstallation delegateSelectedUpdate;
+
         public delegate void DelegateProgressResult(ProgressDetail progressResult);
 
         private ProcessSelection _processSelectionPage = new();
@@ -83,10 +86,11 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             NavigateToSelectedPage((int)ENavigatePage.ProcessSelectionPage);
             _processSelectionPage.SetDelegate(new DelegateNavigate(NavigateToSelectedPage));
             _installProcessPage.SetDelegate(new DelegateNavigate(NavigateToSelectedPage));
-            _installProcessPage.SetDelegateOverlayShow(new DelegateOverlayShow(OverlayShowListener));
-            _installProcessPage.SetDelegateSelectedInstallation(new DelegateSelectedInstallation(SettingModalListener));
+            _installProcessPage.SetDelegateSelectedInstallation(new DelegateSelectedInstallation(InstallSettingModalListener));
 
             _progressMonitorPage.SetDelegate(new DelegateNavigate(NavigateToSelectedPage));
+
+            _updateProcessPage.SetDelegateSelectedUpdate(new DelegateSelectedUpdate(UpdateSettingModalListener));
 
         }
         private void NavigateToSelectedPage(int pageNumber)
@@ -113,19 +117,42 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     return;
             }
         }
-        private void SettingModalListener(List<Install> selectedInstallation)
+        private void InstallSettingModalListener(List<Install> selectedInstallation)
         {
+            Debug.WriteLine("InstallSettingModalListener");
             if (selectedInstallation.Count > 0)
             {
+                OverlayShowListener(true);
                 SettingModal settingModal = new SettingModal()
                 {
                     Owner = Application.Current.MainWindow,
                 };
-
+                settingModal.SetProcessMode(0);
                 settingModal.SetDelegateOverlayShow(new DelegateOverlayShow(OverlayShowListener));
                 settingModal.SetDelegateInstallationData(new DelegateInstallationData(InstallationDataListener));
                 settingModal.SetSelectedInstallation(selectedInstallation);
                 settingModal.ShowDialog();
+            }
+        }
+        private void UpdateSettingModalListener(Update selectedUpdate)
+        {
+            Debug.WriteLine("UpdateSettingModalListener");
+            if (selectedUpdate.IsProceedToSettingModal)
+            {
+                OverlayShowListener(true);
+                SettingModal settingModal = new SettingModal()
+                {
+                    Owner = Application.Current.MainWindow,
+                };
+                settingModal.SetProcessMode(1);
+                settingModal.SetDelegateOverlayShow(new DelegateOverlayShow(OverlayShowListener));
+                settingModal.SetSelectedUpdate(selectedUpdate);
+                settingModal.SetDelegateInstallationData(new DelegateInstallationData(UpdateDataListener));
+                settingModal.ShowDialog();
+            }
+            else
+            {
+                if (selectedUpdate.UpdateID == (int)EUpdateID.UMonitorSocketServer_ALL) RenewSocketServer();
             }
         }
         private void OverlayShowListener(bool isShown)
@@ -163,6 +190,41 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
             _progressMonitorPage.GetSelectedInstallationTodoList(progressList);
             
+            NavigateToSelectedPage((int)ENavigatePage.ProgressMonitorPage);
+
+            //Check Docker Is Running And Auto Restart Enabled
+            if (Config.EnableDockerCheck)
+            {
+                if (!await CheckDockerIsRunningAndAutoRestartEnabled()) return;
+            }
+
+            //Dataparser to new model for installation process
+            if (installationData.Count > 0)
+            {
+                CmdDataParser cmdDataParser = new CmdDataParser();
+                cmdDataParser.DataParser(installationData);
+                cmdDataParser.SetDelegateProgressResult(new DelegateProgressResult(ProgressResultListener));
+            }
+        }
+        private async void UpdateDataListener(Dictionary<int, List<Setting>> installationData)
+        {
+            //Get items of installation and enumerate all To-do-list in progress monitor page
+            List<Progress> progressList = new List<Progress>();
+
+            foreach (var item in installationData)
+            {
+                Debug.WriteLine($"Key : {item.Key} | Value : {item.Value}");
+
+                progressList.Add(new Progress()
+                {
+                    ProgressID = item.Key,
+                    ProgressName = PublicFunction.GetInstallationName(item.Key),
+                });
+
+            }
+
+            _progressMonitorPage.GetSelectedInstallationTodoList(progressList);
+
             NavigateToSelectedPage((int)ENavigatePage.ProgressMonitorPage);
 
             //Check Docker Is Running And Auto Restart Enabled
@@ -245,6 +307,10 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
             return isDockerRunning; // Docker is not running, go back
 
+        }
+        private void RenewSocketServer()
+        {
+            // todo
         }
 
     }
