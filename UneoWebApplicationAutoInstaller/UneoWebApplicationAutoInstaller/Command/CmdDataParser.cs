@@ -373,22 +373,22 @@ namespace UneoWebApplicationAutoInstaller.Command
         {
             // Init progress result and send to progress monitor
             ProgressDetail progressDetail_UMonitorSocketServer = new ProgressDetail();
-            //progressDetail_UMonitorSocketServer.ProgressParentID = (int)EUpdateID.UMonitorSocketServer_APPSETTINGS;
+            progressDetail_UMonitorSocketServer.ProgressParentID = (int)EUpdateID.UMonitorSocketServer_APPSETTINGS;
 
-            //// Initialize UMonitorSocketServer appsettings
-            //await Task.Delay(100); // system run too fast, need to wait it delegate
-            //progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
-            //progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Ongoing;
-            //delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+            // Initialize UMonitorSocketServer appsettings
+            await Task.Delay(100); // system run too fast, need to wait it delegate
+            progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
+            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Ongoing;
+            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
 
-            //// load and 
-            //ObservableCollection<DictionaryInput> appSettingList = new ObservableCollection<DictionaryInput>();
-            //List<DictionaryInput> temp_appSettingList = settingList.First(s => s.SettingName == "App Settings").KeyValueItems.ToList();
-            //foreach (var appSetting in temp_appSettingList)
-            //{
-            //    appSettingList.Add(appSetting);
-            //}
-            //PublicFunction.WriteJsonFile(appSettingList, PublicFunction.USocketServer_AppSettings_JSON_FilePath);
+            // load and 
+            ObservableCollection<DictionaryInput> appSettingList = new ObservableCollection<DictionaryInput>();
+            List<DictionaryInput> temp_appSettingList = settingList.First(s => s.SettingName == "App Settings").KeyValueItems.ToList();
+            foreach (var appSetting in temp_appSettingList)
+            {
+                appSettingList.Add(appSetting);
+            }
+            PublicFunction.WriteJsonFile(appSettingList, PublicFunction.USocketServer_AppSettings_JSON_FilePath);
 
             // call setting modal to read json then write again
             await StopUMonitorSocketServerAsync();
@@ -1422,20 +1422,27 @@ namespace UneoWebApplicationAutoInstaller.Command
                         delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
                     }
                 }
+                else
+                {
+                    // skip checking webapi container running, so "initialize" porgress detail delegate fake "PASS"
+                    progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
+                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Pass;
+                    delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+                }
 
                 // START umonitorsocketserver
-                /*
+                
                 progressDetail_UMonitorSocketServer.ProgressDescription = "Start UMonitorSocketServer";
                 progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
 
                 string uMonitorSocketServerExeFilePath = Path.Combine(AppContext.BaseDirectory, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
 
-                if (!File.Exists(uMonitorSocketServerExeFilePath))
-                {
-                    string projectRoot = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
-                    uMonitorSocketServerExeFilePath = Path.Combine(projectRoot, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
-                }
+                //if (!File.Exists(uMonitorSocketServerExeFilePath))
+                //{
+                //    string projectRoot = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
+                //    uMonitorSocketServerExeFilePath = Path.Combine(projectRoot, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
+                //}
                 if (!File.Exists(uMonitorSocketServerExeFilePath))
                 {
                     try
@@ -1496,7 +1503,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
                     return;
                 }
-                */
+                
             }
             else
             {
