@@ -15,6 +15,12 @@
     {
         "Entry"
         {
+        "MsmKey" = "8:_14AAAAA587AB4045BD40FED8761C0224"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_A1478AEDDEA54B2B968E5B8F956B54CD"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -43,6 +49,22 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
+            }
         }
         "Release"
         {
@@ -59,6 +81,22 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
+            }
         }
     }
     "Deployable"
@@ -76,10 +114,40 @@
         {
             "LaunchCondition"
             {
+                "{A06ECF26-33A3-4562-8140-9B0E340D4F24}:_81C311C2C5CE41BE94E8522E22DC3222"
+                {
+                "Name" = "8:.NET Core"
+                "Message" = "8:[VSDNETCOREMSG]"
+                "AllowLaterVersions" = "11:FALSE"
+                "InstallUrl" = "8:https://dotnet.microsoft.com/download/dotnet-core/[NetCoreVerMajorDotMinor]"
+                "IsNETCore" = "11:TRUE"
+                "Architecture" = "2:0"
+                "Runtime" = "2:0"
+                }
             }
         }
         "File"
         {
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_14AAAAA587AB4045BD40FED8761C0224"
+            {
+            "SourcePath" = "8:..\\UneoWebApplicationAutoInstaller\\Views\\Assets\\Icon_Logo.ico"
+            "TargetName" = "8:Icon_Logo.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_4FC78C331426454D87A3F206F23A7215"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A1478AEDDEA54B2B968E5B8F956B54CD"
             {
             "SourcePath" = "8:..\\UneoWebApplicationAutoInstaller\\UMonitorSocketServer\\publish\\appsettings.json"
@@ -178,8 +246,8 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:UneoWebApplicationSetupInstaller"
-        "ProductCode" = "8:{1A06590D-AB9D-4EA5-82B9-7347981221DD}"
-        "PackageCode" = "8:{00D75548-661D-4716-A8F5-B11AB66C7496}"
+        "ProductCode" = "8:{EAF09BCD-36A7-4194-B776-78A41617DA14}"
+        "PackageCode" = "8:{C570E0D8-F565-4113-ACE8-60AE3AF85EE3}"
         "UpgradeCode" = "8:{3582E975-6D1B-4B61-9200-5DB1C7758CEC}"
         "AspNetVersion" = "8:"
         "RestartWWWService" = "11:FALSE"
@@ -301,7 +369,7 @@
         {
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_AF1BA2140DBD4690976822FE95805F79"
             {
-            "Name" = "8:UneoWebApplication(V1.0.0)"
+            "Name" = "8:Uneo Web Application"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
@@ -310,7 +378,7 @@
             "Target" = "8:_FF32A167315C43D6874075D43F466E21"
             "Folder" = "8:_7E85F78C88DA4CEB819342487738EB19"
             "WorkingFolder" = "8:_4FC78C331426454D87A3F206F23A7215"
-            "Icon" = "8:"
+            "Icon" = "8:_14AAAAA587AB4045BD40FED8761C0224"
             "Feature" = "8:"
             }
         }
@@ -714,7 +782,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_FF32A167315C43D6874075D43F466E21"
             {
-            "SourcePath" = "8:..\\UneoWebApplicationAutoInstaller\\obj\\Release\\net8.0-windows\\apphost.exe"
+            "SourcePath" = "8:..\\UneoWebApplicationAutoInstaller\\obj\\Debug\\net8.0-windows\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_4FC78C331426454D87A3F206F23A7215"

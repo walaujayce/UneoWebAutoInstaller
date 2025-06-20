@@ -12,7 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UneoWebApplicationAutoInstaller.Models;
 using UneoWebApplicationAutoInstaller.ViewModels;
+using static UneoWebApplicationAutoInstaller.ViewModels.MainWindowViewModel;
 
 namespace UneoWebApplicationAutoInstaller.Views
 {
@@ -37,6 +39,16 @@ namespace UneoWebApplicationAutoInstaller.Views
         private void ProceedToNextStage_Update_Clicked(object sender, MouseButtonEventArgs e)
         {
 
+        }
+        public void SetDelegateSelectedUpdate(DelegateSelectedUpdate del)
+        {
+            _updateProcessVM.SetVMDelegateSelectedUpdate(del);
+        }
+        private void SelectBtn_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            var button = (Border)sender;
+            _updateProcessVM.UpdateSelected = (Update)button.DataContext;
+            _updateProcessVM.ProccedToUpdate();
         }
     }
 }

@@ -15,14 +15,14 @@ namespace UneoWebApplicationAutoInstaller.Models
     {
         private int _progressID;
         private string _progressName = "";
-        private int _statusState = (int)EInstallStatus.Pending;
+        private int _statusState = (int)EProgressStatus.Pending;
         private string _statusImage = "";
         private double _progressNameTextOpacity = 0.5;
         private Visibility _isDetailedListVisible = Visibility.Collapsed; 
         private string _expandImage = "/Views/Assets/Icon_Contract.png";
         private ObservableCollection<ProgressDetail> _progressDescriptionList = new();
 
-        public bool IsRotating => StatusState == (int)EInstallStatus.Ongoing;
+        public bool IsRotating => StatusState == (int)EProgressStatus.Ongoing;
         public int ProgressID
         {
             get => _progressID;

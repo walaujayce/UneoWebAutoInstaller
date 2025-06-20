@@ -12,6 +12,8 @@ using ProcessOrigin = System.Diagnostics.Process;
 using System.IO;
 using UneoWebApplicationAutoInstaller.Utilities;
 using System.Diagnostics;
+using System.Text.Json;
+using System.ComponentModel;
 
 namespace UneoWebApplicationAutoInstaller.Command
 {
@@ -59,7 +61,10 @@ namespace UneoWebApplicationAutoInstaller.Command
                         await WebAPIInstallProcess(settingList);
                         break;
                     case (int)EInstallID.Website:
-                        await WebsiteInstallProcess(settingList);
+                        // Init progress result and send to progress monitor
+                        ProgressDetail progressDetail_Website = new ProgressDetail();
+                        progressDetail_Website.ProgressParentID = (int)EInstallID.Website;
+                        await WebsiteInstallProcess(settingList, progressDetail_Website);
                         break;
                     case (int)EInstallID.UMonitorSocketServer:
                         await UMonitorSocketServerInstallProcess(settingList);
@@ -73,7 +78,519 @@ namespace UneoWebApplicationAutoInstaller.Command
                 await Task.Delay(100);
             }
             Debug.WriteLine("End of installation process!");
-        }        
+        }
+        public async void DataParserUpdateProcess(Dictionary<int, List<Setting>> installationData)
+        {
+            List<Setting> settingList = installationData.First().Value.ToList();
+            switch (installationData.First().Key)
+            {
+                case (int)EUpdateID.Website_CONTAINER:
+                    await RemakeWebsiteContainer(settingList);
+                    break;
+                case (int)EUpdateID.Website_IMAGE:
+                    await UpdateWebsiteImage(settingList);
+                    break;
+                case (int)EUpdateID.UMonitorSocketServer_APPSETTINGS:
+                    await ModifySocketServerAppSettings(settingList);
+                    break;
+                case (int)EUpdateID.UMonitorSocketServer_ALL:
+                    await UpdateSocketServer(settingList);
+                    break;
+                case (int)EUpdateID.WebAPI_CONTAINER:
+                    await RemakeWebAPI(settingList);
+                    break;
+                case (int)EUpdateID.WebAPI_IMAGE:
+                    await UpdateWebApiImage(settingList);
+                    break;
+                case (int)EUpdateID.UMonitorService_CONTAINER:
+                    await RemakeMonitorService(settingList);
+                    break;
+                case (int)EUpdateID.UMonitorService_IMAGE:
+                    await UpdateMonitorService(settingList);
+                    break;
+            }
+            // Wait a moment before go to next step
+            await Task.Delay(100);
+
+            Debug.WriteLine("End of update process!");
+        }
+        // IP changes, remake website container
+        private async Task RemakeWebsiteContainer(List<Setting> settingList)
+        {
+            // Init progress result and send to progress monitor
+            ProgressDetail progressDetail_RemakeWebsiteContainer = new ProgressDetail();
+            progressDetail_RemakeWebsiteContainer.ProgressParentID = (int)EUpdateID.Website_CONTAINER;
+
+            // Get setting param - image name, container name, ports, envirionment variables
+            imageName_Website = settingList.First(s => s.SettingName == "Image Name").SettingValue;
+
+            List<DictionaryInput> portsList = settingList.First(s => s.SettingName == "Ports").InputList.ToList();
+            string portScript = "";
+            foreach (var port in portsList)
+            {
+                portScript += $"-p {port.DictionaryValue} ";
+            }
+            List<DictionaryInput> environmentVariablesList = settingList.First(s => s.SettingName == "Environment Variables").KeyValueItems.ToList();
+            string environmentVariableScript = "";
+            foreach (var ev in environmentVariablesList)
+            {
+                environmentVariableScript += $"-e {ev.DictionaryKey}={ev.DictionaryValue} ";
+            }
+            containerName_Website = settingList.First(s => s.SettingName == "Container Name").SettingValue;
+
+            progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
+            progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
+            delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+
+            // check image existence using image name
+            bool isImageExists_Website = await CheckImageExistence(imageName_Website);
+            if (isImageExists_Website)
+            {
+                // check container existence using image name
+                bool isContainerExist = await CheckContainerExistenceUsingImageName(imageName_Website);
+                if (isContainerExist)
+                {
+                    Log.I(TAG, "Container WEBSITE exists locally.");
+                    // get container name using image name
+                    string currentExistedContainerName = await GetExistedContainerNameUsingImageName(imageName_Website);
+                    // get running container ID using image name
+                    bool isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_Website);
+                    if (isContainerRunning_Website)
+                    {
+                        // if running, then stop and delete container
+                        string containerId = await GetContainerIdUsingImageName(imageName_Website);
+                        // use container id to remove current container
+                        await StopContainerUsingContainerName(currentExistedContainerName);
+
+                        //check again 
+                        isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_Website);
+                        if (!isContainerRunning_Website)
+                        {
+                            progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
+                            progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
+                            delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+                            await Task.Delay(100);
+                            progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
+                            progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
+                            delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+                        }
+                        else
+                        {
+                            progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
+                            progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Fail;
+                            progressDetail_RemakeWebsiteContainer.IsFinish = true;
+                            delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+                            return;
+                        }
+
+                    }
+                    // if not running, then delete container using container name
+                    await DeleteContainerUsingContainerName(currentExistedContainerName);
+
+                    bool isCurrentContainerExisted = await CheckContainerExistenceUsingImageName(imageName_Website);
+                    if (!isCurrentContainerExisted)
+                    {
+                        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
+                        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
+                        delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+                    }
+                    else
+                    {
+                        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
+                        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Fail;
+                        progressDetail_RemakeWebsiteContainer.IsFinish = true;
+                        delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+                        return;
+                    }
+                }
+                // use image name to containerize 
+                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
+                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
+                delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+
+                await ContainerizeImage(imageName_Website, containerName_Website, portScript, environmentVariableScript);
+
+            }
+            else
+            {
+                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
+                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
+                delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+                await Task.Delay(100);
+                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
+                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
+                delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+                await Task.Delay(100);
+                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
+                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
+                delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+
+                await WebsiteInstallProcess(settingList, progressDetail_RemakeWebsiteContainer);
+            }
+            // confirm container is running            
+            bool isWebsiteContainerRunning = await CheckContainerRunningUsingImage(imageName_Website);
+            if (isWebsiteContainerRunning)
+            {
+                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
+                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
+            }
+            else
+            {
+                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
+                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Fail;
+            }
+            progressDetail_RemakeWebsiteContainer.IsFinish = true;
+            delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+        }
+        private async Task UpdateWebsiteImage(List<Setting> settingList)
+        {            
+            // Init progress result and send to progress monitor
+            ProgressDetail progressDetail_UpdateWebsite = new ProgressDetail();
+            progressDetail_UpdateWebsite.ProgressParentID = (int)EUpdateID.Website_IMAGE;
+
+            // Get setting param - image name, container name, ports, envirionment variables
+            imageName_Website = settingList.First(s => s.SettingName == "Image Name").SettingValue;
+
+            List<DictionaryInput> portsList = settingList.First(s => s.SettingName == "Ports").InputList.ToList();
+            string portScript = "";
+            foreach (var port in portsList)
+            {
+                portScript += $"-p {port.DictionaryValue} ";
+            }
+            List<DictionaryInput> environmentVariablesList = settingList.First(s => s.SettingName == "Environment Variables").KeyValueItems.ToList();
+            string environmentVariableScript = "";
+            foreach (var ev in environmentVariablesList)
+            {
+                environmentVariableScript += $"-e {ev.DictionaryKey}={ev.DictionaryValue} ";
+            }
+            containerName_Website = settingList.First(s => s.SettingName == "Container Name").SettingValue;
+
+            progressDetail_UpdateWebsite.ProgressDescription = "Stopping current existed container";
+            progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Ongoing;
+            delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
+
+            // check image existence using image name
+            bool isImageExists_Website = await CheckImageExistence(imageName_Website);
+            if (isImageExists_Website)
+            {
+                // check container existence using image name
+                bool isContainerExist = await CheckContainerExistenceUsingImageName(imageName_Website);
+                if (isContainerExist)
+                {
+                    Log.I(TAG, "Container WEBSITE exists locally.");
+                    // get container name using image name
+                    string currentExistedContainerName = await GetExistedContainerNameUsingImageName(imageName_Website);
+                    // get running container ID using image name
+                    bool isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_Website);
+                    if (isContainerRunning_Website)
+                    {
+                        // if running, then stop and delete container
+                        string containerId = await GetContainerIdUsingImageName(imageName_Website);
+                        
+                        // use container id to remove current container
+                        await StopContainerUsingContainerName(currentExistedContainerName);
+                        
+                        //check again 
+                        isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_Website);
+                        if (!isContainerRunning_Website)
+                        {
+                            progressDetail_UpdateWebsite.ProgressDescription = "Stopping current existed container";
+                            progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Pass;
+                            delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
+                            await Task.Delay(100);
+                            progressDetail_UpdateWebsite.ProgressDescription = "Deleting current existed container";
+                            progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Ongoing;
+                            delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
+                        }
+                        else
+                        {
+                            progressDetail_UpdateWebsite.ProgressDescription = "Stopping current existed container";
+                            progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Fail;
+                            progressDetail_UpdateWebsite.IsFinish = true;
+                            delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
+                            return;
+                        }
+                    }
+                    // if not running, then delete container using container name
+                    await DeleteContainerUsingContainerName(currentExistedContainerName);
+                    
+                    bool isCurrentContainerExisted = await CheckContainerExistenceUsingImageName(imageName_Website);
+                    if (!isCurrentContainerExisted)
+                    {
+                        progressDetail_UpdateWebsite.ProgressDescription = "Deleting current existed container";
+                        progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Pass;
+                        delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
+                    }
+                    else
+                    {
+                        progressDetail_UpdateWebsite.ProgressDescription = "Deleting current existed container";
+                        progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Fail;
+                        progressDetail_UpdateWebsite.IsFinish = true;
+                        delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
+                        return;
+                    }
+                }
+                // delete image 
+                progressDetail_UpdateWebsite.ProgressDescription = "Deleting Website image";
+                progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Ongoing;
+                delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
+                await DeleteImage(imageName_Website);
+
+                // check image is deleted
+                bool isImageDeleted = await CheckImageExistence(imageName_Website);
+                if (!isImageDeleted)
+                {
+                    progressDetail_UpdateWebsite.ProgressDescription = "Deleting Website image";
+                    progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Pass;
+                    delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
+                }
+                else
+                {
+                    progressDetail_UpdateWebsite.ProgressDescription = "Deleting Website image";
+                    progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Fail;
+                    progressDetail_UpdateWebsite.IsFinish= true;
+                    delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
+                }
+            }         
+
+            await WebsiteInstallProcess(settingList, progressDetail_UpdateWebsite);
+            // confirm container is running
+            bool isWebsiteContainerRunning = await CheckContainerRunningUsingImage(imageName_Website);
+            if (isWebsiteContainerRunning)
+            {
+                progressDetail_UpdateWebsite.ProgressDescription = "Containerize Website image";
+                progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Pass;
+            }
+            else
+            {
+                progressDetail_UpdateWebsite.ProgressDescription = "Containerize Website image";
+                progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Fail;
+            }
+            progressDetail_UpdateWebsite.IsFinish = true;
+            delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
+        }
+        private async Task ModifySocketServerAppSettings(List<Setting> settingList)
+        {
+            // Init progress result and send to progress monitor
+            ProgressDetail progressDetail_UMonitorSocketServer = new ProgressDetail();
+            //progressDetail_UMonitorSocketServer.ProgressParentID = (int)EUpdateID.UMonitorSocketServer_APPSETTINGS;
+
+            //// Initialize UMonitorSocketServer appsettings
+            //await Task.Delay(100); // system run too fast, need to wait it delegate
+            //progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
+            //progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Ongoing;
+            //delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+
+            //// load and 
+            //ObservableCollection<DictionaryInput> appSettingList = new ObservableCollection<DictionaryInput>();
+            //List<DictionaryInput> temp_appSettingList = settingList.First(s => s.SettingName == "App Settings").KeyValueItems.ToList();
+            //foreach (var appSetting in temp_appSettingList)
+            //{
+            //    appSettingList.Add(appSetting);
+            //}
+            //PublicFunction.WriteJsonFile(appSettingList, PublicFunction.USocketServer_AppSettings_JSON_FilePath);
+
+            // call setting modal to read json then write again
+            await StopUMonitorSocketServerAsync();
+
+            await StartUMonitorSocketServer(progressDetail_UMonitorSocketServer);
+            progressDetail_UMonitorSocketServer.IsFinish = true;
+            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+        }
+        private async Task UpdateSocketServer(List<Setting> settingList)
+        {
+
+        }
+        private async Task RemakeWebAPI(List<Setting> settingList)
+        {
+            // Get setting param - image name, container name, ports
+            imageName_WebAPI = settingList.First(s => s.SettingName == "Image Name").SettingValue;
+
+            List<DictionaryInput> portsList = settingList.First(s => s.SettingName == "Ports").InputList.ToList();
+            string portScript = "";
+            foreach (var port in portsList)
+            {
+                portScript += $"-p {port.DictionaryValue} ";
+            }
+            
+            containerName_WebAPI = settingList.First(s => s.SettingName == "Container Name").SettingValue;
+
+            // check image existence using image name
+            bool isImageExists_WebAPI = await CheckImageExistence(imageName_WebAPI);
+            if (isImageExists_WebAPI)
+            {
+                // check container existence using image name
+                bool isContainerExist = await CheckContainerExistenceUsingImageName(imageName_WebAPI);
+                if (isContainerExist)
+                {
+                    Log.I(TAG, "Container WebAPI exists locally.");
+                    // get container name using image name
+                    string currentExistedContainerName = await GetExistedContainerNameUsingImageName(imageName_WebAPI);
+                    // get running container ID using image name
+                    bool isContainerRunning_WebAPI = await CheckContainerRunningUsingImage(imageName_WebAPI);
+                    if (isContainerRunning_WebAPI)
+                    {
+                        // if running, then stop and delete container
+                        string containerId = await GetContainerIdUsingImageName(imageName_WebAPI);
+                        // use container id to remove current container
+                        await StopContainerUsingContainerName(currentExistedContainerName);
+                    }
+                    // if not running, then delete container using container name
+                    await DeleteContainerUsingContainerName(currentExistedContainerName);
+                }
+                // use image name to containerize 
+                await ContainerizeImage(imageName_WebAPI, containerName_WebAPI, portScript);
+            }
+            else
+            {
+                await WebAPIInstallProcess(settingList);
+            }
+            // confirm container is running
+            //todo - send confirmation message
+            await CheckContainerRunningUsingImage(imageName_WebAPI);
+        }
+        private async Task UpdateWebApiImage(List<Setting> settingList)
+        {
+            // Get setting param - image name, container name, ports
+            imageName_WebAPI = settingList.First(s => s.SettingName == "Image Name").SettingValue;
+
+            List<DictionaryInput> portsList = settingList.First(s => s.SettingName == "Ports").InputList.ToList();
+            string portScript = "";
+            foreach (var port in portsList)
+            {
+                portScript += $"-p {port.DictionaryValue} ";
+            }
+
+            containerName_WebAPI = settingList.First(s => s.SettingName == "Container Name").SettingValue;
+
+            // check image existence using image name
+            bool isImageExists_WebAPI = await CheckImageExistence(imageName_WebAPI);
+            if (isImageExists_WebAPI)
+            {
+                // check container existence using image name
+                bool isContainerExist = await CheckContainerExistenceUsingImageName(imageName_WebAPI);
+                if (isContainerExist)
+                {
+                    Log.I(TAG, "Container WebAPI exists locally.");
+                    // get container name using image name
+                    string currentExistedContainerName = await GetExistedContainerNameUsingImageName(imageName_WebAPI);
+                    // get running container ID using image name
+                    bool isContainerRunning_WebAPI = await CheckContainerRunningUsingImage(imageName_WebAPI);
+                    if (isContainerRunning_WebAPI)
+                    {
+                        // if running, then stop and delete container
+                        string containerId = await GetContainerIdUsingImageName(imageName_WebAPI);
+                        // use container id to remove current container
+                        await StopContainerUsingContainerName(currentExistedContainerName);
+                    }
+                    // if not running, then delete container using container name
+                    await DeleteContainerUsingContainerName(currentExistedContainerName);
+                }
+                // delete image 
+                await DeleteImage(imageName_WebAPI);
+            }
+            await WebAPIInstallProcess(settingList);
+            // confirm container is running
+            //todo - send confirmation message
+            await CheckContainerRunningUsingImage(imageName_WebAPI);
+        }
+        private async Task RemakeMonitorService(List<Setting> settingList)
+        {
+            // Get setting param - image name, container name, ports, envirionment variables
+            imageName_UMonitorServices = settingList.First(s => s.SettingName == "Image Name").SettingValue;
+
+            List<DictionaryInput> environmentVariablesList = settingList.First(s => s.SettingName == "Environment Variables").KeyValueItems.ToList();
+            string environmentVariableScript = "";
+            foreach (var ev in environmentVariablesList)
+            {
+                environmentVariableScript += $"-e {ev.DictionaryKey}={ev.DictionaryValue} ";
+            }
+            containerName_UMonitorServices = settingList.First(s => s.SettingName == "Container Name").SettingValue;
+
+            // check image existence using image name
+            bool isImageExists_UMonitorService = await CheckImageExistence(imageName_UMonitorServices);
+            if (isImageExists_UMonitorService)
+            {
+                // check container existence using image name
+                bool isContainerExist = await CheckContainerExistenceUsingImageName(imageName_UMonitorServices);
+                if (isContainerExist)
+                {
+                    Log.I(TAG, "Container UMonitorServices exists locally.");
+                    // get container name using image name
+                    string currentExistedContainerName = await GetExistedContainerNameUsingImageName(imageName_UMonitorServices);
+                    // get running container ID using image name
+                    bool isContainerRunning_UMonitorServices = await CheckContainerRunningUsingImage(imageName_UMonitorServices);
+                    if (isContainerRunning_UMonitorServices)
+                    {
+                        // if running, then stop and delete container
+                        string containerId = await GetContainerIdUsingImageName(imageName_UMonitorServices);
+                        // use container id to remove current container
+                        await StopContainerUsingContainerName(currentExistedContainerName);
+                    }
+                    // if not running, then delete container using container name
+                    await DeleteContainerUsingContainerName(currentExistedContainerName);
+                }
+                // use image name to containerize 
+                await ContainerizeImage(imageName_UMonitorServices, containerName_UMonitorServices, environmentVariableScript);
+            }
+            else
+            {
+                await UMonitorServiceInstallProcess(settingList);
+            }
+            // confirm container is running
+            //todo - send confirmation message
+            await CheckContainerRunningUsingImage(imageName_UMonitorServices);
+        }
+        private async Task UpdateMonitorService(List<Setting> settingList)
+        {
+            // Get setting param - image name, container name, ports, envirionment variables
+            imageName_UMonitorServices = settingList.First(s => s.SettingName == "Image Name").SettingValue;
+
+            List<DictionaryInput> portsList = settingList.First(s => s.SettingName == "Ports").InputList.ToList();
+            string portScript = "";
+            foreach (var port in portsList)
+            {
+                portScript += $"-p {port.DictionaryValue} ";
+            }
+            List<DictionaryInput> environmentVariablesList = settingList.First(s => s.SettingName == "Environment Variables").KeyValueItems.ToList();
+            string environmentVariableScript = "";
+            foreach (var ev in environmentVariablesList)
+            {
+                environmentVariableScript += $"-e {ev.DictionaryKey}={ev.DictionaryValue} ";
+            }
+            containerName_UMonitorServices = settingList.First(s => s.SettingName == "Container Name").SettingValue;
+
+            // check image existence using image name
+            bool isImageExists_UMonitorServices = await CheckImageExistence(imageName_UMonitorServices);
+            if (isImageExists_UMonitorServices)
+            {
+                // check container existence using image name
+                bool isContainerExist = await CheckContainerExistenceUsingImageName(imageName_UMonitorServices);
+                if (isContainerExist)
+                {
+                    Log.I(TAG, "Container UMonitorServices exists locally.");
+                    // get container name using image name
+                    string currentExistedContainerName = await GetExistedContainerNameUsingImageName(imageName_UMonitorServices);
+                    // get running container ID using image name
+                    bool isContainerRunning_UMonitorServices = await CheckContainerRunningUsingImage(imageName_UMonitorServices);
+                    if (isContainerRunning_UMonitorServices)
+                    {
+                        // if running, then stop and delete container
+                        string containerId = await GetContainerIdUsingImageName(imageName_UMonitorServices);
+                        // use container id to remove current container
+                        await StopContainerUsingContainerName(currentExistedContainerName);
+                    }
+                    // if not running, then delete container using container name
+                    await DeleteContainerUsingContainerName(currentExistedContainerName);
+                }
+                // delete image 
+                await DeleteImage(imageName_UMonitorServices);
+            }
+            await UMonitorServiceInstallProcess(settingList);
+            // confirm container is running
+            //todo - send confirmation message
+            await CheckContainerRunningUsingImage(imageName_UMonitorServices);
+        }
         private async Task PostgreSQLDatabaseInstallProcess(List<Setting> settingList)
         {
             // Init progress result and send to progress monitor
@@ -103,13 +620,13 @@ namespace UneoWebApplicationAutoInstaller.Command
             // Set local database file "postgres_data" in C:\Users\uneo\
             await Task.Delay(100); // system run too fast, need to wait it delegate
             progressDetail_PostgreSQL.ProgressDescription = "Create local folder for database";
-            progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
             bool isDatabaseLocalFolderExists = PublicFunction.CheckFileExist(databaseLocalFolder);
             if(!isDatabaseLocalFolderExists) 
             {
-                CreateDatabaseLocalFolder(databaseLocalFolder);
+                await CreateDatabaseLocalFolder(databaseLocalFolder);
             }
 
             // Check again after create local folder
@@ -120,7 +637,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 do
                 {
                     isLocalFolderExistAfterCreate_PostgreSQL = PublicFunction.CheckFileExist(databaseLocalFolder);
-                    if(!isLocalFolderExistAfterCreate_PostgreSQL) CreateDatabaseLocalFolder(databaseLocalFolder);
+                    if(!isLocalFolderExistAfterCreate_PostgreSQL) await CreateDatabaseLocalFolder(databaseLocalFolder);
                     attemptTimes++;
                     await Task.Delay(1000);
                 } while (attemptTimes < OVERALL_ATTEMPT_TIMES && !isLocalFolderExistAfterCreate_PostgreSQL);
@@ -130,7 +647,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 {
                     Log.E(TAG, "Create local folder for database FAIL");
                     progressDetail_PostgreSQL.ProgressDescription = "Create local folder for database";
-                    progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_PostgreSQL.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                     // failed then return
@@ -139,13 +656,13 @@ namespace UneoWebApplicationAutoInstaller.Command
             }
 
             progressDetail_PostgreSQL.ProgressDescription = "Create local folder for database";
-            progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Pass;
+            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
             delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
             // Check if PostgreSQL image already exist, if NO, then pull image
             await Task.Delay(100);
             progressDetail_PostgreSQL.ProgressDescription = "Pull PostgreSQL image";
-            progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
             bool isImageExists_PostgreSQL = await CheckImageExistence(imageName_PostgreSQL);
@@ -153,7 +670,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             {
                 Log.I(TAG, $"Image {imageName_PostgreSQL} has already exist.");
                 progressDetail_PostgreSQL.ProgressDescription = "Pull PostgreSQL image";
-                progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
             }
             else
@@ -161,9 +678,9 @@ namespace UneoWebApplicationAutoInstaller.Command
                 Log.I(TAG, $"Image {imageName_PostgreSQL} doesn't exist.");
                 Log.I(TAG, "Start to pull image");
                 progressDetail_PostgreSQL.ProgressDescription = "Pull PostgreSQL image";
-                progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Ongoing;
+                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
-                PullImage(imageName_PostgreSQL);
+                await PullImage(imageName_PostgreSQL);
 
                 // Check again after pull image
                 int attemptTimes = 0;
@@ -180,14 +697,14 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                     Log.I(TAG, "Pull PostgreSQL image PASS");
                     progressDetail_PostgreSQL.ProgressDescription = "Pull PostgreSQL image";
-                    progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                 }
                 else
                 {
                     Log.E(TAG, "Pull PostgreSQL image FAIL");
                     progressDetail_PostgreSQL.ProgressDescription = "Pull PostgreSQL image";
-                    progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_PostgreSQL.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                     // failed then return
@@ -198,7 +715,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             // Check if PostgreSQL container already exist, if No, then containerize the image
             Log.I(TAG, "Check if PostgreSQL container already exist, if No, then containerize the image");
             progressDetail_PostgreSQL.ProgressDescription = "Containerize PostgreSQL image";
-            progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
             bool isContainerExists_PostgreSQL = await CheckContainerExistenceUsingImageName(imageName_PostgreSQL);
@@ -213,7 +730,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     isContainerRunning_PostgreSQL = await CheckContainerRunningUsingImage(imageName_PostgreSQL);
                     if (!isContainerRunning_PostgreSQL)
                     {
-                        RunContainerUsingContainerName(containterName_PostgreSQL);
+                        await RunContainerUsingContainerName(containterName_PostgreSQL);
                     }
                     checkContainerAttemptTimes++;
                     await Task.Delay(1000);
@@ -221,7 +738,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                 Log.I(TAG, "Container PostgreSQL exists locally.");
                 progressDetail_PostgreSQL.ProgressDescription = "Containerize PostgreSQL image";
-                progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
             }
             else
@@ -229,7 +746,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 Log.I(TAG, "Container PostgreSQL does NOT exist locally.");
                 Log.I(TAG, "Start to containerize image");
 #if DEBUG
-                ContainerizeDatabaseImage(imageName_PostgreSQL, containterName_PostgreSQL, databaseLocalFolder, "-p 5430:5432 ");
+                await ContainerizeDatabaseImage(imageName_PostgreSQL, containterName_PostgreSQL, databaseLocalFolder, "-p 5430:5432 ");
 #else
                 ContainerizeDatabaseImage(imageName_PostgreSQL, containterName_PostgreSQL, databaseLocalFolder, portScript, environmentVariableScript);
 #endif
@@ -247,14 +764,14 @@ namespace UneoWebApplicationAutoInstaller.Command
                 {
                     Log.I(TAG, "Containerize PostgreSQL image PASS");
                     progressDetail_PostgreSQL.ProgressDescription = "Containerize PostgreSQL image";
-                    progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                 }
                 else
                 {
                     Log.E(TAG, "Containerize PostgreSQL image FAIL");
                     progressDetail_PostgreSQL.ProgressDescription = "Containerize PostgreSQL image";
-                    progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_PostgreSQL.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                     // failed then return
@@ -265,7 +782,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                 // Create database "uneo_web"
                 progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
-                progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Ongoing;
+                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
                 //Get container ID from image name
@@ -305,7 +822,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                         databaseExistAttemtpTimes = 0;
                         // Fail to create database then return
                         progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
-                        progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Fail;
+                        progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
                         progressDetail_PostgreSQL.IsFinish = true;
                         delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                         return;
@@ -314,7 +831,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                 // database "uneo_web" exist, then delegate pass
                 progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
-                progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
                 // Cleanup the temp file
@@ -322,7 +839,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                 // Init database tables by dump-postgres file
                 progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
-                progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Ongoing;
+                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
                 string containerSqlFilePath = "/tmp/dump.sql";
@@ -351,7 +868,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                         if (!File.Exists(postgreSQLPath))
                         {
                             progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
-                            progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Fail;
+                            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
                             progressDetail_PostgreSQL.IsFinish = true;
                             delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                             return;
@@ -361,7 +878,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     {
                         Log.E(TAG, "Cant find dump-postgreSQL file path.");
                         progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
-                        progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Fail;
+                        progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
                         progressDetail_PostgreSQL.IsFinish = true;
                         delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                         return;
@@ -400,7 +917,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     if(table_existed_count > 0)
                     {
                         progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
-                        progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Pass;
+                        progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
                         delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                     }
 
@@ -409,7 +926,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 {
                     Log.E(TAG, $"Database {DATABASE_NAME} with tables has already existed, delete it first before restore process continue to execute.");
                     progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
-                    progressDetail_PostgreSQL.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_PostgreSQL.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
                     return;
@@ -441,7 +958,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             // Check if WebAPI image already exist, if NO, then pull image
             await Task.Delay(100); // system run too fast, need to wait it delegate
             progressDetail_WebAPI.ProgressDescription = "Pull WebAPI image";
-            progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_WebAPI);
 
             bool isImageExists_WebAPI = await CheckImageExistence(imageName_WebAPI);
@@ -449,7 +966,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             {
                 Log.I(TAG, $"Image {imageName_WebAPI} has already exist.");
                 progressDetail_WebAPI.ProgressDescription = "Pull WebAPI image";
-                progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_WebAPI);
             }
             else
@@ -457,9 +974,9 @@ namespace UneoWebApplicationAutoInstaller.Command
                 Log.I(TAG, $"Image {imageName_WebAPI} doesn't exist.");
                 Log.I(TAG, "Start to pull image");
                 progressDetail_WebAPI.ProgressDescription = "Pull WebAPI image";
-                progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Ongoing;
+                progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_WebAPI);
-                PullImage(imageName_WebAPI);
+                await PullImage(imageName_WebAPI);
 
                 // Check again after pull image
                 int attemptTimes = 0;
@@ -476,14 +993,14 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                     Log.I(TAG, "Pull WebAPI image PASS");
                     progressDetail_WebAPI.ProgressDescription = "Pull WebAPI image";
-                    progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_WebAPI);
                 }
                 else
                 {
                     Log.E(TAG, "Pull WebAPI image FAIL");
                     progressDetail_WebAPI.ProgressDescription = "Pull WebAPI image";
-                    progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_WebAPI.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_WebAPI);
                     // failed then return
@@ -494,7 +1011,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
             // Check if WebAPI container already exist, if No, then containerize the image
             progressDetail_WebAPI.ProgressDescription = "Containerize WebAPI image";
-            progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_WebAPI);
 
             bool isContainerExists_WEBAPI = await CheckContainerExistenceUsingImageName(imageName_WebAPI);
@@ -509,7 +1026,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     isContainerRunning_WebAPI = await CheckContainerRunningUsingImage(imageName_WebAPI);
                     if (!isContainerRunning_WebAPI)
                     {
-                        RunContainerUsingContainerName(containerName_WebAPI);
+                        await RunContainerUsingContainerName(containerName_WebAPI);
                     }
                     attemptTimes++;
                     await Task.Delay(1000);
@@ -517,14 +1034,14 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                 Log.I(TAG, "Container UmonitorWebAPI exists locally.");
                 progressDetail_WebAPI.ProgressDescription = "Containerize WebAPI image";
-                progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_WebAPI);
             }
             else
             {
                 Log.I(TAG, "Container UmonitorWebAPI does NOT exist locally.");
                 Log.I(TAG, "Start to containerize image");
-                ContainerizeImage(imageName_WebAPI, containerName_WebAPI, portsScript);
+                await ContainerizeImage(imageName_WebAPI, containerName_WebAPI, portsScript);
 
                 //Check again if the container is running
                 int attemptTimes = 0;
@@ -540,14 +1057,14 @@ namespace UneoWebApplicationAutoInstaller.Command
                 {
                     Log.I(TAG, "Containerize WebAPI image PASS");
                     progressDetail_WebAPI.ProgressDescription = "Containerize WebAPI image";
-                    progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_WebAPI);
                 }
                 else
                 {
                     Log.E(TAG, "Containerize WebAPI image FAIL");
                     progressDetail_WebAPI.ProgressDescription = "Containerize WebAPI image";
-                    progressDetail_WebAPI.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_WebAPI.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_WebAPI);
                     // failed then return
@@ -558,11 +1075,9 @@ namespace UneoWebApplicationAutoInstaller.Command
             progressDetail_WebAPI.IsFinish = true;
             delegateProgressResult?.Invoke(progressDetail_WebAPI);
         }
-        private async Task WebsiteInstallProcess(List<Setting> settingList)
+        private async Task WebsiteInstallProcess(List<Setting> settingList, ProgressDetail progressDetail_Website)
         {
-            // Init progress result and send to progress monitor
-            ProgressDetail progressDetail_Website = new ProgressDetail();
-            progressDetail_Website.ProgressParentID = (int)EInstallID.Website;
+
 
             // Get setting param - image name, container name, ports, envirionment variables
             imageName_Website = settingList.First(s => s.SettingName == "Image Name").SettingValue;
@@ -584,7 +1099,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             // Check if Website image already exist, if NO, then pull image
             await Task.Delay(100); // system run too fast, need to wait it delegate
             progressDetail_Website.ProgressDescription = "Pull Website image";
-            progressDetail_Website.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_Website.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_Website);
             
             bool isImageExists_Website = await CheckImageExistence(imageName_Website);
@@ -592,7 +1107,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             {
                 Log.I(TAG, $"Image {imageName_Website} has already exist.");
                 progressDetail_Website.ProgressDescription = "Pull Website image";
-                progressDetail_Website.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_Website.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_Website);
             }
             else
@@ -600,9 +1115,9 @@ namespace UneoWebApplicationAutoInstaller.Command
                 Log.I(TAG, $"Image {imageName_Website} doesn't exist.");
                 Log.I(TAG, "Start to pull image");
                 progressDetail_Website.ProgressDescription = "Pull Website image";
-                progressDetail_Website.StatusStatePD = (int)EInstallStatus.Ongoing;
+                progressDetail_Website.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_Website);
-                PullImage(imageName_Website);
+                await PullImage(imageName_Website);
 
                 // Check again after pull image
                 int attemptTimes = 0;
@@ -619,14 +1134,14 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                     Log.I(TAG, "Pull Website image PASS");
                     progressDetail_Website.ProgressDescription = "Pull Website image";
-                    progressDetail_Website.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_Website.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_Website);
                 }
                 else
                 {
                     Log.E(TAG, "Pull Website image FAIL");
                     progressDetail_Website.ProgressDescription = "Pull Website image";
-                    progressDetail_Website.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_Website.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_Website.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_Website);
                     // failed then return
@@ -637,7 +1152,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
             // Check if WebAPI container already exist, if No, then containerize the image
             progressDetail_Website.ProgressDescription = "Containerize Website image";
-            progressDetail_Website.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_Website.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_Website);
 
             bool isContainerExists_Website = await CheckContainerExistenceUsingImageName(imageName_Website);
@@ -652,7 +1167,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_Website);
                     if (!isContainerRunning_Website)
                     {
-                        RunContainerUsingContainerName(containerName_Website);
+                        await RunContainerUsingContainerName(containerName_Website);
                     }
                     attemptTimes++;
                     await Task.Delay(1000);
@@ -660,14 +1175,14 @@ namespace UneoWebApplicationAutoInstaller.Command
 
                 Log.I(TAG, "Container Website exists locally.");
                 progressDetail_Website.ProgressDescription = "Containerize Website image";
-                progressDetail_Website.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_Website.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_Website);
             }
             else
             {
                 Log.I(TAG, "Container Website does NOT exist locally.");
                 Log.I(TAG, "Start to containerize image");
-                ContainerizeImage(imageName_Website, containerName_Website, portScript, environmentVariableScript);
+                await ContainerizeImage(imageName_Website, containerName_Website, portScript, environmentVariableScript);
 
                 //Check again if the container is running
                 int attemptTimes = 0;
@@ -683,14 +1198,14 @@ namespace UneoWebApplicationAutoInstaller.Command
                 {
                     Log.I(TAG, "Containerize Website image PASS");
                     progressDetail_Website.ProgressDescription = "Containerize Website image";
-                    progressDetail_Website.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_Website.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_Website);
                 }
                 else
                 {
                     Log.E(TAG, "Containerize Website image FAIL");
                     progressDetail_Website.ProgressDescription = "Containerize Website image";
-                    progressDetail_Website.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_Website.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_Website.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_Website);
                     // failed then return
@@ -711,7 +1226,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             // Initialize UMonitorSocketServer appsettings
             await Task.Delay(100); // system run too fast, need to wait it delegate
             progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
-            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Ongoing;
+            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Ongoing;
             delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
 
             // load and 
@@ -723,49 +1238,195 @@ namespace UneoWebApplicationAutoInstaller.Command
             }
             PublicFunction.WriteJsonFile(appSettingList, PublicFunction.USocketServer_AppSettings_JSON_FilePath);
 
+            await StartUMonitorSocketServer(progressDetail_UMonitorSocketServer);
+            
+            progressDetail_UMonitorSocketServer.IsFinish = true;
+            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+        }
+        private async Task UMonitorServiceInstallProcess(List<Setting> settingList)
+        {
+            // Init progress result and send to progress monitor
+            ProgressDetail progressDetail_UMonitorServices = new ProgressDetail();
+            progressDetail_UMonitorServices.ProgressParentID = (int)EInstallID.UMonitorService;
+
+            // Get setting param - image name, container name, envirionment variables
+            imageName_UMonitorServices = settingList.First(s => s.SettingName == "Image Name").SettingValue;
+
+            List<DictionaryInput> environmentVariablesList = settingList.First(s => s.SettingName == "Environment Variables").KeyValueItems.ToList();
+            string environmentVariableScript = "";
+            foreach (var ev in environmentVariablesList)
+            {
+                environmentVariableScript += $"-e {ev.DictionaryKey}={ev.DictionaryValue} ";
+            }
+            containerName_UMonitorServices = settingList.First(s => s.SettingName == "Container Name").SettingValue;
+
+            // Check if UMonitorServices image already exist, if NO, then pull image
+            await Task.Delay(100); // system run too fast, need to wait it delegate
+            progressDetail_UMonitorServices.ProgressDescription = "Pull UMonitorServices image";
+            progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Ongoing;
+            delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
+
+            bool isImageExists_Website = await CheckImageExistence(imageName_UMonitorServices);
+            if (isImageExists_Website)
+            {
+                Log.I(TAG, $"Image {imageName_UMonitorServices} has already exist.");
+                progressDetail_UMonitorServices.ProgressDescription = "Pull UMonitorServices image";
+                progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Pass;
+                delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
+            }
+            else
+            {
+                Log.I(TAG, $"Image {imageName_UMonitorServices} doesn't exist.");
+                Log.I(TAG, "Start to pull image");
+                progressDetail_UMonitorServices.ProgressDescription = "Pull UMonitorServices image";
+                progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Ongoing;
+                delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
+                await PullImage(imageName_UMonitorServices);
+
+                // Check again after pull image
+                int attemptTimes = 0;
+                bool isImageExistAfterPull_Website;
+                do
+                {
+                    isImageExistAfterPull_Website = await CheckImageExistence(imageName_UMonitorServices);
+                    attemptTimes++;
+                    await Task.Delay(1000);
+                } while (attemptTimes < OVERALL_ATTEMPT_TIMES && !isImageExistAfterPull_Website);
+
+                if (isImageExistAfterPull_Website)
+                {
+
+                    Log.I(TAG, "Pull UMonitorServices image PASS");
+                    progressDetail_UMonitorServices.ProgressDescription = "Pull UMonitorServices image";
+                    progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Pass;
+                    delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
+                }
+                else
+                {
+                    Log.E(TAG, "Pull UMonitorServices image FAIL");
+                    progressDetail_UMonitorServices.ProgressDescription = "Pull UMonitorServices image";
+                    progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Fail;
+                    progressDetail_UMonitorServices.IsFinish = true;
+                    delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
+                    // failed then return
+                    return;
+                }
+            }
+
+
+            // Check if WebAPI container already exist, if No, then containerize the image
+            progressDetail_UMonitorServices.ProgressDescription = "Containerize UMonitorServices image";
+            progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Ongoing;
+            delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
+
+            bool isContainerExists_Website = await CheckContainerExistenceUsingImageName(imageName_UMonitorServices);
+
+            if (isContainerExists_Website)
+            {
+                //container exist, check if it is running
+                int attemptTimes = 0;
+                bool isContainerRunning_Website = false;
+                do
+                {
+                    isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_UMonitorServices);
+                    if (!isContainerRunning_Website)
+                    {
+                        await RunContainerUsingContainerName(containerName_UMonitorServices);
+                    }
+                    attemptTimes++;
+                    await Task.Delay(1000);
+                } while (!isContainerRunning_Website && attemptTimes < OVERALL_ATTEMPT_TIMES);
+
+                Log.I(TAG, "Container UMonitorServices exists locally.");
+                progressDetail_UMonitorServices.ProgressDescription = "Containerize UMonitorServices image";
+                progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Pass;
+                delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
+            }
+            else
+            {
+                Log.I(TAG, "Container UMonitorServices does NOT exist locally.");
+                Log.I(TAG, "Start to containerize image");
+                await ContainerizeImage(imageName_UMonitorServices, containerName_UMonitorServices, environmentVariableScript);
+
+                //Check again if the container is running
+                int attemptTimes = 0;
+                bool isContainerRunning_Website = false;
+                do
+                {
+                    isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_UMonitorServices);
+                    attemptTimes++;
+                    await Task.Delay(1000);
+                } while (!isContainerRunning_Website && attemptTimes < OVERALL_ATTEMPT_TIMES);
+
+                if (isContainerRunning_Website)
+                {
+                    Log.I(TAG, "Containerize UMonitorServices image PASS");
+                    progressDetail_UMonitorServices.ProgressDescription = "Containerize UMonitorServices image";
+                    progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Pass;
+                    delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
+                }
+                else
+                {
+                    Log.E(TAG, "Containerize UMonitorServices image FAIL");
+                    progressDetail_UMonitorServices.ProgressDescription = "Containerize UMonitorServices image";
+                    progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Fail;
+                    progressDetail_UMonitorServices.IsFinish = true;
+                    delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
+                    // failed then return
+                    return;
+                }
+            }
+            // invoke progress monitor that all process finish
+            progressDetail_UMonitorServices.IsFinish = true;
+            delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
+        }
+        private async Task StartUMonitorSocketServer(ProgressDetail progressDetail_UMonitorSocketServer)
+        {
             // Check UMonitorSocketServer has run
             string processName = "UMonitorSocketServer";
             bool isUMonitorSocketServerRunning = await CheckUMonitorSocketServerIsRunning(processName);
             if (!isUMonitorSocketServerRunning) // Process not found
             {
-
-                bool isRunning;
-                int count = 0;
-                do
+                if (Config.IsCheckWebAPIContainerRunning)
                 {
-                    isRunning = await CheckContainerRunningUsingImage(imageName_WebAPI);
-                    if (!isRunning)
+                    bool isWebAPIContainerRunning = false;
+                    int count = 0;
+                    do
                     {
-                        Log.I(TAG, "The WebAPI container isn't running yet.");
-                        Log.I(TAG, "Waiting for 5 seconds...");
-                        await Task.Delay(1000);
-                        count++;
-                    }
+                        isWebAPIContainerRunning = await CheckContainerRunningUsingImage(imageName_WebAPI);
+                        if (!isWebAPIContainerRunning)
+                        {
+                            Log.I(TAG, "The WebAPI container isn't running yet.");
+                            Log.I(TAG, "Waiting for 5 seconds...");
+                            await Task.Delay(1000);
+                            count++;
+                        }
 
-                    if (count >= 30)
+                        if (count >= 30)
+                        {
+                            Log.E(TAG, "Failed to start WebAPI container, please check Docker.");
+
+                            progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
+                            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Fail;
+                            progressDetail_UMonitorSocketServer.IsFinish = true;
+                            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+                            return;
+                        }
+
+                    } while (!isWebAPIContainerRunning);
+
+                    if (isWebAPIContainerRunning)
                     {
-                        Log.E(TAG, "Failed to start WebAPI container, please check Docker.");
-
                         progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
-                        progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
-                        progressDetail_UMonitorSocketServer.IsFinish = true;
+                        progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Pass;
                         delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
-                        return;
                     }
-
-                } while (!isRunning);
-
-                if (isRunning)
-                {
-                    progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
-                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
-                    delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
                 }
 
                 // START umonitorsocketserver
                 /*
                 progressDetail_UMonitorSocketServer.ProgressDescription = "Start UMonitorSocketServer";
-                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Ongoing;
+                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
 
                 string uMonitorSocketServerExeFilePath = Path.Combine(AppContext.BaseDirectory, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
@@ -798,7 +1459,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                         if (!File.Exists(uMonitorSocketServerExeFilePath))
                         {
                             progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
-                            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
+                            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Fail;
                             progressDetail_UMonitorSocketServer.IsFinish = true;
                             delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
                             return;
@@ -808,7 +1469,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     {
                         Log.E(TAG, "Cant find dump-UMonitorSocketServer file path.");
                         progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
-                        progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
+                        progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Fail;
                         progressDetail_UMonitorSocketServer.IsFinish = true;
                         delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
                         return;
@@ -824,13 +1485,13 @@ namespace UneoWebApplicationAutoInstaller.Command
                 if (await CheckUMonitorSocketServerIsRunning(processName))
                 {
                     progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
-                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
+                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Pass;
                     delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
                 }
                 else
                 {
                     progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
-                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Fail;
+                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_UMonitorSocketServer.IsFinish = true;
                     delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
                     return;
@@ -841,150 +1502,11 @@ namespace UneoWebApplicationAutoInstaller.Command
             {
                 Log.I(TAG, "UMonitorSocketServer is already running. Skipping execution.");
                 progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
-                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Pass;
                 progressDetail_UMonitorSocketServer.ProgressDescription = "Start UMonitorSocketServer";
-                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EInstallStatus.Pass;
+                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Pass;
                 delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
             }
-            progressDetail_UMonitorSocketServer.IsFinish = true;
-            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
-        }
-        private async Task UMonitorServiceInstallProcess(List<Setting> settingList)
-        {
-            // Init progress result and send to progress monitor
-            ProgressDetail progressDetail_UMonitorServices = new ProgressDetail();
-            progressDetail_UMonitorServices.ProgressParentID = (int)EInstallID.UMonitorService;
-
-            // Get setting param - image name, container name, envirionment variables
-            imageName_UMonitorServices = settingList.First(s => s.SettingName == "Image Name").SettingValue;
-
-            List<DictionaryInput> environmentVariablesList = settingList.First(s => s.SettingName == "Environment Variables").KeyValueItems.ToList();
-            string environmentVariableScript = "";
-            foreach (var ev in environmentVariablesList)
-            {
-                environmentVariableScript += $"-e {ev.DictionaryKey}={ev.DictionaryValue} ";
-            }
-            containerName_UMonitorServices = settingList.First(s => s.SettingName == "Container Name").SettingValue;
-
-            // Check if UMonitorServices image already exist, if NO, then pull image
-            await Task.Delay(100); // system run too fast, need to wait it delegate
-            progressDetail_UMonitorServices.ProgressDescription = "Pull UMonitorServices image";
-            progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Ongoing;
-            delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
-
-            bool isImageExists_Website = await CheckImageExistence(imageName_UMonitorServices);
-            if (isImageExists_Website)
-            {
-                Log.I(TAG, $"Image {imageName_UMonitorServices} has already exist.");
-                progressDetail_UMonitorServices.ProgressDescription = "Pull UMonitorServices image";
-                progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Pass;
-                delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
-            }
-            else
-            {
-                Log.I(TAG, $"Image {imageName_UMonitorServices} doesn't exist.");
-                Log.I(TAG, "Start to pull image");
-                progressDetail_UMonitorServices.ProgressDescription = "Pull UMonitorServices image";
-                progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Ongoing;
-                delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
-                PullImage(imageName_UMonitorServices);
-
-                // Check again after pull image
-                int attemptTimes = 0;
-                bool isImageExistAfterPull_Website;
-                do
-                {
-                    isImageExistAfterPull_Website = await CheckImageExistence(imageName_UMonitorServices);
-                    attemptTimes++;
-                    await Task.Delay(1000);
-                } while (attemptTimes < OVERALL_ATTEMPT_TIMES && !isImageExistAfterPull_Website);
-
-                if (isImageExistAfterPull_Website)
-                {
-
-                    Log.I(TAG, "Pull UMonitorServices image PASS");
-                    progressDetail_UMonitorServices.ProgressDescription = "Pull UMonitorServices image";
-                    progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Pass;
-                    delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
-                }
-                else
-                {
-                    Log.E(TAG, "Pull UMonitorServices image FAIL");
-                    progressDetail_UMonitorServices.ProgressDescription = "Pull UMonitorServices image";
-                    progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Fail;
-                    progressDetail_UMonitorServices.IsFinish = true;
-                    delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
-                    // failed then return
-                    return;
-                }
-            }
-
-
-            // Check if WebAPI container already exist, if No, then containerize the image
-            progressDetail_UMonitorServices.ProgressDescription = "Containerize UMonitorServices image";
-            progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Ongoing;
-            delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
-
-            bool isContainerExists_Website = await CheckContainerExistenceUsingImageName(imageName_UMonitorServices);
-
-            if (isContainerExists_Website)
-            {
-                //container exist, check if it is running
-                int attemptTimes = 0;
-                bool isContainerRunning_Website = false;
-                do
-                {
-                    isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_UMonitorServices);
-                    if (!isContainerRunning_Website)
-                    {
-                        RunContainerUsingContainerName(containerName_UMonitorServices);
-                    }
-                    attemptTimes++;
-                    await Task.Delay(1000);
-                } while (!isContainerRunning_Website && attemptTimes < OVERALL_ATTEMPT_TIMES);
-
-                Log.I(TAG, "Container UMonitorServices exists locally.");
-                progressDetail_UMonitorServices.ProgressDescription = "Containerize UMonitorServices image";
-                progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Pass;
-                delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
-            }
-            else
-            {
-                Log.I(TAG, "Container UMonitorServices does NOT exist locally.");
-                Log.I(TAG, "Start to containerize image");
-                ContainerizeImage(imageName_UMonitorServices, containerName_UMonitorServices, environmentVariableScript);
-
-                //Check again if the container is running
-                int attemptTimes = 0;
-                bool isContainerRunning_Website = false;
-                do
-                {
-                    isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_UMonitorServices);
-                    attemptTimes++;
-                    await Task.Delay(1000);
-                } while (!isContainerRunning_Website && attemptTimes < OVERALL_ATTEMPT_TIMES);
-
-                if (isContainerRunning_Website)
-                {
-                    Log.I(TAG, "Containerize UMonitorServices image PASS");
-                    progressDetail_UMonitorServices.ProgressDescription = "Containerize UMonitorServices image";
-                    progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Pass;
-                    delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
-                }
-                else
-                {
-                    Log.E(TAG, "Containerize UMonitorServices image FAIL");
-                    progressDetail_UMonitorServices.ProgressDescription = "Containerize UMonitorServices image";
-                    progressDetail_UMonitorServices.StatusStatePD = (int)EInstallStatus.Fail;
-                    progressDetail_UMonitorServices.IsFinish = true;
-                    delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
-                    // failed then return
-                    return;
-                }
-            }
-            // invoke progress monitor that all process finish
-            progressDetail_UMonitorServices.IsFinish = true;
-            delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
         }
         public static async Task StopUMonitorSocketServerAsync()
         {
@@ -1009,6 +1531,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             string result = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkProcessCommand, "Check if UMonitorSocketServer is already running");
             return result.Contains(processName, StringComparison.OrdinalIgnoreCase);
         }
+        // METHOD
         private async Task<bool> CheckImageExistence(string imageName)
         {
             bool commandSuccess = await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
@@ -1017,11 +1540,16 @@ namespace UneoWebApplicationAutoInstaller.Command
             );
             return commandSuccess;
         }
-        private async void PullImage(string imageName)
+        private async Task PullImage(string imageName)
         {
             await Task.Delay(DEBUG_WAITING_TIME);
             await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync($"docker pull {imageName}", $"Pull {imageName} image");
         }
+        /// <summary>
+        /// this script return container name whether container is running or not as long as container exist
+        /// </summary>
+        /// <param name="imageName"></param>
+        /// <returns></returns>
         private async Task<bool> CheckContainerExistenceUsingImageName(string imageName)
         {
             //return bool if result has string
@@ -1031,12 +1559,31 @@ namespace UneoWebApplicationAutoInstaller.Command
             );
             return commandSuccess;
         }
-        private async void ContainerizeImage(string imageName, string containerName, string ports = "", string environmentVariables = "")
+        /// <summary>
+        /// this script return container name whether container is running or not as long as container exist
+        /// </summary>
+        /// <param name="imageName"></param>
+        /// <returns></returns>
+        private async Task<string> GetExistedContainerNameUsingImageName(string imageName)
+        {
+            //return bool if result has string
+            string containerName = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(
+                $"docker ps -a --filter \"ancestor={imageName}\" --format \"{{{{.Names}}}}\" | findstr .",
+                $"Check if {imageName} container exists locally."
+            );
+            return containerName;
+        }
+        private async Task ContainerizeImage(string imageName, string containerName, string ports = "", string environmentVariables = "")
         {
             await Task.Delay(DEBUG_WAITING_TIME);
 
             await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync($"docker run -d --restart unless-stopped {environmentVariables}{ports}--name {containerName} {imageName}", $"Containerize {imageName} image");
         }
+        /// <summary>
+        /// this script return container ID only if container is exist and running
+        /// </summary>
+        /// <param name="imageName"></param>
+        /// <returns></returns>
         private async Task<bool> CheckContainerRunningUsingImage(string imageName)
         {
             // if container is running return containerID, if not then return null
@@ -1046,16 +1593,16 @@ namespace UneoWebApplicationAutoInstaller.Command
 
             return !string.IsNullOrEmpty(containerId); // Check if output is NOT empty
         }
-        private async void RunContainerUsingContainerName(string containerName)
+        private async Task RunContainerUsingContainerName(string containerName)
         {
             await Task.Delay(DEBUG_WAITING_TIME);
             await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync($"docker start {containerName}", $"Run {containerName} container");
         }
-        private async void CreateDatabaseLocalFolder(string databaseLocalFolderPath)
+        private async Task CreateDatabaseLocalFolder(string databaseLocalFolderPath)
         {            
             await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync($"mkdir {databaseLocalFolderPath}", "Created database folder on local PC");
         }
-        private async void ContainerizeDatabaseImage(string imageName, string containerName, string folderPath, string ports, string environmentVariables = "")
+        private async Task ContainerizeDatabaseImage(string imageName, string containerName, string folderPath, string ports, string environmentVariables = "")
         {
 #if DEBUG
             Debug.WriteLine($"docker run -d --restart unless-stopped -e ALLOW_EMPTY_PASSWORD=yes {ports}-v {folderPath}:/bitnami/postgresql --name {containerName} {imageName}");
@@ -1064,6 +1611,28 @@ namespace UneoWebApplicationAutoInstaller.Command
             await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync($"docker run -d --restart unless-stopped {environmentVariables}{ports}-v {folderPath}:/bitnami/postgresql --name {containerName} {imageName}", "Containerized postgresql image");
 #endif
         }
-
+        private async Task<string> GetContainerIdUsingImageName(string imageName)
+        {
+            string containerID = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(
+                    $"docker ps -q -f \"ancestor={imageName}\"",
+                    $"Get {imageName} container ID");
+            return containerID;
+        }
+        private async Task StopContainerUsingContainerName(string containerName)
+        {
+            await CommandExecutor.Instance.RunCommandAsAdminAsync(
+                            $"docker stop {containerName}",
+                            $"Stopping the {containerName} container");
+        }
+        private async Task DeleteContainerUsingContainerName(string containerName)
+        {
+            await CommandExecutor.Instance.RunCommandAsAdminAsync(
+                $"docker rm {containerName}",
+                $"Deleting the {containerName} container");
+        }
+        private async Task DeleteImage(string imageName)
+        {
+            await CommandExecutor.Instance.RunCommandAsAdminAsync($"docker rmi -f {imageName}", "Deleting the image");
+        }
     }
 }

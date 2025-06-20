@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Management;
@@ -25,7 +26,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
         /// Read JSON file
         /// </summary>
         /// <param name="folderPath"></param>
-        /// <returns></returns>
+        /// <returns>ObservableCollection(DictionaryInput) AppSettingsList</returns>
         public static ObservableCollection<DictionaryInput> LoadJsonFile(string folderPath)
         {
             ObservableCollection<DictionaryInput> AppSettingsList = new();
@@ -35,7 +36,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                 {
                     Debug.WriteLine("appsetting.json FOUND.");
                     string json = File.ReadAllText(folderPath);
-                    Dictionary<string, object>? AppSettingsJSON = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+                    Dictionary<string, JsonElement>? AppSettingsJSON = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
                     if (AppSettingsJSON == null) return AppSettingsList;
                     AppSettingsList.Clear();
                     foreach (var item in AppSettingsJSON)
@@ -70,9 +71,12 @@ namespace UneoWebApplicationAutoInstaller.Utilities
         {
             try
             {
-                var dictToSave = appSettingsList.ToDictionary(
-                    item => item.DictionaryKey,
-                    item => (object)item.DictionaryValue ?? ""); // avoid null values
+                Dictionary<string, JsonElement> dictToSave = new();
+                if (appSettingsList == null) return;
+                foreach (var item in appSettingsList)
+                {
+                    dictToSave[item.DictionaryKey] = JsonSerializer.SerializeToElement(TryParseObject(item.DictionaryValue));
+                }
 
                 var json = JsonSerializer.Serialize(dictToSave, new JsonSerializerOptions
                 {
@@ -86,6 +90,28 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             {
                 Debug.WriteLine("Error writing appsetting.json: " + ex.Message);
             }
+        }        
+        public static object TryParseObject(object rawValue)
+        {
+            if (rawValue == null)
+                return "";
+
+            string value = rawValue.ToString().Trim();
+
+            // Try bool (true, false)
+            if (bool.TryParse(value, out bool boolResult))
+                return boolResult;
+
+            // Try int (42)
+            if (int.TryParse(value, out int intResult))
+                return intResult;
+
+            // Try double (1.7)
+            if (double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out double doubleResult))
+                return doubleResult;
+
+            // Fallback to string
+            return value;
         }
         public static string GetInstallationName(int installationID)
         { 
@@ -102,7 +128,31 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                 case (int)EInstallID.UMonitorService:
                     return "UMonitorService";
                 default:
-                    return "";
+                    return "Undefined";
+            }
+        }
+        public static string GetUpdateName(int updateID)
+        {
+            switch (updateID)
+            {
+                case (int)EUpdateID.Website_CONTAINER:
+                    return "更新 IP Address";
+                case (int)EUpdateID.Website_IMAGE:
+                    return "更新網頁版本";
+                case (int)EUpdateID.UMonitorSocketServer_APPSETTINGS:
+                    return "變更 USocketServer 設定檔";
+                case (int)EUpdateID.UMonitorSocketServer_ALL:
+                    return "更新 USocketServer 版本";
+                case (int)EUpdateID.WebAPI_CONTAINER:
+                    return "重新設定 WebAPI 容器";
+                case (int)EUpdateID.WebAPI_IMAGE:
+                    return "更新 WebAPI 版本";
+                case (int)EUpdateID.UMonitorService_CONTAINER:
+                    return "重新設定 UMonitorService 容器";
+                case (int)EUpdateID.UMonitorService_IMAGE:
+                    return "更新 UMonitorService 版本";
+                default:
+                    return "Undefined";
             }
         }
         /// <summary>

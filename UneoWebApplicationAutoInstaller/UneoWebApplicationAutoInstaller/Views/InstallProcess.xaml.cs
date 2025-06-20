@@ -35,10 +35,8 @@ namespace UneoWebApplicationAutoInstaller.Views
         {
             installProcessVM.SetDelegateNavigate(del);
         }
-        public void SetDelegateOverlayShow(DelegateOverlayShow del)
-        {
-            installProcessVM.SetVMDelegateOverlayShow(del);
-        }        
+      
+        // delegate selected installation back to mainviewmomdel
         public void SetDelegateSelectedInstallation(DelegateSelectedInstallation del)
         {
             installProcessVM.SetVMDelegateSelectedInstallation(del);
@@ -51,7 +49,6 @@ namespace UneoWebApplicationAutoInstaller.Views
         {
             installProcessVM.ProceedToInstallation();
         }
-
         private void InstallProcess_PreviewKeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)

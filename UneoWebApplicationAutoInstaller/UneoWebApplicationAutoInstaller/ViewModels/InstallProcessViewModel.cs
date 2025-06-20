@@ -31,24 +31,14 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         }
 
         private List<Install> _installSelected;
+        private ObservableCollection<DictionaryInput> UMonitorSocketServerAppSettings = new();
+        private string ipAddress_WIFI = "";
+        private string ipAddress_Ethernet = "";
 
         public InstallProcessViewModel()
         {
-            // Initialize UMonitorSocketServer Appsettings JSON file
-            PublicFunction.USocketServer_AppSettings_JSON_FilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UMonitorSocketServer", "publish", "appsettings.json");
-            ObservableCollection<DictionaryInput> UMonitorSocketServerAppSettings = PublicFunction.LoadJsonFile(PublicFunction.USocketServer_AppSettings_JSON_FilePath);
-
-            // Init IP Address of both wifi and thernet
-            string ipAddress_WIFI = PublicFunction.GetWireless80211IPAddress();
-            string ipAddress_Ethernet = PublicFunction.GetEthernetIPAddress();
-            if(ipAddress_WIFI == null || ipAddress_WIFI == "")
-            {
-                ipAddress_WIFI = ipAddress_Ethernet;
-            }
-            if (ipAddress_Ethernet == null || ipAddress_Ethernet == "")
-            {
-                ipAddress_Ethernet = ipAddress_WIFI;
-            }
+            InitializeIPAddress();
+            InitializeUMonitorSocketServerAppsettings();
 
             InstallSelection = new ObservableCollection<Install>()
             {
@@ -110,7 +100,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                             }
                         },
                     }
-
                 },
                 new Install() 
                 { 
@@ -146,8 +135,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                     DictionaryValue = "7284:8080"
                                 },
                             }
-                        }
-                        
+                        }                        
                     }
                 },
                 new Install() 
@@ -269,11 +257,11 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         {
             this.delegateNavigate = del;
         }
-        private DelegateOverlayShow? delegateOverlayShow = null;
-        public void SetVMDelegateOverlayShow(DelegateOverlayShow del)
-        {
-            this.delegateOverlayShow = del;
-        }
+        //private DelegateOverlayShow? delegateOverlayShow = null;
+        //public void SetVMDelegateOverlayShow(DelegateOverlayShow del)
+        //{
+        //    this.delegateOverlayShow = del;
+        //}
         private DelegateSelectedInstallation? delegateSelectedInstallation = null;
         public void SetVMDelegateSelectedInstallation(DelegateSelectedInstallation del)
         {
@@ -298,7 +286,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 MessageBox.Show("At least one application should be selected.", "Alert", MessageBoxButton.OK);
                 return;
             }
-            delegateOverlayShow?.Invoke(true);
+            //delegateOverlayShow?.Invoke(true);
             delegateSelectedInstallation?.Invoke(_installSelected);
         }
         private Install CloneInstall(Install original)
@@ -334,6 +322,30 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     }))
             };
         }
-
+        /// <summary>
+        /// Initialize UMonitorSocketServer Appsettings JSON file
+        /// </summary>
+        public void InitializeUMonitorSocketServerAppsettings()
+        {
+            Debug.WriteLine("Load JSON file in debug folder");
+            PublicFunction.USocketServer_AppSettings_JSON_FilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "UMonitorSocketServer", "publish", "appsettings.json");
+            UMonitorSocketServerAppSettings = PublicFunction.LoadJsonFile(PublicFunction.USocketServer_AppSettings_JSON_FilePath);
+        }
+        /// <summary>
+        /// Init IP Address of both wifi and thernet
+        /// </summary>
+        public void InitializeIPAddress()
+        {
+            ipAddress_WIFI = PublicFunction.GetWireless80211IPAddress();
+            ipAddress_Ethernet = PublicFunction.GetEthernetIPAddress();
+            if (ipAddress_WIFI == null || ipAddress_WIFI == "")
+            {
+                ipAddress_WIFI = ipAddress_Ethernet;
+            }
+            if (ipAddress_Ethernet == null || ipAddress_Ethernet == "")
+            {
+                ipAddress_Ethernet = ipAddress_WIFI;
+            }
+        }
     }
 }

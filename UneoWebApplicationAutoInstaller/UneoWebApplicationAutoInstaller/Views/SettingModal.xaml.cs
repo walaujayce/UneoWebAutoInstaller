@@ -29,7 +29,6 @@ namespace UneoWebApplicationAutoInstaller.Views
             InitializeComponent();
             settingVM = new SettingViewModel();
             DataContext = settingVM;
-
             OptionPopupList.ViewModel.OptionSelectedChanged += OnOptionSelectedChanged;
             OptionPopupList.ViewModel.Init(); // Load the options list
 
@@ -70,6 +69,16 @@ namespace UneoWebApplicationAutoInstaller.Views
         {       
             settingVM.SelectedInstallationListener(selectedInstallation);
         }
+        
+        public void SetSelectedUpdate(Update selectedUpdate)
+        {
+            settingVM.SelectedUpdateListener(selectedUpdate);
+        }
+        public void SetProcessMode(int processMode)
+        {
+            settingVM.ProcessSettingMode = processMode;
+        }
+        
         private void AddInputBtn_Clicked(object sender, MouseButtonEventArgs e)
         {
             //var button = (Border)sender;

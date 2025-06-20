@@ -128,7 +128,19 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 OnPropertyChanged(nameof(SettingList)); 
             }
         }
-
+        private int _processSettingMode;
+        public int ProcessSettingMode
+        {
+            get
+            {
+                return _processSettingMode;
+            }
+            set
+            {
+                _processSettingMode = value;
+                OnPropertyChanged(nameof(ProcessSettingMode));
+            }
+        }
         public ObservableCollection<ProgressBarItem> ProgressItems { get; set; }
 
         public readonly SolidColorBrush greenProgressBar = new SolidColorBrush(Color.FromRgb(0x00, 0xE5, 0x00));
@@ -170,6 +182,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             //};
 
             SettingList = new ObservableCollection<Setting>();
+
         }
 
         #region DELEGATE METHODS
@@ -184,7 +197,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         {
             this.delegateInstallationData = del;
         }
-        
+
+
         #endregion
 
         //Deinitiate Setting Modal
@@ -227,6 +241,18 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 //OrderedKeysInInstalltionSettings = InstallationItems.Keys.ToList();// already sorted because it's a SortedDictionary
             }
         }
+        public void SelectedUpdateListener(Update selectedUpdate)
+        {
+            InstallationItems[selectedUpdate.UpdateID] = selectedUpdate.SettingList;
+
+            SettingTitle = PublicFunction.GetUpdateName(selectedUpdate.UpdateID);
+            SettingList = InstallationItems.First().Value;
+
+            NextBtnLabel = "Run";
+            NextBtnLabelForeground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF212121")); ;
+
+        }
+        
 
         //Button of adding single input box to inputlist
         //public void AddInputItems(Setting setting)
@@ -286,85 +312,115 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
         public void GoToNextInstallationSettings()
         {
-            if (currentSettingListIndex < InstallationItems.Count - 1)
-            {
-                currentSettingListIndex++;
-                //int nextKey = OrderedKeysInInstalltionSettings[currentSettingListIndex];
-                int nextKey = currentSettingListIndex;
-                Debug.WriteLine($"NextBtn, Currrent Key: {nextKey}");
-                ProgressItems[nextKey] = new ProgressBarItem()
-                {
-                    ProgressBarColor = greenProgressBar,
-                };
-                SettingTitle = PublicFunction.GetInstallationName(InstallationItems.ElementAt(nextKey).Key);
-                SettingList = InstallationItems.ElementAt(nextKey).Value;
-                if (nextKey == InstallationItems.Count - 1)
-                {
-                    NextBtnLabel = "Run";
-                    NextBtnLabelForeground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF212121"));
-                }
-                else
-                {
-                    BackBtnLabel = "Previous";
-                }
-            }
-            else
-            {
-                Debug.WriteLine("Already at last item.");
+            Debug.WriteLine($"Process mode: {ProcessSettingMode}");
 
-                //send installation items back to mainwindowviewmodel
-                var plainDict = InstallationItems.ToDictionary(
-                    kvp => kvp.Key,
-                    kvp => kvp.Value.ToList()
-                );
-                delegateInstallationData?.Invoke(plainDict);
-                isCloseSettingModalEnable = true;
+            switch (ProcessSettingMode)
+            {
+                case (int)EProcessMode.Install:
 
-                //foreach (var item in InstallationItems)
-                //{
-                //    Debug.WriteLine($"Key : {item.Key} | Value : {item.Value}");
-                //    foreach(var sub_item in item.Value)
-                //    {
-                //        Debug.WriteLine($"sub_item value : {sub_item}");
-                //    }
-                //}
+                    if (currentSettingListIndex < InstallationItems.Count - 1)
+                    {
+                        currentSettingListIndex++;
+                        //int nextKey = OrderedKeysInInstalltionSettings[currentSettingListIndex];
+                        int nextKey = currentSettingListIndex;
+                        Debug.WriteLine($"NextBtn, Currrent Key: {nextKey}");
+                        ProgressItems[nextKey] = new ProgressBarItem()
+                        {
+                            ProgressBarColor = greenProgressBar,
+                        };
+                        SettingTitle = PublicFunction.GetInstallationName(InstallationItems.ElementAt(nextKey).Key);
+                        SettingList = InstallationItems.ElementAt(nextKey).Value;
+                        if (nextKey == InstallationItems.Count - 1)
+                        {
+                            NextBtnLabel = "Run";
+                            NextBtnLabelForeground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF212121"));
+                        }
+                        else
+                        {
+                            BackBtnLabel = "Previous";
+                        }
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Already at last item.");
+
+                        //send installation items back to mainwindowviewmodel
+                        var temp_InstallItems = InstallationItems.ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value.ToList()
+                        );
+                        delegateInstallationData?.Invoke(temp_InstallItems);
+                        isCloseSettingModalEnable = true;
+
+                        //foreach (var item in InstallationItems)
+                        //{
+                        //    Debug.WriteLine($"Key : {item.Key} | Value : {item.Value}");
+                        //    foreach(var sub_item in item.Value)
+                        //    {
+                        //        Debug.WriteLine($"sub_item value : {sub_item}");
+                        //    }
+                        //}
+                    }
+                    break;
+
+                case (int)EProcessMode.Update:
+                    var temp_UpdateItems = InstallationItems.ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value.ToList()
+                        );
+                    delegateInstallationData?.Invoke(temp_UpdateItems);
+                    isCloseSettingModalEnable = true;
+                    break;
+
             }
         }
         public void BackToPreviousInstallationSettings()
         {
-            if (currentSettingListIndex > 0)
-            {
-                currentSettingListIndex--;
-                int previousKey = currentSettingListIndex;
-                Debug.WriteLine($"PreviousBtn, Currrent Key: {previousKey}");
-                ProgressItems[previousKey+1] = new ProgressBarItem()
-                {
-                    ProgressBarColor = grayProgressBar,
-                };
-                SettingTitle = PublicFunction.GetInstallationName(InstallationItems.ElementAt(previousKey).Key);
-                SettingList = InstallationItems.ElementAt(previousKey).Value;
+            Debug.WriteLine($"Back Process mode: {ProcessSettingMode}");
 
-                if (previousKey == 0)
-                {
-                    BackBtnLabel = "Back";
-                }
-                else
-                {
-                    NextBtnLabel = "Next";
-                    NextBtnLabelForeground = Brushes.White;
-
-                }
-            }
-            else
+            switch (ProcessSettingMode)
             {
-                Debug.WriteLine("Already at first item.");
-                isCloseSettingModalEnable = true;
+                case (int)EProcessMode.Install:
+
+                    if (currentSettingListIndex > 0)
+                    {
+                        currentSettingListIndex--;
+                        int previousKey = currentSettingListIndex;
+                        Debug.WriteLine($"PreviousBtn, Currrent Key: {previousKey}");
+                        ProgressItems[previousKey + 1] = new ProgressBarItem()
+                        {
+                            ProgressBarColor = grayProgressBar,
+                        };
+                        SettingTitle = PublicFunction.GetInstallationName(InstallationItems.ElementAt(previousKey).Key);
+                        SettingList = InstallationItems.ElementAt(previousKey).Value;
+
+                        if (previousKey == 0)
+                        {
+                            BackBtnLabel = "Back";
+                        }
+                        else
+                        {
+                            NextBtnLabel = "Next";
+                            NextBtnLabelForeground = Brushes.White;
+
+                        }
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Already at first item.");
+                        isCloseSettingModalEnable = true;
+                    }
+                    break;
+                case (int)EProcessMode.Update:
+                    isCloseSettingModalEnable = true;
+                    break;
             }
+
         }
         public void CheckSelectedObject()
         {
             //Debug.WriteLine($"SettingName : {SettingSelected.SettingName}");
-            Debug.WriteLine($"Key : {KeyValuePairSelected.DictionaryKey} | Value : {KeyValuePairSelected.DictionaryValue}");
+            //Debug.WriteLine($"Key : {KeyValuePairSelected.DictionaryKey} | Value : {KeyValuePairSelected.DictionaryValue}");
         }
     }
 }

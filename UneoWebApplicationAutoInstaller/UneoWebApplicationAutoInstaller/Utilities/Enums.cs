@@ -31,7 +31,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             Website = 3,
             UMonitorService = 4,            
         }
-        public enum EInstallStatus
+        public enum EProgressStatus
         {
             Fail = 0,
             Pass = 1,
@@ -39,5 +39,24 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             Pending = 3,
             Warning = 4,
         }
+        public enum EUpdateID
+        {
+            Website_CONTAINER = 0,
+            Website_IMAGE = 1,
+            UMonitorSocketServer_APPSETTINGS = 2,
+            UMonitorSocketServer_ALL = 3,
+            WebAPI_CONTAINER = 4,
+            WebAPI_IMAGE = 5,
+            UMonitorService_CONTAINER = 6,
+            UMonitorService_IMAGE = 7,
+        }
+        public enum EProcessMode
+        { 
+            Install = 0,
+            Update = 1,
+            Diagnostic = 2,
+            ConfigureProgram = 3,
+        }
+
     }
 }

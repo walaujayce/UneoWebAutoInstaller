@@ -103,7 +103,8 @@
             <Setter Property="Padding" Value="3"/>            
         </Style>
     </Page.Resources>
-    <Grid>
+    
+    <Grid Margin="15,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
