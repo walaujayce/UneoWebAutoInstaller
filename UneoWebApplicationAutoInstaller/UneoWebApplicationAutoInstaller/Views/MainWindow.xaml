@@ -55,46 +55,58 @@
     </Window.Resources>
     
     <Grid Background="Transparent">
-        <Border CornerRadius="10" BorderBrush="Black" BorderThickness="0.5" Background="White"/>
-        <Grid Margin="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <!--Title Bar-->
-            <Border Grid.Row="0" MouseLeftButtonDown="DragWindow_Click" Background="Transparent" Padding="15,15,15,0">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid Grid.Column="0">
-                        <Label Content="{Binding MainWindowTitle}" Foreground="Orange" FontFamily="roboto" FontSize="18" FontWeight="ExtraBold" VerticalAlignment="Center" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Padding="0"/>
-                    </Grid>
-                    <Grid Grid.Column="1">
-                        <Border Style="{DynamicResource Border_Image_CloseBtn}" MouseLeftButtonUp="CloseWindow_Clicked" Cursor="Hand" MouseLeftButtonDown="AvoidDragWindow_Clicked">
-                            <Image Source="/Views/Assets/Icon_Close.png"/>
-                        </Border>
-                    </Grid>
-                </Grid>
-            </Border>
-            <!--Main Content-->
-            <Grid Grid.Row="1" Margin="15,10,15,0">
-                <Border BorderBrush="Transparent" BorderThickness="1" CornerRadius="10">
+        <Border CornerRadius="10" BorderBrush="Black" BorderThickness="0.5" Background="White">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <!--Title Bar-->
+                <Border Grid.Row="0" MouseLeftButtonDown="DragWindow_Click" Background="Transparent" Padding="15,15,15,0">
                     <Grid>
-                        <Frame x:Name="Navigation"
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0">
+                            <Label Content="{Binding MainWindowTitle}" Foreground="Orange" FontFamily="roboto" FontSize="18" FontWeight="ExtraBold" VerticalAlignment="Center" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Padding="0"/>
+                        </Grid>
+                        <Grid Grid.Column="1">
+                            <Border Style="{DynamicResource Border_Image_CloseBtn}" MouseLeftButtonUp="CloseWindow_Clicked" Cursor="Hand" MouseLeftButtonDown="AvoidDragWindow_Clicked">
+                                <Image Source="/Views/Assets/Icon_Close_FFD3D3D3.png"/>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
+                <!--Main Content-->
+                <Grid Grid.Row="1" Margin="0,10,0,10" Background="Transparent">
+                    <Border BorderBrush="Transparent" BorderThickness="1" CornerRadius="10">
+                        <Grid>
+                            <Frame x:Name="Navigation"
                        NavigationUIVisibility="Hidden"
                        HorizontalAlignment="Stretch"
                        VerticalAlignment="Stretch" />
+                        </Grid>
+                    </Border>
+                </Grid>
+                <!--Footer-->
+                <Border Grid.Row="2" Padding="15,5" Height="30" CornerRadius="0,0,10,10" Background="#E9E9E9">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="6*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <TextBlock x:Name="Version" Text="V1.0.0" Foreground="Gray" VerticalAlignment="Center" FontFamily="Tahoma" />
+                            <Image Source="/Views/Assets/Icon_Info_FFDBCA34.png" Margin="5,0" Height="15"/>
+                        </StackPanel>
+                        <Label Grid.Column="1" Padding="0" FontSize="12" Content="Copyright" FontFamily="Arial" FontStyle="Italic" Foreground="Gray" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                     </Grid>
                 </Border>
             </Grid>
-            <!--Footer-->
-            <Grid Grid.Row="2" Margin="5">
-                <Label Padding="0" FontSize="12" Content="Copyright" Foreground="Black" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
-            </Grid>
-        </Grid>
+        </Border>
         <Border x:Name="Overlay" Visibility="{Binding OverlayVisibility}" BorderBrush="Black" BorderThickness="1" CornerRadius="10" Background="Black" Opacity="0.3" Panel.ZIndex="99"/>
     </Grid>
 </Window>

@@ -13,6 +13,7 @@ using System.IO;
 using UneoWebApplicationAutoInstaller.Utilities;
 using System.Diagnostics;
 using System.Text.Json;
+using System.ComponentModel;
 
 namespace UneoWebApplicationAutoInstaller.Command
 {
@@ -75,10 +76,10 @@ namespace UneoWebApplicationAutoInstaller.Command
             }
             Debug.WriteLine("End of installation process!");
         }
-        public async void DataParserUpdateProcess(Update updateData)
+        public async void DataParserUpdateProcess(Dictionary<int, List<Setting>> installationData)
         {
-            List<Setting> settingList = updateData.SettingList.ToList();
-            switch (updateData.UpdateID)
+            List<Setting> settingList = installationData.First().Value.ToList();
+            switch (installationData.First().Key)
             {
                 case (int)EUpdateID.Website_CONTAINER:
                     await RemakeWebsiteContainer(settingList);
@@ -110,9 +111,58 @@ namespace UneoWebApplicationAutoInstaller.Command
 
             Debug.WriteLine("End of update process!");
         }
+        // IP changes, remake website container
         private async Task RemakeWebsiteContainer(List<Setting> settingList)
         {
-            // remove container only
+            // Get setting param - image name, container name, ports, envirionment variables
+            imageName_Website = settingList.First(s => s.SettingName == "Image Name").SettingValue;
+
+            List<DictionaryInput> portsList = settingList.First(s => s.SettingName == "Ports").InputList.ToList();
+            string portScript = "";
+            foreach (var port in portsList)
+            {
+                portScript += $"-p {port.DictionaryValue} ";
+            }
+            List<DictionaryInput> environmentVariablesList = settingList.First(s => s.SettingName == "Environment Variables").KeyValueItems.ToList();
+            string environmentVariableScript = "";
+            foreach (var ev in environmentVariablesList)
+            {
+                environmentVariableScript += $"-e {ev.DictionaryKey}={ev.DictionaryValue} ";
+            }
+            containerName_Website = settingList.First(s => s.SettingName == "Container Name").SettingValue;
+
+            // check image existence using image name
+            bool isImageExists_Website = await CheckImageExistence(imageName_Website);
+            if (isImageExists_Website)
+            {
+                // check container existence using image name
+                bool isContainerExist = await CheckContainerExistenceUsingImageName(imageName_Website);
+                if (isContainerExist)
+                {
+                    Log.I(TAG, "Container WEBSITE exists locally.");
+                    // get container name using image name
+                    string currentExistedContainerName = await GetExistedContainerNameUsingImageName(imageName_Website);
+                    // get running container ID using image name
+                    bool isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_Website);
+                    if (isContainerRunning_Website)
+                    {
+                        // if running, then stop and delete container
+                        string containerId = await GetContainerIdUsingImageName(imageName_Website);
+                        // use container id to remove current container
+                        await StopContainerUsingContainerName(currentExistedContainerName);
+                    }
+                    // if not running, then delete container using container name
+                    await DeleteContainerUsingContainerName(currentExistedContainerName);
+                }
+                // use image name to containerize 
+                await ContainerizeImage(imageName_Website, containerName_Website, portScript, environmentVariableScript);
+                // confirm container is running
+                await CheckContainerRunningUsingImage(imageName_Website);
+            }
+            else
+            {
+                await WebsiteInstallProcess(settingList);
+            }
         }
         private async Task UpdateWebsiteImage(List<Setting> settingList)
         {
@@ -186,7 +236,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             bool isDatabaseLocalFolderExists = PublicFunction.CheckFileExist(databaseLocalFolder);
             if(!isDatabaseLocalFolderExists) 
             {
-                CreateDatabaseLocalFolder(databaseLocalFolder);
+                await CreateDatabaseLocalFolder(databaseLocalFolder);
             }
 
             // Check again after create local folder
@@ -197,7 +247,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 do
                 {
                     isLocalFolderExistAfterCreate_PostgreSQL = PublicFunction.CheckFileExist(databaseLocalFolder);
-                    if(!isLocalFolderExistAfterCreate_PostgreSQL) CreateDatabaseLocalFolder(databaseLocalFolder);
+                    if(!isLocalFolderExistAfterCreate_PostgreSQL) await CreateDatabaseLocalFolder(databaseLocalFolder);
                     attemptTimes++;
                     await Task.Delay(1000);
                 } while (attemptTimes < OVERALL_ATTEMPT_TIMES && !isLocalFolderExistAfterCreate_PostgreSQL);
@@ -240,7 +290,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 progressDetail_PostgreSQL.ProgressDescription = "Pull PostgreSQL image";
                 progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
-                PullImage(imageName_PostgreSQL);
+                await PullImage(imageName_PostgreSQL);
 
                 // Check again after pull image
                 int attemptTimes = 0;
@@ -290,7 +340,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     isContainerRunning_PostgreSQL = await CheckContainerRunningUsingImage(imageName_PostgreSQL);
                     if (!isContainerRunning_PostgreSQL)
                     {
-                        RunContainerUsingContainerName(containterName_PostgreSQL);
+                        await RunContainerUsingContainerName(containterName_PostgreSQL);
                     }
                     checkContainerAttemptTimes++;
                     await Task.Delay(1000);
@@ -306,7 +356,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 Log.I(TAG, "Container PostgreSQL does NOT exist locally.");
                 Log.I(TAG, "Start to containerize image");
 #if DEBUG
-                ContainerizeDatabaseImage(imageName_PostgreSQL, containterName_PostgreSQL, databaseLocalFolder, "-p 5430:5432 ");
+                await ContainerizeDatabaseImage(imageName_PostgreSQL, containterName_PostgreSQL, databaseLocalFolder, "-p 5430:5432 ");
 #else
                 ContainerizeDatabaseImage(imageName_PostgreSQL, containterName_PostgreSQL, databaseLocalFolder, portScript, environmentVariableScript);
 #endif
@@ -536,7 +586,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 progressDetail_WebAPI.ProgressDescription = "Pull WebAPI image";
                 progressDetail_WebAPI.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_WebAPI);
-                PullImage(imageName_WebAPI);
+                await PullImage(imageName_WebAPI);
 
                 // Check again after pull image
                 int attemptTimes = 0;
@@ -586,7 +636,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     isContainerRunning_WebAPI = await CheckContainerRunningUsingImage(imageName_WebAPI);
                     if (!isContainerRunning_WebAPI)
                     {
-                        RunContainerUsingContainerName(containerName_WebAPI);
+                        await RunContainerUsingContainerName(containerName_WebAPI);
                     }
                     attemptTimes++;
                     await Task.Delay(1000);
@@ -601,7 +651,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             {
                 Log.I(TAG, "Container UmonitorWebAPI does NOT exist locally.");
                 Log.I(TAG, "Start to containerize image");
-                ContainerizeImage(imageName_WebAPI, containerName_WebAPI, portsScript);
+                await ContainerizeImage(imageName_WebAPI, containerName_WebAPI, portsScript);
 
                 //Check again if the container is running
                 int attemptTimes = 0;
@@ -679,7 +729,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 progressDetail_Website.ProgressDescription = "Pull Website image";
                 progressDetail_Website.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_Website);
-                PullImage(imageName_Website);
+                await PullImage(imageName_Website);
 
                 // Check again after pull image
                 int attemptTimes = 0;
@@ -729,7 +779,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_Website);
                     if (!isContainerRunning_Website)
                     {
-                        RunContainerUsingContainerName(containerName_Website);
+                        await RunContainerUsingContainerName(containerName_Website);
                     }
                     attemptTimes++;
                     await Task.Delay(1000);
@@ -744,7 +794,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             {
                 Log.I(TAG, "Container Website does NOT exist locally.");
                 Log.I(TAG, "Start to containerize image");
-                ContainerizeImage(imageName_Website, containerName_Website, portScript, environmentVariableScript);
+                await ContainerizeImage(imageName_Website, containerName_Website, portScript, environmentVariableScript);
 
                 //Check again if the container is running
                 int attemptTimes = 0;
@@ -964,7 +1014,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 progressDetail_UMonitorServices.ProgressDescription = "Pull UMonitorServices image";
                 progressDetail_UMonitorServices.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
-                PullImage(imageName_UMonitorServices);
+                await PullImage(imageName_UMonitorServices);
 
                 // Check again after pull image
                 int attemptTimes = 0;
@@ -1014,7 +1064,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_UMonitorServices);
                     if (!isContainerRunning_Website)
                     {
-                        RunContainerUsingContainerName(containerName_UMonitorServices);
+                        await RunContainerUsingContainerName(containerName_UMonitorServices);
                     }
                     attemptTimes++;
                     await Task.Delay(1000);
@@ -1029,7 +1079,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             {
                 Log.I(TAG, "Container UMonitorServices does NOT exist locally.");
                 Log.I(TAG, "Start to containerize image");
-                ContainerizeImage(imageName_UMonitorServices, containerName_UMonitorServices, environmentVariableScript);
+                await ContainerizeImage(imageName_UMonitorServices, containerName_UMonitorServices, environmentVariableScript);
 
                 //Check again if the container is running
                 int attemptTimes = 0;
@@ -1086,6 +1136,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             string result = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkProcessCommand, "Check if UMonitorSocketServer is already running");
             return result.Contains(processName, StringComparison.OrdinalIgnoreCase);
         }
+        // METHOD
         private async Task<bool> CheckImageExistence(string imageName)
         {
             bool commandSuccess = await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
@@ -1094,11 +1145,16 @@ namespace UneoWebApplicationAutoInstaller.Command
             );
             return commandSuccess;
         }
-        private async void PullImage(string imageName)
+        private async Task PullImage(string imageName)
         {
             await Task.Delay(DEBUG_WAITING_TIME);
             await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync($"docker pull {imageName}", $"Pull {imageName} image");
         }
+        /// <summary>
+        /// this script return container name whether container is running or not as long as container exist
+        /// </summary>
+        /// <param name="imageName"></param>
+        /// <returns></returns>
         private async Task<bool> CheckContainerExistenceUsingImageName(string imageName)
         {
             //return bool if result has string
@@ -1108,12 +1164,31 @@ namespace UneoWebApplicationAutoInstaller.Command
             );
             return commandSuccess;
         }
-        private async void ContainerizeImage(string imageName, string containerName, string ports = "", string environmentVariables = "")
+        /// <summary>
+        /// this script return container name whether container is running or not as long as container exist
+        /// </summary>
+        /// <param name="imageName"></param>
+        /// <returns></returns>
+        private async Task<string> GetExistedContainerNameUsingImageName(string imageName)
+        {
+            //return bool if result has string
+            string containerName = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(
+                $"docker ps -a --filter \"ancestor={imageName}\" --format \"{{{{.Names}}}}\" | findstr .",
+                $"Check if {imageName} container exists locally."
+            );
+            return containerName;
+        }
+        private async Task ContainerizeImage(string imageName, string containerName, string ports = "", string environmentVariables = "")
         {
             await Task.Delay(DEBUG_WAITING_TIME);
 
             await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync($"docker run -d --restart unless-stopped {environmentVariables}{ports}--name {containerName} {imageName}", $"Containerize {imageName} image");
         }
+        /// <summary>
+        /// this script return container ID only if container is exist and running
+        /// </summary>
+        /// <param name="imageName"></param>
+        /// <returns></returns>
         private async Task<bool> CheckContainerRunningUsingImage(string imageName)
         {
             // if container is running return containerID, if not then return null
@@ -1123,16 +1198,16 @@ namespace UneoWebApplicationAutoInstaller.Command
 
             return !string.IsNullOrEmpty(containerId); // Check if output is NOT empty
         }
-        private async void RunContainerUsingContainerName(string containerName)
+        private async Task RunContainerUsingContainerName(string containerName)
         {
             await Task.Delay(DEBUG_WAITING_TIME);
             await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync($"docker start {containerName}", $"Run {containerName} container");
         }
-        private async void CreateDatabaseLocalFolder(string databaseLocalFolderPath)
+        private async Task CreateDatabaseLocalFolder(string databaseLocalFolderPath)
         {            
             await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync($"mkdir {databaseLocalFolderPath}", "Created database folder on local PC");
         }
-        private async void ContainerizeDatabaseImage(string imageName, string containerName, string folderPath, string ports, string environmentVariables = "")
+        private async Task ContainerizeDatabaseImage(string imageName, string containerName, string folderPath, string ports, string environmentVariables = "")
         {
 #if DEBUG
             Debug.WriteLine($"docker run -d --restart unless-stopped -e ALLOW_EMPTY_PASSWORD=yes {ports}-v {folderPath}:/bitnami/postgresql --name {containerName} {imageName}");
@@ -1141,6 +1216,24 @@ namespace UneoWebApplicationAutoInstaller.Command
             await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync($"docker run -d --restart unless-stopped {environmentVariables}{ports}-v {folderPath}:/bitnami/postgresql --name {containerName} {imageName}", "Containerized postgresql image");
 #endif
         }
-
+        private async Task<string> GetContainerIdUsingImageName(string imageName)
+        {
+            string containerID = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(
+                    $"docker ps -q -f \"ancestor={imageName}\"",
+                    $"Get {imageName} container ID");
+            return containerID;
+        }
+        private async Task StopContainerUsingContainerName(string containerName)
+        {
+            await CommandExecutor.Instance.RunCommandAsAdminAsync(
+                            $"docker stop {containerName}",
+                            $"Stopping the {containerName} container");
+        }
+        private async Task DeleteContainerUsingContainerName(string containerName)
+        {
+            await CommandExecutor.Instance.RunCommandAsAdminAsync(
+                $"docker rm {containerName}",
+                $"Deleting the {containerName} container");
+        }
     }
 }

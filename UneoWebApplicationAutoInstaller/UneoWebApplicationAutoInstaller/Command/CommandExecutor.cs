@@ -96,5 +96,48 @@ namespace UneoWebApplicationAutoInstaller.Command
                 return string.Empty; // Return empty if there was an error
             }
         }
+        public async Task<bool> RunCommandAsAdminAsync(string command, string msg)
+        {
+            lock (_lock)
+            {
+                success = false; // Reset success before executing
+            }
+
+            try
+            {
+                var processStartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c {command}",
+                    Verb = "runas", // Run as administrator
+                    UseShellExecute = true,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
+
+                using (var process = Process.Start(processStartInfo))
+                {
+                    if (process == null)
+                    {
+                        Console.WriteLine("Failed to start the process.");
+                        return false;
+                    }
+
+                    await process.WaitForExitAsync();
+
+                    lock (_lock)
+                    {
+                        success = process.ExitCode == 0;
+                    }
+                    Log.S(TAG, $"{msg} (Result: {success})");
+                    return success;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.E(TAG, $"Error: {ex.Message}");
+                return false;
+            }
+        }
     }
 }

@@ -83,48 +83,49 @@
             <Setter Property="TextAlignment" Value="Center"/>
         </Style>
     </Page.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/> 
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <!--Update Selection CArds-->
-        <Grid Grid.Row="0" Margin="0,0,0,10">
-                <ItemsControl ItemsSource="{Binding UpdateSelection}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <UniformGrid Rows="2" Columns="4"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>                        
-                        <DataTemplate>
-                            <Border Margin="10" BorderBrush="Black" BorderThickness="0.2" CornerRadius="10" Padding="5">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="5.5*"/>
-                                        <RowDefinition Height="2*"/>
-                                        <RowDefinition Height="2.5*"/>
-                                    </Grid.RowDefinitions>
+        <!--Update Selection Cards-->
+        <Grid Grid.Row="0" Margin="5,0,5,10">
+            <ItemsControl ItemsSource="{Binding UpdateSelection}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="2" Columns="4"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="10" BorderBrush="Black" BorderThickness="0.3" CornerRadius="10" Padding="5">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="5.5*"/>
+                                    <RowDefinition Height="2*"/>
+                                    <RowDefinition Height="2.5*"/>
+                                </Grid.RowDefinitions>
                                 <Grid Grid.Row="0">
                                     <TextBlock Text="{Binding UpdateName}" Style="{DynamicResource TitleTextblockStyle}"/>
-                                    </Grid>
+                                </Grid>
                                 <Grid Grid.Row="1">
-                                        <TextBlock Text="{Binding UpdateDescription}" Style="{DynamicResource DescriptionTextblockStyle}"/>
-                                    </Grid>
+                                    <TextBlock Text="{Binding UpdateDescription}" Style="{DynamicResource DescriptionTextblockStyle}"/>
+                                </Grid>
                                 <Grid Grid.Row="2">
                                     <Border x:Name="SelectButton" Style="{DynamicResource SelectBtnBorderStyle}" MouseLeftButtonUp="SelectBtn_Clicked" >
                                         <TextBlock Text="Select" Style="{DynamicResource SelectBtnTextblockStyle}"/>
-                                        </Border>
-                                    </Grid>
+                                    </Border>
                                 </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Grid>
 
         <!--Control Button-->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" Margin="15,0" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>

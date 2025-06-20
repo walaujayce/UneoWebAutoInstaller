@@ -80,7 +80,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
         public MainWindowViewModel(INavigationService navigationService)
         {
-            Version = "V1.1.0";
+            Version = Config.Version;
 
             _navigationService = navigationService;
             NavigateToSelectedPage((int)ENavigatePage.ProcessSelectionPage);
@@ -218,7 +218,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 progressList.Add(new Progress()
                 {
                     ProgressID = item.Key,
-                    ProgressName = PublicFunction.GetInstallationName(item.Key),
+                    ProgressName = PublicFunction.GetUpdateName(item.Key),
                 });
 
             }
@@ -237,7 +237,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             if (installationData.Count > 0)
             {
                 CmdDataParser cmdDataParser = new CmdDataParser();
-                cmdDataParser.DataParser(installationData);
+                cmdDataParser.DataParserUpdateProcess(installationData);
                 cmdDataParser.SetDelegateProgressResult(new DelegateProgressResult(ProgressResultListener));
             }
         }

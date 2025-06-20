@@ -29,7 +29,6 @@ namespace UneoWebApplicationAutoInstaller.Views
             InitializeComponent();
             settingVM = new SettingViewModel();
             DataContext = settingVM;
-            Debug.WriteLine("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             OptionPopupList.ViewModel.OptionSelectedChanged += OnOptionSelectedChanged;
             OptionPopupList.ViewModel.Init(); // Load the options list
 

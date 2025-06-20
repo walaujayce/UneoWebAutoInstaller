@@ -11,7 +11,7 @@
       PreviewKeyUp="ProcessSelection_PreviewKeyUp" Focusable="True"
       >
 
-    <Grid>
+    <Grid Margin="15,0,15,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>

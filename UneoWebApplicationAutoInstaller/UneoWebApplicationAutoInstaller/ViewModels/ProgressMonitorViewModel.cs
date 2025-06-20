@@ -72,7 +72,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             {
                 progress.ProgressDescriptionList.Add(temp_progressDetailed);                    
                 _progressList.Add(progress);   
-
             }    
         }
         public void ProgressResponseListener(ProgressDetail progressResult)
