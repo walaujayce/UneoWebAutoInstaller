@@ -15,12 +15,17 @@
     <None Remove="Views\Assets\Icon_Contract.png" />
     <None Remove="Views\Assets\Icon_Fail_FFFF0000.png" />
     <None Remove="Views\Assets\Icon_Info_00FFFFFF.png" />
+    <None Remove="Views\Assets\Icon_Info_B0470F.png" />
     <None Remove="Views\Assets\Icon_LatestVersion_00FFFFFF.png" />
     <None Remove="Views\Assets\Icon_LatestVersion_FF00FF7F.png" />
     <None Remove="Views\Assets\Icon_Option_FFD3D3D3.png" />
     <None Remove="Views\Assets\Icon_Pass_FF7CFC00.png" />
     <None Remove="Views\Assets\Icon_Remove_FFD3D3D3.png" />
     <None Remove="Views\Assets\Icon_Warning_FFFCD700.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Views\Assets\Icon_Info_B0470F.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -48,9 +53,6 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Views\Assets\Icon_Info_00FFFFFF.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Views\Assets\Icon_Info_FFDBCA34.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Views\Assets\Icon_LatestVersion_00FFFFFF.png">

@@ -91,18 +91,18 @@
                     </Border>
                 </Grid>
                 <!--Footer-->
-                <Border Grid.Row="2" Padding="15,5" Height="30" CornerRadius="0,0,10,10" Background="#E9E9E9">
+                <Border Grid.Row="2" Padding="10,5" Height="30" CornerRadius="0,0,10,10" Background="#F9F9FA">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
                             <ColumnDefinition Width="6*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Orientation="Horizontal">
-                            <TextBlock x:Name="Version" Text="V1.0.0" Foreground="Gray" VerticalAlignment="Center" FontFamily="Tahoma" />
-                            <Image Source="/Views/Assets/Icon_Info_FFDBCA34.png" Margin="5,0" Height="15"/>
-                        </StackPanel>
                         <Label Grid.Column="1" Padding="0" FontSize="12" Content="Copyright" FontFamily="Arial" FontStyle="Italic" Foreground="Gray" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Image Source="/Views/Assets/Icon_Info_B0470F.png" Margin="5,0" Height="15"/>
+                            <TextBlock x:Name="Version" Text="New version available" Foreground="#B0470F" VerticalAlignment="Center" FontFamily="Arial" FontWeight="Bold" />
+                        </StackPanel>
                     </Grid>
                 </Border>
             </Grid>
