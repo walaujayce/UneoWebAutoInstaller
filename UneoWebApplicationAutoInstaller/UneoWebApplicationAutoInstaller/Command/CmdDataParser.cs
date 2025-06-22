@@ -399,7 +399,32 @@ namespace UneoWebApplicationAutoInstaller.Command
         }
         private async Task UpdateSocketServer(List<Setting> settingList)
         {
+            // Init progress result and send to progress monitor
+            ProgressDetail progressDetail_UMonitorSocketServerUpdateAll = new ProgressDetail();
+            progressDetail_UMonitorSocketServerUpdateAll.ProgressParentID = (int)EUpdateID.UMonitorSocketServer_ALL;
 
+            await StopUMonitorSocketServerAsync();
+
+            PublicFunction.SelectFolderAndDeleteContents();
+
+            // Initialize UMonitorSocketServer appsettings
+            await Task.Delay(100); // system run too fast, need to wait it delegate
+            progressDetail_UMonitorSocketServerUpdateAll.ProgressDescription = "Initialize UMonitorSocketServer";
+            progressDetail_UMonitorSocketServerUpdateAll.StatusStatePD = (int)EProgressStatus.Ongoing;
+            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServerUpdateAll);
+
+            // load and 
+            ObservableCollection<DictionaryInput> appSettingList = new ObservableCollection<DictionaryInput>();
+            List<DictionaryInput> temp_appSettingList = settingList.First(s => s.SettingName == "App Settings").KeyValueItems.ToList();
+            foreach (var appSetting in temp_appSettingList)
+            {
+                appSettingList.Add(appSetting);
+            }
+            PublicFunction.WriteJsonFile(appSettingList, PublicFunction.USocketServer_AppSettings_JSON_FilePath);
+
+            await StartUMonitorSocketServer(progressDetail_UMonitorSocketServerUpdateAll);
+            progressDetail_UMonitorSocketServerUpdateAll.IsFinish = true;
+            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServerUpdateAll);
         }
         private async Task RemakeWebAPI(List<Setting> settingList)
         {

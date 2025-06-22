@@ -11,10 +11,14 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows;
 using Newtonsoft.Json.Linq;
 using UneoWebApplicationAutoInstaller.Models;
 using static UneoWebApplicationAutoInstaller.Utilities.Enums;
+using MessageBox = System.Windows.MessageBox;
 using Process = System.Diagnostics.Process;
+using MessageBoxButtons = System.Windows.MessageBoxButton;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace UneoWebApplicationAutoInstaller.Utilities
 {
@@ -90,7 +94,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             {
                 Debug.WriteLine("Error writing appsetting.json: " + ex.Message);
             }
-        }        
+        }
         public static object TryParseObject(object rawValue)
         {
             if (rawValue == null)
@@ -114,7 +118,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             return value;
         }
         public static string GetInstallationName(int installationID)
-        { 
+        {
             switch (installationID)
             {
                 case (int)EInstallID.PostgreSQLDatabase:
@@ -161,7 +165,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
         /// <param name="installationName"></param>
         /// <returns></returns>
         public static List<string> EnumerateInstallToDoList(int installationID)
-        {   
+        {
             List<string> list = new();
             switch (installationID)
             {
@@ -221,7 +225,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             {
                 // Ignore vEthernet interfaces
                 if (networkInterface.Name.StartsWith("vEthernet")) continue;
-                if (networkInterface.Name.StartsWith("Loopback")) continue; 
+                if (networkInterface.Name.StartsWith("Loopback")) continue;
                 //if (networkInterface.Name.StartsWith("Wi-Fi")) continue; z
 
                 // Only check interfaces that are up
@@ -350,23 +354,23 @@ namespace UneoWebApplicationAutoInstaller.Utilities
         }
         //public static bool IsTaskScheduleExecuted()
         //{
-            //try
-            //{
-            //    using (var process = Process.GetCurrentProcess())
-            //    using (var parent = GetParentProcess(process.Id))
-            //    {
-            //        if (parent == null) return true; // No parent process found, assume manual execution.
+        //try
+        //{
+        //    using (var process = Process.GetCurrentProcess())
+        //    using (var parent = GetParentProcess(process.Id))
+        //    {
+        //        if (parent == null) return true; // No parent process found, assume manual execution.
 
-            //        string parentName = parent.ProcessName.ToLower();
+        //        string parentName = parent.ProcessName.ToLower();
 
-            //        // If parent is "taskeng" or "svchost", it's likely from Task Scheduler.
-            //        return (parentName.Contains("taskeng") || parentName.Contains("svchost"));
-            //    }
-            //}
-            //catch
-            //{
-            //    return false; // If there's an error retrieving the parent process, assume manual execution.
-            //}
+        //        // If parent is "taskeng" or "svchost", it's likely from Task Scheduler.
+        //        return (parentName.Contains("taskeng") || parentName.Contains("svchost"));
+        //    }
+        //}
+        //catch
+        //{
+        //    return false; // If there's an error retrieving the parent process, assume manual execution.
+        //}
         //}
 
         //private static Process GetParentProcess(int processId)
@@ -486,6 +490,83 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             {
                 Log.I(TAG, "Folder is not exist.");
                 return false;
+            }
+        }
+        public static void SelectFolderAndDeleteContents()
+        {
+            // Current "publish" Folder Path
+            string currentPublishFolderPath;
+#if DEBUG
+            currentPublishFolderPath = "C:\\SW\\SW_UneoWebApplicationAutoInstaller\\UneoWebApplicationAutoInstaller\\UneoWebApplicationAutoInstaller\\UMonitorSocketServer\\publish\\";
+#else
+            currentPublishFolderPath = Path.Combine(AppContext.BaseDirectory, "UMonitorSocketServer", "publish");
+#endif
+            // select the latest version of "publish" folder 
+            string newVersionPublishFolderPath;
+            
+            var dialog = new CommonOpenFileDialog
+            {
+                IsFolderPicker = true,
+                Title = "Select a folder to update.",
+            };
+
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                newVersionPublishFolderPath = dialog.FileName;
+
+                try
+                {
+                    CopyFolderToDestination(newVersionPublishFolderPath, currentPublishFolderPath);
+                    MessageBox.Show("Folder copied successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error copying folder: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+
+
+        }
+
+        public static void CopyFolderToDestination(string sourceFolderPath, string destinationFolderPath)
+        {
+            if (!Directory.Exists(sourceFolderPath))
+            {
+                throw new DirectoryNotFoundException($"Source folder does not exist: {sourceFolderPath}");
+            }
+
+            // Ensure destination folder exists
+            Directory.CreateDirectory(destinationFolderPath);
+
+            // Step 1: Delete all contents in destination folder
+            foreach (string file in Directory.GetFiles(destinationFolderPath))
+            {
+                File.Delete(file);
+            }
+
+            foreach (string dir in Directory.GetDirectories(destinationFolderPath))
+            {
+                Directory.Delete(dir, true); // true = recursive delete
+            }
+
+            // Step 2: Recursively copy contents from source to destination
+            CopyDirectoryRecursive(sourceFolderPath, destinationFolderPath);
+        }
+
+        private static void CopyDirectoryRecursive(string sourceDir, string targetDir)
+        {
+            // Create all directories
+            foreach (string dirPath in Directory.GetDirectories(sourceDir, "*", SearchOption.AllDirectories))
+            {
+                string newDirPath = dirPath.Replace(sourceDir, targetDir);
+                Directory.CreateDirectory(newDirPath);
+            }
+
+            // Copy all files
+            foreach (string filePath in Directory.GetFiles(sourceDir, "*.*", SearchOption.AllDirectories))
+            {
+                string newFilePath = filePath.Replace(sourceDir, targetDir);
+                File.Copy(filePath, newFilePath, true);
             }
         }
 

@@ -150,10 +150,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 settingModal.SetDelegateInstallationData(new DelegateInstallationData(UpdateDataListener));
                 settingModal.ShowDialog();
             }
-            else
-            {
-                if (selectedUpdate.UpdateID == (int)EUpdateID.UMonitorSocketServer_ALL) RenewSocketServer();
-            }
+            
         }
         private void OverlayShowListener(bool isShown)
         {

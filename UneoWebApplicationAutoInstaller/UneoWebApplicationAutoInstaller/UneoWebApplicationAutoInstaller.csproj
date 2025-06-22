@@ -7,7 +7,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <UseWindowsForms>False</UseWindowsForms>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="UMonitorSocketServer\TestFolder\**" />
+    <EmbeddedResource Remove="UMonitorSocketServer\TestFolder\**" />
+    <None Remove="UMonitorSocketServer\TestFolder\**" />
+    <Page Remove="UMonitorSocketServer\TestFolder\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="Views\Assets\Icon_Close.png" />
@@ -29,6 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Management" Version="9.0.6" />
   </ItemGroup>
@@ -85,6 +94,10 @@
     <None Update="UMonitorSocketServer\publish\appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="UMonitorSocketServer\" />
   </ItemGroup>
 
 </Project>
