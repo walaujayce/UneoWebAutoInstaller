@@ -14,8 +14,13 @@ namespace UneoWebApplicationAutoInstaller.Models
         private string _processName = "";
         private string _processDescription = "";
         private bool _isChecked = false;
-        private SolidColorBrush _borderBrush = new SolidColorBrush(Colors.LightGray);
-        private SolidColorBrush _processNameForeground = new SolidColorBrush(Colors.Gray);
+        private SolidColorBrush _backgroundColor = new SolidColorBrush(Color.FromRgb(255, 253, 249));
+        private SolidColorBrush _borderBrush = new SolidColorBrush(Colors.Orange);
+        private SolidColorBrush _innerBorderBrush = new SolidColorBrush(Color.FromRgb(255, 253, 249));
+        private SolidColorBrush _processNameForeground = new SolidColorBrush(Colors.Orange); 
+        private SolidColorBrush _processDescriptionForeground = new SolidColorBrush(Colors.Gray); 
+        private string _nextBtnImage = "/Views/Assets/Icon_GoToNext_Orange.png";
+        private double _borderThickness = 1.5;
         public int ProcessID
         {
             get => _processID;
@@ -61,6 +66,24 @@ namespace UneoWebApplicationAutoInstaller.Models
                 OnPropertyChanged("BorderBrush");
             }
         }
+        public SolidColorBrush InnerBorderBrush
+        {
+            get => _innerBorderBrush;
+            set
+            {
+                _innerBorderBrush = value;
+                OnPropertyChanged("InnerBorderBrush");
+            }
+        }
+        public double BorderThickness
+        {
+            get => _borderThickness;
+            set
+            {
+                _borderThickness = value;
+                OnPropertyChanged("BorderThickness");
+            }
+        }
         public SolidColorBrush ProcessNameForeground
         {
             get => _processNameForeground;
@@ -68,6 +91,35 @@ namespace UneoWebApplicationAutoInstaller.Models
             {
                 _processNameForeground = value;
                 OnPropertyChanged("ProcessNameForeground");
+            }
+        }
+        
+        public SolidColorBrush ProcessDescriptionForeground
+        {
+            get => _processDescriptionForeground;
+            set
+            {
+                _processDescriptionForeground = value;
+                OnPropertyChanged("ProcessDescriptionForeground");
+            }
+        }
+        public SolidColorBrush BackgroundColor
+        {
+            get => _backgroundColor;
+            set
+            {
+                _backgroundColor = value;
+                OnPropertyChanged("BackgroundColor");
+            }
+        }       
+
+        public string NextBtnImage
+        {
+            get => _nextBtnImage;
+            set
+            {
+                _nextBtnImage = value;
+                OnPropertyChanged("NextBtnImage");
             }
         }
     }

@@ -16,20 +16,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 {
     public class ProcessSelectionViewModel:ViewModelBase
     {
-        public ObservableCollection<Process> ProcessSelection { get; set; }
-
-        public ProcessSelectionViewModel()
-        {
-            ProcessSelection = new ObservableCollection<Process>()
-            {
-                new Process() { ProcessID = (int)ENavigatePage.InstallProcessPage,  ProcessName="Install", ProcessDescription="I don't have the application installed on my computer and I want to install it.", IsChecked = true, BorderBrush = new SolidColorBrush(Colors.Orange), ProcessNameForeground =new SolidColorBrush(Colors.Black)},
-                new Process() { ProcessID = (int)ENavigatePage.UpdateProcessPage, ProcessName="Update", ProcessDescription="My application is not working correctly and I want to reinstall it.", IsChecked = false, BorderBrush = new SolidColorBrush(Colors.LightGray), ProcessNameForeground =new SolidColorBrush(Colors.Gray)},
-                new Process() { ProcessID = (int)ENavigatePage.UninstallPage, ProcessName="Uninstall", ProcessDescription="I want to delete the application completely.", IsChecked = false, BorderBrush = new SolidColorBrush(Colors.LightGray), ProcessNameForeground =new SolidColorBrush(Colors.Gray)}
-            };
-            ProcessSelected = ProcessSelection[1]; //default selection - Install
-            SelectChange(ProcessSelected);
-
-        }
         /// <summary>
         /// 目前選到的process
         /// </summary>
@@ -46,25 +32,46 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 OnPropertyChanged(nameof(ProcessSelected));
             }
         }
-        // Radio button change status of each selection
-        public void SelectChange(Process processSelected)
+        public ObservableCollection<Process> ProcessSelection { get; set; }
+
+        public ProcessSelectionViewModel()
         {
-            foreach (var process in ProcessSelection)
+            ProcessSelection = new ObservableCollection<Process>()
             {
-                if (processSelected.ProcessName == process.ProcessName)
-                {
-                    process.BorderBrush = new SolidColorBrush(Colors.Orange);
-                    process.ProcessNameForeground = new SolidColorBrush (Colors.Black);
-                    process.IsChecked = true;
-                }
-                else
-                {
-                    process.BorderBrush = new SolidColorBrush(Colors.LightGray);
-                    process.ProcessNameForeground = new SolidColorBrush(Colors.Gray);
-                    process.IsChecked = false;
-                }
+                new Process() { ProcessID = (int)ENavigatePage.InstallProcessPage,  ProcessName="Install", ProcessDescription="I don't have the application installed on my computer and I want to install it.", },
+                new Process() { ProcessID = (int)ENavigatePage.UpdateProcessPage, ProcessName="Update", ProcessDescription="My application is not working correctly and I want to reinstall it.",},
+                new Process() { ProcessID = (int)ENavigatePage.UninstallPage, ProcessName="Uninstall", ProcessDescription="I want to delete the application completely.", },
+            };
+        }
+        public void ProcessBorderHover(bool isHover)
+        {
+            if (isHover)
+            {
+                ProcessSelected.InnerBorderBrush = new SolidColorBrush(Colors.Orange);
+
+            }
+            else
+            {
+                ProcessSelected.BorderThickness = 1.5;
+                ProcessSelected.BackgroundColor = new SolidColorBrush(Color.FromRgb(255, 253, 249));
+                ProcessSelected.ProcessNameForeground = new SolidColorBrush(Colors.Orange);
+                ProcessSelected.NextBtnImage = "/Views/Assets/Icon_GoToNext_Orange.png";
+                ProcessSelected.ProcessDescriptionForeground = new SolidColorBrush(Colors.Gray);
+                ProcessSelected.BorderBrush = new SolidColorBrush(Colors.Orange);
+                ProcessSelected.InnerBorderBrush = new SolidColorBrush(Color.FromRgb(255, 253, 249));
             }
         }
+        public void ProcessBorderMouseButtonDown()
+        {
+            ProcessSelected.ProcessNameForeground = new SolidColorBrush(Colors.White);
+            ProcessSelected.NextBtnImage = "/Views/Assets/Icon_GoToNext_White.png";
+            ProcessSelected.ProcessDescriptionForeground = new SolidColorBrush(Colors.LightGray);
+            ProcessSelected.BorderBrush = new SolidColorBrush(Colors.Transparent);
+            ProcessSelected.InnerBorderBrush = new SolidColorBrush(Colors.Transparent);
+            ProcessSelected.BackgroundColor = new SolidColorBrush(Colors.Orange);
+            ProcessSelected.BorderThickness = 1.5;
+        }
+
         private DelegateNavigate? delegateNavigate = null;
         public void SetDelegateNavigate(DelegateNavigate del)
         {
@@ -72,6 +79,12 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         }
         public void ProcessToNextStage()
         {
+            ProcessSelected.ProcessNameForeground = new SolidColorBrush(Colors.Orange);
+            ProcessSelected.NextBtnImage = "/Views/Assets/Icon_GoToNext_Orange.png";
+            ProcessSelected.ProcessDescriptionForeground = new SolidColorBrush(Colors.Gray);
+            ProcessSelected.BorderBrush = new SolidColorBrush(Colors.Orange);
+            ProcessSelected.InnerBorderBrush = new SolidColorBrush(Colors.Orange);
+
             delegateNavigate?.Invoke(ProcessSelected.ProcessID);
         }
     }

@@ -29,13 +29,14 @@ namespace UneoWebApplicationAutoInstaller.Views
             InitializeComponent();
             _processSelectionVM = new ProcessSelectionViewModel();
             DataContext = _processSelectionVM;
+            
             this.Focus();
         }
         private void SelectProcess_Clicked(object sender, MouseButtonEventArgs e)
         {
-            var button = (Grid)sender;
+            var button = (Border)sender;
             _processSelectionVM.ProcessSelected = (Process)button.DataContext;
-            _processSelectionVM.SelectChange(_processSelectionVM.ProcessSelected);
+            _processSelectionVM.ProcessToNextStage();
         }
         public void SetDelegate(DelegateNavigate del)
         {
@@ -53,6 +54,28 @@ namespace UneoWebApplicationAutoInstaller.Views
                 _processSelectionVM.ProcessToNextStage();
                 e.Handled = true;
             }
+        }
+
+        private void ProcessBorder_MouseEnter(object sender, MouseEventArgs e)
+        {
+            var button = (Border)sender;
+            _processSelectionVM.ProcessSelected = (Process)button.DataContext;
+            _processSelectionVM.ProcessBorderHover(true);
+        }
+
+        private void ProcessBorder_MouseLeave(object sender, MouseEventArgs e)
+        {
+            var button = (Border)sender;
+            _processSelectionVM.ProcessSelected = (Process)button.DataContext;
+            _processSelectionVM.ProcessBorderHover(false);
+
+        }
+
+        private void ProcessBorder_MouseButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var button = (Border)sender;
+            _processSelectionVM.ProcessSelected = (Process)button.DataContext;
+            _processSelectionVM.ProcessBorderMouseButtonDown();
         }
     }
 }
