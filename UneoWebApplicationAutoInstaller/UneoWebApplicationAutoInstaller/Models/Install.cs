@@ -17,6 +17,7 @@ namespace UneoWebApplicationAutoInstaller.Models
         private string _installDescription = ""; 
         private bool _isChecked = false;
         private ObservableCollection<Setting> _settingList = new();
+        private string _checkboxImage = "/Views/Assets/Icon_Tick.png";
         public int InstallID
         {
             get => _installID;
@@ -50,16 +51,33 @@ namespace UneoWebApplicationAutoInstaller.Models
             set
             {
                 _isChecked = value;
+                if (_isChecked)
+                {
+                    CheckboxImage = "/Views/Assets/Icon_Tick.png";
+                }
+                else
+                {
+                    CheckboxImage = "";
+                }
                 OnPropertyChanged("IsChecked");
             }
         }
         public ObservableCollection<Setting> SettingList
         {
-            get => _settingList;
+            get => _settingList; 
             set
             {
                 _settingList = value;
                 OnPropertyChanged("SettingList");
+            }
+        }
+        public string CheckboxImage
+        {
+            get => _checkboxImage; 
+            set
+            {
+                _checkboxImage = value;
+                OnPropertyChanged("CheckboxImage");
             }
         }
     }

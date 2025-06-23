@@ -5,8 +5,11 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
+using System.Security.Policy;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -47,9 +50,12 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
         public string MainWindowTitle
         {
-            get { return $"Uneo Web Application Auto Installer ({Version})"; }
+            get { return $"Uneo Web Application Auto Installer"; }
         }
-
+        public string Copyright
+        {
+            get { return $"Copyright ©{DateTime.Now.Year.ToString()} Uneo Inc. All rights reserved."; }
+        }
         private readonly INavigationService _navigationService;
 
         public delegate void DelegateNavigate(int pageNumber);
@@ -75,7 +81,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         private ProcessSelection _processSelectionPage = new();
         private InstallProcess _installProcessPage = new();
         private UpdateProcess _updateProcessPage = new();
-        private UninstallProcess _uninstallProcessPage = new();
+        private DiagnosticProcess _diagnosticProcessPage = new();
         private ProgressMonitor _progressMonitorPage = new();
 
         public MainWindowViewModel(INavigationService navigationService)
@@ -92,6 +98,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
             _updateProcessPage.SetDelegateSelectedUpdate(new DelegateSelectedUpdate(UpdateSettingModalListener));
 
+            _=CheckApplicationVersion();
+
+
         }
         private void NavigateToSelectedPage(int pageNumber)
         {
@@ -106,8 +115,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 case (int)ENavigatePage.UpdateProcessPage:
                     _navigationService.NavigateTo(_updateProcessPage);
                     break;
-                case (int)ENavigatePage.UninstallPage:
-                    _navigationService.NavigateTo(_uninstallProcessPage);
+                case (int)ENavigatePage.DiagnosticPage:
+                    _navigationService.NavigateTo(_diagnosticProcessPage);
                     break;
                 case (int)ENavigatePage.ProgressMonitorPage:
                     _navigationService.NavigateTo(_progressMonitorPage);
@@ -238,7 +247,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 cmdDataParser.SetDelegateProgressResult(new DelegateProgressResult(ProgressResultListener));
             }
         }
-
         private void ProgressResultListener(ProgressDetail progressResult)
         {
             _progressMonitorPage.SendInstallationResponseToProgressMonitorPage(progressResult);
@@ -305,9 +313,25 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             return isDockerRunning; // Docker is not running, go back
 
         }
-        private void RenewSocketServer()
+        private async Task<ApplicationVersion> CheckApplicationVersion()
         {
-            // todo
+            string url = "http://files.uneotech.com:3168/share.cgi?ssid=2bf6154550c648eeb07d2d177aa64217&openfolder=forcedownload&ep=&_dc=1750601668034&fid=2bf6154550c648eeb07d2d177aa64217";
+            using HttpClient client = new HttpClient();
+            try
+            {
+                var response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();                
+
+                var result = JsonSerializer.Deserialize<ApplicationVersion>(content);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}");
+                return null;
+            }
         }
 
     }

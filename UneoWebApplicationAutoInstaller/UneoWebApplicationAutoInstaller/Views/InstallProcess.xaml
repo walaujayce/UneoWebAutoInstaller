@@ -18,23 +18,32 @@
             <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="Height" Value="50"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Background" Value="#f9c193"/>
+            <Setter Property="Background" Value="#F6F7E8"/>
 
         </Style>
         <Style x:Key="CheckButtonStyle" TargetType="CheckBox">
-                <Setter Property="Template">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="Arial"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="CheckBox">
                         <Border Style="{DynamicResource CheckboxBorderStyle}">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="4">
                             <!-- Circle -->
-                            <Ellipse x:Name="Circle"
-                                     Width="20"
-                                     Height="20"
-                                     Stroke="Black"
-                                     StrokeThickness="1"
-                                     Fill="Transparent"
-                                     VerticalAlignment="Center" />
+                                <Grid>
+                                    <Rectangle x:Name="Circle"
+                                         Width="15"
+                                         Height="15"
+                                         Stroke="Black"
+                                         StrokeThickness="0.5"
+                                         Fill="Transparent"
+                                         VerticalAlignment="Center"/>
+                                    <Border  Height="20" Width="20" Margin="3,0,0,3" BorderBrush="Transparent" BorderThickness="1.5" Panel.ZIndex="10" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Image Source="{Binding CheckboxImage}"/>
+                                    </Border>
+                                    
+                                </Grid>
 
                             <!-- Space between circle and text -->
                             <ContentPresenter Margin="8,0,0,0"
@@ -45,14 +54,15 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <!-- When Checked: fill with blue -->
+                            <!--
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Circle" Property="Fill" Value="black" />
-                                <Setter TargetName="Circle" Property="Stroke" Value="black" />
+                                <Setter TargetName="Circle" Property="Fill" Value="orange" />
+                                <Setter TargetName="Circle" Property="Stroke" Value="orange" />
                             </Trigger>
-
+                            -->        
                             <!-- Optional: MouseOver effect -->
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Circle" Property="StrokeThickness" Value="2" />
+                                <Setter TargetName="Circle" Property="StrokeThickness" Value="1.5" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

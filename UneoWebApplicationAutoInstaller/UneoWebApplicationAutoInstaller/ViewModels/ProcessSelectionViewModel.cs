@@ -32,6 +32,22 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 OnPropertyChanged(nameof(ProcessSelected));
             }
         }
+        /// <summary>
+        /// 要執行的process
+        /// </summary>
+        private Process processSelectedToProceed;
+        public Process ProcessSelectedToProceed
+        {
+            get
+            {
+                return processSelectedToProceed;
+            }
+            set
+            {
+                processSelectedToProceed = value;
+                OnPropertyChanged(nameof(ProcessSelectedToProceed));
+            }
+        }
         public ObservableCollection<Process> ProcessSelection { get; set; }
 
         public ProcessSelectionViewModel()
@@ -40,7 +56,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             {
                 new Process() { ProcessID = (int)ENavigatePage.InstallProcessPage,  ProcessName="Install", ProcessDescription="I don't have the application installed on my computer and I want to install it.", },
                 new Process() { ProcessID = (int)ENavigatePage.UpdateProcessPage, ProcessName="Update", ProcessDescription="My application is not working correctly and I want to reinstall it.",},
-                new Process() { ProcessID = (int)ENavigatePage.UninstallPage, ProcessName="Uninstall", ProcessDescription="I want to delete the application completely.", },
+                new Process() { ProcessID = (int)ENavigatePage.DiagnosticPage, ProcessName="Diagnostic", ProcessDescription="Check server's integrity automatically.", },
             };
         }
         public void ProcessBorderHover(bool isHover)
@@ -77,15 +93,16 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         {
             this.delegateNavigate = del;
         }
-        public void ProcessToNextStage()
+        public async void ProcessToNextStage()
         {
-            ProcessSelected.ProcessNameForeground = new SolidColorBrush(Colors.Orange);
-            ProcessSelected.NextBtnImage = "/Views/Assets/Icon_GoToNext_Orange.png";
-            ProcessSelected.ProcessDescriptionForeground = new SolidColorBrush(Colors.Gray);
-            ProcessSelected.BorderBrush = new SolidColorBrush(Colors.Orange);
-            ProcessSelected.InnerBorderBrush = new SolidColorBrush(Colors.Orange);
+            //ProcessSelected.ProcessNameForeground = new SolidColorBrush(Colors.Orange);
+            //ProcessSelected.NextBtnImage = "/Views/Assets/Icon_GoToNext_Orange.png";
+            //ProcessSelected.ProcessDescriptionForeground = new SolidColorBrush(Colors.Gray);
+            //ProcessSelected.BorderBrush = new SolidColorBrush(Colors.Orange);
+            //ProcessSelected.InnerBorderBrush = new SolidColorBrush(Colors.Orange);
 
-            delegateNavigate?.Invoke(ProcessSelected.ProcessID);
+            await Task.Delay(500);
+            delegateNavigate?.Invoke(ProcessSelectedToProceed.ProcessID);
         }
     }
 }

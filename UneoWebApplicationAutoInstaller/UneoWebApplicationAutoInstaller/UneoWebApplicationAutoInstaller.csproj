@@ -31,6 +31,7 @@
     <None Remove="Views\Assets\Icon_Option_FFD3D3D3.png" />
     <None Remove="Views\Assets\Icon_Pass_FF7CFC00.png" />
     <None Remove="Views\Assets\Icon_Remove_FFD3D3D3.png" />
+    <None Remove="Views\Assets\Icon_Tick.png" />
     <None Remove="Views\Assets\Icon_Warning_FFFCD700.png" />
   </ItemGroup>
 
@@ -86,6 +87,7 @@
     <Resource Include="Views\Assets\Icon_Remove_FFD3D3D3.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Views\Assets\Icon_Tick.png" />
     <Resource Include="Views\Assets\Icon_Warning_FFFCD700.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>

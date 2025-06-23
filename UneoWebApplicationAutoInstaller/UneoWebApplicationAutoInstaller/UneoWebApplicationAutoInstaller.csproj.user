@@ -7,6 +7,9 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="Views\DiagnosticProcess.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\InstallProcess.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -19,15 +22,15 @@
     <Compile Update="Views\SettingModal.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\UninstallProcess.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Update="Views\UpdateProcess.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Styles\ScrollBar.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\DiagnosticProcess.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\InstallProcess.xaml">
@@ -43,9 +46,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\SettingModal.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="Views\UninstallProcess.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\UpdateProcess.xaml">

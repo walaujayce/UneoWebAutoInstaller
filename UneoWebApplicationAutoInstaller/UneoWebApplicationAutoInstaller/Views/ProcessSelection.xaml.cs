@@ -75,6 +75,7 @@ namespace UneoWebApplicationAutoInstaller.Views
         {
             var button = (Border)sender;
             _processSelectionVM.ProcessSelected = (Process)button.DataContext;
+            _processSelectionVM.ProcessSelectedToProceed = (Process)button.DataContext;
             _processSelectionVM.ProcessBorderMouseButtonDown();
         }
     }

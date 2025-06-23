@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace UneoWebApplicationAutoInstaller.Views
 {
     /// <summary>
-    /// Interaction logic for UninstallProcess.xaml
+    /// Interaction logic for DiagnosticProcess.xaml
     /// </summary>
-    public partial class UninstallProcess : Page
+    public partial class DiagnosticProcess : Page
     {
-        public UninstallProcess()
+        public DiagnosticProcess()
         {
             InitializeComponent();
         }

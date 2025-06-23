@@ -13,7 +13,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             ProcessSelectionPage = 0,
             InstallProcessPage = 1,
             UpdateProcessPage = 2,
-            UninstallPage = 3,
+            DiagnosticPage = 3,
             ProgressMonitorPage = 4,
         }
         public enum ESettingType
