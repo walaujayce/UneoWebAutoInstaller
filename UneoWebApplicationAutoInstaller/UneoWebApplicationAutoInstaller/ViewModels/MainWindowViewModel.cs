@@ -5,19 +5,24 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
+using System.Security.Policy;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Navigation;
+using MS.WindowsAPICodePack.Internal;
 using Newtonsoft.Json.Linq;
 using UneoWebApplicationAutoInstaller.Command;
 using UneoWebApplicationAutoInstaller.Models;
 using UneoWebApplicationAutoInstaller.Utilities;
 using UneoWebApplicationAutoInstaller.Views;
 using static UneoWebApplicationAutoInstaller.Utilities.Enums;
+using Color = System.Windows.Media.Color;
 using ProcessOrigin = System.Diagnostics.Process;
 
 namespace UneoWebApplicationAutoInstaller.ViewModels
@@ -47,7 +52,41 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
         public string MainWindowTitle
         {
-            get { return $"Uneo Web Application Auto Installer ({Version})"; }
+            get { return $"Uneo Web Application Auto Installer"; }
+        }
+        public string Copyright
+        {
+            get { return $"Copyright ©{DateTime.Now.Year.ToString()} Uneo Inc. All rights reserved."; }
+        }
+        private string _versionImage = "/Views/Assets/Icon_LatestVersion_FF00FF7F.png";
+        public string VersionImage
+        {
+            get { return _versionImage; }
+            set
+            {
+                _versionImage = value;
+                OnPropertyChanged(nameof(VersionImage));
+            }
+        }
+        private string _versionTextBlock = "Latest version";
+        public string VersionTextBlock
+        {
+            get { return _versionTextBlock; }
+            set
+            {
+                _versionTextBlock = value;
+                OnPropertyChanged(nameof(VersionTextBlock));
+            }
+        }
+        private SolidColorBrush _versionTextBlockForeground = new SolidColorBrush(Color.FromRgb(154, 205, 50));
+        public SolidColorBrush VersionTextBlockForeground
+        {
+            get { return _versionTextBlockForeground; }
+            set
+            {
+                _versionTextBlockForeground = value;
+                OnPropertyChanged(nameof(VersionTextBlockForeground));
+            }
         }
 
         private readonly INavigationService _navigationService;
@@ -75,9 +114,11 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         private ProcessSelection _processSelectionPage = new();
         private InstallProcess _installProcessPage = new();
         private UpdateProcess _updateProcessPage = new();
-        private UninstallProcess _uninstallProcessPage = new();
+        private DiagnosticProcess _diagnosticProcessPage = new();
         private ProgressMonitor _progressMonitorPage = new();
 
+        private Version currentVersion, latestVersion;
+        private string newInstallerUrl;
         public MainWindowViewModel(INavigationService navigationService)
         {
             Version = Config.Version;
@@ -91,6 +132,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             _progressMonitorPage.SetDelegate(new DelegateNavigate(NavigateToSelectedPage));
 
             _updateProcessPage.SetDelegateSelectedUpdate(new DelegateSelectedUpdate(UpdateSettingModalListener));
+
+            _=CheckApplicationVersion();
+
 
         }
         private void NavigateToSelectedPage(int pageNumber)
@@ -106,8 +150,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 case (int)ENavigatePage.UpdateProcessPage:
                     _navigationService.NavigateTo(_updateProcessPage);
                     break;
-                case (int)ENavigatePage.UninstallPage:
-                    _navigationService.NavigateTo(_uninstallProcessPage);
+                case (int)ENavigatePage.DiagnosticPage:
+                    _navigationService.NavigateTo(_diagnosticProcessPage);
                     break;
                 case (int)ENavigatePage.ProgressMonitorPage:
                     _navigationService.NavigateTo(_progressMonitorPage);
@@ -150,10 +194,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 settingModal.SetDelegateInstallationData(new DelegateInstallationData(UpdateDataListener));
                 settingModal.ShowDialog();
             }
-            else
-            {
-                if (selectedUpdate.UpdateID == (int)EUpdateID.UMonitorSocketServer_ALL) RenewSocketServer();
-            }
+            
         }
         private void OverlayShowListener(bool isShown)
         {
@@ -241,7 +282,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 cmdDataParser.SetDelegateProgressResult(new DelegateProgressResult(ProgressResultListener));
             }
         }
-
         private void ProgressResultListener(ProgressDetail progressResult)
         {
             _progressMonitorPage.SendInstallationResponseToProgressMonitorPage(progressResult);
@@ -308,10 +348,76 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             return isDockerRunning; // Docker is not running, go back
 
         }
-        private void RenewSocketServer()
+        private async Task CheckApplicationVersion()
         {
-            // todo
-        }
+            string url = "http://files.uneotech.com:3168/share.cgi?ssid=dcc312867be64128953be7637947f7c1&openfolder=forcedownload&ep=&_dc=1750763418805&fid=dcc312867be64128953be7637947f7c1&filename=UneoWebApplicationVersion.json";
+            using HttpClient client = new HttpClient();
+            try
+            {
+                var response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
 
+                var content = await response.Content.ReadAsStringAsync();                
+
+                var result = JsonSerializer.Deserialize<ApplicationVersion>(content);
+                if (result == null) return;
+                currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
+                latestVersion =  System.Version.Parse(result.version);
+                newInstallerUrl = result.url;
+
+                if (latestVersion > currentVersion)
+                {
+                    VersionImage = "/Views/Assets/Icon_Info_B0470F.png";
+                    VersionTextBlock = "New version available";
+                    VersionTextBlockForeground = new SolidColorBrush(Color.FromRgb(176, 71, 15));                    
+                }
+                else
+                {
+                    VersionImage = "/Views/Assets/Icon_LatestVersion_FF00FF7F.png";
+                    VersionTextBlock = "Latest version";
+                    VersionTextBlockForeground = new SolidColorBrush(Color.FromRgb(154, 205, 50));
+                }
+
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+        public async void CheckVersion()
+        {
+            await CheckApplicationVersion();
+
+            if (latestVersion > currentVersion)
+            {
+                var result = MessageBox.Show(
+                    $"New version {latestVersion} available.\nDo you want to download and update now?",
+                    "Update Available", MessageBoxButton.YesNo);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    await DownloadAndInstallAsync(newInstallerUrl);
+                }
+            }
+        }
+        private static async Task DownloadAndInstallAsync(string downloadUrl)
+        {
+            if(downloadUrl == null || downloadUrl == "") return; 
+            string tempFile = Path.Combine(Path.GetTempPath(), $"UneoWebApplicationSetupInstaller{DateTime.Now}.msi");
+
+            using var client = new HttpClient();
+            var data = await client.GetByteArrayAsync(downloadUrl);
+            await File.WriteAllBytesAsync(tempFile, data);
+
+            // Run MSI installer silently
+            ProcessOrigin.Start(new ProcessStartInfo
+            {
+                FileName = "msiexec",
+                Arguments = $"/i \"{tempFile}\" /qn",
+                UseShellExecute = true,
+                Verb = "runas"
+            });
+
+            Application.Current.Shutdown(); // Close app so MSI can overwrite files
+        }
     }
 }

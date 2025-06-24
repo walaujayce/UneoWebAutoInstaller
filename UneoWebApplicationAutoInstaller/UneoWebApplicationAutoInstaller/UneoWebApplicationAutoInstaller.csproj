@@ -1,19 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+	<AssemblyVersion>1.0.1</AssemblyVersion>
+	<OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <UseWindowsForms>False</UseWindowsForms>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="UMonitorSocketServer\TestFolder\**" />
+    <EmbeddedResource Remove="UMonitorSocketServer\TestFolder\**" />
+    <None Remove="UMonitorSocketServer\TestFolder\**" />
+    <Page Remove="UMonitorSocketServer\TestFolder\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="Views\Assets\Icon_Close.png" />
     <None Remove="Views\Assets\Icon_Close_FFD3D3D3.png" />
     <None Remove="Views\Assets\Icon_Contract.png" />
     <None Remove="Views\Assets\Icon_Fail_FFFF0000.png" />
+    <None Remove="Views\Assets\Icon_GoToNext_Orange.png" />
+    <None Remove="Views\Assets\Icon_GoToNext_White.png" />
     <None Remove="Views\Assets\Icon_Info_00FFFFFF.png" />
     <None Remove="Views\Assets\Icon_Info_B0470F.png" />
     <None Remove="Views\Assets\Icon_LatestVersion_00FFFFFF.png" />
@@ -21,14 +32,18 @@
     <None Remove="Views\Assets\Icon_Option_FFD3D3D3.png" />
     <None Remove="Views\Assets\Icon_Pass_FF7CFC00.png" />
     <None Remove="Views\Assets\Icon_Remove_FFD3D3D3.png" />
+    <None Remove="Views\Assets\Icon_Tick.png" />
     <None Remove="Views\Assets\Icon_Warning_FFFCD700.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Views\Assets\Icon_GoToNext_Orange.png" />
+    <Resource Include="Views\Assets\Icon_GoToNext_White.png" />
     <Resource Include="Views\Assets\Icon_Info_B0470F.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Management" Version="9.0.6" />
   </ItemGroup>
@@ -73,6 +88,7 @@
     <Resource Include="Views\Assets\Icon_Remove_FFD3D3D3.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Views\Assets\Icon_Tick.png" />
     <Resource Include="Views\Assets\Icon_Warning_FFFCD700.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
@@ -85,6 +101,10 @@
     <None Update="UMonitorSocketServer\publish\appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="UMonitorSocketServer\" />
   </ItemGroup>
 
 </Project>

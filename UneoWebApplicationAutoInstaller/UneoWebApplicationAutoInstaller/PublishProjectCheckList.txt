@@ -1,0 +1,4 @@
+﻿1. version in UneoWebApplicationAutoInstaller.csproj
+2. version in config
+3. version in setupinstaller
+4. version in jUneoWebApplicationVersion.json

@@ -176,6 +176,16 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     UpdateID = (int)EUpdateID.UMonitorSocketServer_ALL,
                     UpdateName = PublicFunction.GetUpdateName((int)EUpdateID.UMonitorSocketServer_ALL),
                     UpdateDescription = "Renew UMonitorSocketServer files.",
+                    IsProceedToSettingModal = true,
+                    SettingList = new()
+                    {
+                        new Setting()
+                        {
+                            SettingType = (int)ESettingType.MultipleKeyValue,
+                            SettingName = "App Settings",
+                            KeyValueItems = UMonitorSocketServerAppSettings
+                        }
+                    }
                 },                                                                                
                 new Update()
                 {
