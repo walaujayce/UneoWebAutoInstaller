@@ -18,13 +18,43 @@
             <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="Height" Value="50"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Background" Value="#F6F7E8"/>
-
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="Transparent"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                    Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                    To="#F6F7E8"
+                    Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                    Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                    To="Transparent"
+                    Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
         </Style>
+        
         <Style x:Key="CheckButtonStyle" TargetType="CheckBox">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontFamily" Value="Arial"/>
             <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="CheckBox">
@@ -62,14 +92,53 @@
                             -->        
                             <!-- Optional: MouseOver effect -->
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Circle" Property="StrokeThickness" Value="1.5" />
+                                <Setter TargetName="Circle" Property="StrokeThickness" Value="0.5" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="BackButtonStyle" TargetType="Border">
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="LightGray"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <!-- Background -->
+                                <ColorAnimation Storyboard.TargetProperty="(Background).(SolidColorBrush.Color)"
+                                        To="White" Duration="0:0:0.1"/>
+                                <!-- BorderBrush -->
+                                <ColorAnimation Storyboard.TargetProperty="(BorderBrush).(SolidColorBrush.Color)"
+                                        To="Black" Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation Storyboard.TargetProperty="(Background).(SolidColorBrush.Color)"
+                                        To="LightGray" Duration="0:0:0.1"/>
+                                <ColorAnimation Storyboard.TargetProperty="(BorderBrush).(SolidColorBrush.Color)"
+                                        To="White" Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+
     </Page.Resources>
+    
     <Grid Margin="15,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -94,10 +163,38 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
-                <Border  Width="100" Height="40" CornerRadius="8" Background="LightGray" Cursor="Hand" MouseLeftButtonUp="BackToPrevious_Install_Clicked">
-                    <Label FontSize="18" Content="Back" Foreground="Gray" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                <Border Style="{DynamicResource BackButtonStyle}"
+            MouseLeftButtonUp="BackToPrevious_Install_Clicked">
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="BackLabel"
+                                        Storyboard.TargetProperty="(Label.Foreground).(SolidColorBrush.Color)"
+                                        To="Black" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="Border.MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="BackLabel"
+                                        Storyboard.TargetProperty="(Label.Foreground).(SolidColorBrush.Color)"
+                                        To="Gray" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+
+                    <Label x:Name="BackLabel"
+               FontSize="18"
+               Content="Back"
+               Foreground="Gray"
+               VerticalContentAlignment="Center"
+               HorizontalContentAlignment="Center"/>
                 </Border>
             </Grid>
+
             <Grid Grid.Column="2">
                 <Border  Width="100" Height="40" CornerRadius="8" Background="#0078D3" Cursor="Hand" MouseLeftButtonUp="ProceedToNextStage_Install_Clicked">
                     <Label FontFamily="Arial" FontSize="18" Content="Continue" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />

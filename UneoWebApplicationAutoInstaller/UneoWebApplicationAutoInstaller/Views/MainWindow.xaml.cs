@@ -46,5 +46,10 @@ namespace UneoWebApplicationAutoInstaller
         {
             e.Handled = true; // Prevents the drag from being triggered
         }
+
+        private void CheckVersion_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            mainVM.CheckVersion();
+        }
     }
 }

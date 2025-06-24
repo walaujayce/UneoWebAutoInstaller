@@ -140,21 +140,21 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             switch (updateID)
             {
                 case (int)EUpdateID.Website_CONTAINER:
-                    return "更新 IP Address";
+                    return "Modify Website IP Address";
                 case (int)EUpdateID.Website_IMAGE:
-                    return "更新網頁版本";
+                    return "Update Website version";
                 case (int)EUpdateID.UMonitorSocketServer_APPSETTINGS:
-                    return "變更 USocketServer 設定檔";
+                    return "Modify USocketServer settings";
                 case (int)EUpdateID.UMonitorSocketServer_ALL:
-                    return "更新 USocketServer 版本";
+                    return "Update USocketServer version";
                 case (int)EUpdateID.WebAPI_CONTAINER:
-                    return "重新設定 WebAPI 容器";
+                    return "Remake WebAPI container";
                 case (int)EUpdateID.WebAPI_IMAGE:
-                    return "更新 WebAPI 版本";
+                    return "Update WebAPI version";
                 case (int)EUpdateID.UMonitorService_CONTAINER:
-                    return "重新設定 UMonitorService 容器";
+                    return "Remake UMonitorService container";
                 case (int)EUpdateID.UMonitorService_IMAGE:
-                    return "更新 UMonitorService 版本";
+                    return "Update UMonitorService version";
                 default:
                     return "Undefined";
             }

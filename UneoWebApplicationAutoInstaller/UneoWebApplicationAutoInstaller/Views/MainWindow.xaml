@@ -98,11 +98,11 @@
                             <ColumnDefinition Width="6*"/>
                             <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
-                        <Label Grid.Column="0" Padding="0" FontSize="12" Content="{Binding Version}" FontFamily="Arial" Foreground="Gray" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
+                        <Label Grid.Column="0" Padding="0" FontSize="12" Content="{Binding Version}" FontFamily="Arial" Foreground="Gray" FontWeight="Bold" VerticalContentAlignment="Center" HorizontalContentAlignment="Left"/>
                         <Label Grid.Column="1" Padding="0" FontSize="12" Content="{Binding Copyright}" FontFamily="Arial" FontStyle="Italic" Foreground="Gray" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                         <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <Image Source="/Views/Assets/Icon_Info_B0470F.png" Margin="5,0" Height="15"/>
-                            <TextBlock x:Name="Version" Text="New version available" Foreground="#B0470F" VerticalAlignment="Center" FontFamily="Arial" FontWeight="Bold" />
+                            <Image Source="{Binding VersionImage}" Margin="5,0" Height="15" MouseLeftButtonUp="CheckVersion_Clicked"/>
+                            <TextBlock x:Name="Version" Text="{Binding VersionTextBlock}" Foreground="{Binding VersionTextBlockForeground}" VerticalAlignment="Center" FontFamily="Arial" FontWeight="Bold" />
                         </StackPanel>
                     </Grid>
                 </Border>

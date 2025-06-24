@@ -15,12 +15,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Navigation;
+using MS.WindowsAPICodePack.Internal;
 using Newtonsoft.Json.Linq;
 using UneoWebApplicationAutoInstaller.Command;
 using UneoWebApplicationAutoInstaller.Models;
 using UneoWebApplicationAutoInstaller.Utilities;
 using UneoWebApplicationAutoInstaller.Views;
 using static UneoWebApplicationAutoInstaller.Utilities.Enums;
+using Color = System.Windows.Media.Color;
 using ProcessOrigin = System.Diagnostics.Process;
 
 namespace UneoWebApplicationAutoInstaller.ViewModels
@@ -56,6 +58,37 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         {
             get { return $"Copyright ©{DateTime.Now.Year.ToString()} Uneo Inc. All rights reserved."; }
         }
+        private string _versionImage = "/Views/Assets/Icon_LatestVersion_FF00FF7F.png";
+        public string VersionImage
+        {
+            get { return _versionImage; }
+            set
+            {
+                _versionImage = value;
+                OnPropertyChanged(nameof(VersionImage));
+            }
+        }
+        private string _versionTextBlock = "Latest version";
+        public string VersionTextBlock
+        {
+            get { return _versionTextBlock; }
+            set
+            {
+                _versionTextBlock = value;
+                OnPropertyChanged(nameof(VersionTextBlock));
+            }
+        }
+        private SolidColorBrush _versionTextBlockForeground = new SolidColorBrush(Color.FromRgb(154, 205, 50));
+        public SolidColorBrush VersionTextBlockForeground
+        {
+            get { return _versionTextBlockForeground; }
+            set
+            {
+                _versionTextBlockForeground = value;
+                OnPropertyChanged(nameof(VersionTextBlockForeground));
+            }
+        }
+
         private readonly INavigationService _navigationService;
 
         public delegate void DelegateNavigate(int pageNumber);
@@ -84,6 +117,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         private DiagnosticProcess _diagnosticProcessPage = new();
         private ProgressMonitor _progressMonitorPage = new();
 
+        private Version currentVersion, latestVersion;
+        private string newInstallerUrl;
         public MainWindowViewModel(INavigationService navigationService)
         {
             Version = Config.Version;
@@ -313,9 +348,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             return isDockerRunning; // Docker is not running, go back
 
         }
-        private async Task<ApplicationVersion> CheckApplicationVersion()
+        private async Task CheckApplicationVersion()
         {
-            string url = "http://files.uneotech.com:3168/share.cgi?ssid=2bf6154550c648eeb07d2d177aa64217&openfolder=forcedownload&ep=&_dc=1750601668034&fid=2bf6154550c648eeb07d2d177aa64217";
+            string url = "http://files.uneotech.com:3168/share.cgi?ssid=dcc312867be64128953be7637947f7c1&openfolder=forcedownload&ep=&_dc=1750763418805&fid=dcc312867be64128953be7637947f7c1&filename=UneoWebApplicationVersion.json";
             using HttpClient client = new HttpClient();
             try
             {
@@ -325,14 +360,64 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 var content = await response.Content.ReadAsStringAsync();                
 
                 var result = JsonSerializer.Deserialize<ApplicationVersion>(content);
-                return result;
+                if (result == null) return;
+                currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
+                latestVersion =  System.Version.Parse(result.version);
+                newInstallerUrl = result.url;
+
+                if (latestVersion > currentVersion)
+                {
+                    VersionImage = "/Views/Assets/Icon_Info_B0470F.png";
+                    VersionTextBlock = "New version available";
+                    VersionTextBlockForeground = new SolidColorBrush(Color.FromRgb(176, 71, 15));                    
+                }
+                else
+                {
+                    VersionImage = "/Views/Assets/Icon_LatestVersion_FF00FF7F.png";
+                    VersionTextBlock = "Latest version";
+                    VersionTextBlockForeground = new SolidColorBrush(Color.FromRgb(154, 205, 50));
+                }
+
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error: {ex.Message}");
-                return null;
             }
         }
+        public async void CheckVersion()
+        {
+            await CheckApplicationVersion();
 
+            if (latestVersion > currentVersion)
+            {
+                var result = MessageBox.Show(
+                    $"New version {latestVersion} available.\nDo you want to download and update now?",
+                    "Update Available", MessageBoxButton.YesNo);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    await DownloadAndInstallAsync(newInstallerUrl);
+                }
+            }
+        }
+        private static async Task DownloadAndInstallAsync(string downloadUrl)
+        {
+            if(downloadUrl == null || downloadUrl == "") return; 
+            string tempFile = Path.Combine(Path.GetTempPath(), $"UneoWebApplicationSetupInstaller{DateTime.Now}.msi");
+
+            using var client = new HttpClient();
+            var data = await client.GetByteArrayAsync(downloadUrl);
+            await File.WriteAllBytesAsync(tempFile, data);
+
+            // Run MSI installer silently
+            ProcessOrigin.Start(new ProcessStartInfo
+            {
+                FileName = "msiexec",
+                Arguments = $"/i \"{tempFile}\" /qn",
+                UseShellExecute = true,
+                Verb = "runas"
+            });
+
+            Application.Current.Shutdown(); // Close app so MSI can overwrite files
+        }
     }
 }
