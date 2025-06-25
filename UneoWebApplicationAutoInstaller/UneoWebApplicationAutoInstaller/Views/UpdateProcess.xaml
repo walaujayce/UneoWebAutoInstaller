@@ -132,12 +132,32 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
-                <Border Width="100" Height="40" CornerRadius="8" Background="LightGray" Cursor="Hand"  MouseLeftButtonUp="BackToPrevious_Update_Clicked">
-                    <Label FontSize="18" Content="Back" Foreground="Gray" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                <Border Style="{DynamicResource BackButtonStyle}" MouseLeftButtonUp="BackToPrevious_Update_Clicked">
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="BackLabel"
+                    Storyboard.TargetProperty="(Label.Foreground).(SolidColorBrush.Color)"
+                    To="Black" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="Border.MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="BackLabel"
+                    Storyboard.TargetProperty="(Label.Foreground).(SolidColorBrush.Color)"
+                    To="Gray" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+                    <Label x:Name="BackLabel" FontSize="18" Content="Back" Foreground="Gray" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                 </Border>
             </Grid>
             <Grid Grid.Column="2">
-                <Border  Width="100" Height="40" CornerRadius="8" Background="#0078D3" Cursor="Hand" MouseLeftButtonUp="ProceedToNextStage_Update_Clicked">
+                <Border Visibility="Hidden" Width="100" Height="40" CornerRadius="8" Background="#0078D3" Cursor="Hand" MouseLeftButtonUp="ProceedToNextStage_Update_Clicked">
                     <Label FontSize="18" Content="Next" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
                 </Border>
             </Grid>

@@ -27,6 +27,12 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Page Update="Styles\BackButton.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Styles\ContinueButton.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Styles\ScrollBar.xaml">
       <SubType>Designer</SubType>
     </Page>

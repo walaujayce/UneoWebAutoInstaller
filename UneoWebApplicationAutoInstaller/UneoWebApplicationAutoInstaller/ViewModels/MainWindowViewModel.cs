@@ -22,6 +22,7 @@ using UneoWebApplicationAutoInstaller.Models;
 using UneoWebApplicationAutoInstaller.Utilities;
 using UneoWebApplicationAutoInstaller.Views;
 using static UneoWebApplicationAutoInstaller.Utilities.Enums;
+using static UneoWebApplicationAutoInstaller.ViewModels.MainWindowViewModel;
 using Color = System.Windows.Media.Color;
 using ProcessOrigin = System.Diagnostics.Process;
 
@@ -381,6 +382,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             }
             catch (Exception ex)
             {
+                VersionImage = "/Views/Assets/Icon_Info_FFFFD700.png";
+                VersionTextBlock = "No internet connection";
+                VersionTextBlockForeground = new SolidColorBrush(Color.FromRgb(255, 215 , 0));
             }
         }
         public async void CheckVersion()
@@ -399,25 +403,64 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 }
             }
         }
-        private static async Task DownloadAndInstallAsync(string downloadUrl)
+        private async Task DownloadAndInstallAsync(string downloadUrl)
         {
             if(downloadUrl == null || downloadUrl == "") return; 
-            string tempFile = Path.Combine(Path.GetTempPath(), $"UneoWebApplicationSetupInstaller{DateTime.Now}.msi");
+            string tempFile = Path.Combine(Path.GetTempPath(), $"UneoWebApplicationSetupInstaller_{DateTime.Now:yyyyMMddHHmmss}.msi");
 
-            using var client = new HttpClient();
+            List<Progress> updateApplicationProgress = [new Progress() {
+                ProgressID = 0,
+                ProgressName = "Upgrade application to latest version"
+            }];
+
+            _progressMonitorPage.GetSelectedInstallationTodoList(updateApplicationProgress);
+
+            NavigateToSelectedPage((int)ENavigatePage.ProgressMonitorPage);
+
+            ProgressDetail progressDetail_UpdateAppVersion = new ProgressDetail();
+            progressDetail_UpdateAppVersion.ProgressParentID = 0;
+            progressDetail_UpdateAppVersion.ProgressDescription = "Downloading latest msi installer";
+            progressDetail_UpdateAppVersion.StatusStatePD = (int)EProgressStatus.Ongoing;
+            ProgressResultListener(progressDetail_UpdateAppVersion);
+
+            using var client = new HttpClient()
+            {
+                Timeout = TimeSpan.FromMinutes(15)
+            };
             var data = await client.GetByteArrayAsync(downloadUrl);
             await File.WriteAllBytesAsync(tempFile, data);
 
-            // Run MSI installer silently
-            ProcessOrigin.Start(new ProcessStartInfo
+            if (File.Exists(tempFile))
             {
-                FileName = "msiexec",
-                Arguments = $"/i \"{tempFile}\" /qn",
-                UseShellExecute = true,
-                Verb = "runas"
-            });
+                progressDetail_UpdateAppVersion.ProgressDescription = "Downloading latest msi installer";
+                progressDetail_UpdateAppVersion.StatusStatePD = (int)EProgressStatus.Pass;
+            }
+            else
+            {
+                progressDetail_UpdateAppVersion.ProgressDescription = "Downloading latest msi installer";
+                progressDetail_UpdateAppVersion.StatusStatePD = (int)EProgressStatus.Fail;                
+                return;
+            }
 
-            Application.Current.Shutdown(); // Close app so MSI can overwrite files
+            progressDetail_UpdateAppVersion.IsFinish = true;
+            ProgressResultListener(progressDetail_UpdateAppVersion);
+
+            var result = MessageBox.Show(
+                    $"This application will be closed.",
+                    "Message", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+
+            if (result == MessageBoxResult.OK)
+            {
+                ProcessOrigin.Start(new ProcessStartInfo
+                {
+                    FileName = "msiexec",
+                    Arguments = $"/i \"{tempFile}\"",
+                    UseShellExecute = true,
+                    Verb = "runas"
+                });
+            }
+
+            Application.Current.Shutdown(); 
         }
     }
 }

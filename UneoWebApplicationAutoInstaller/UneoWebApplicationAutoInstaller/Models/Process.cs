@@ -14,13 +14,15 @@ namespace UneoWebApplicationAutoInstaller.Models
         private string _processName = "";
         private string _processDescription = "";
         private bool _isChecked = false;
+        private bool _isEnabled = true;
         private SolidColorBrush _backgroundColor = new SolidColorBrush(Color.FromRgb(255, 253, 249));
         private SolidColorBrush _borderBrush = new SolidColorBrush(Colors.Orange);
         private SolidColorBrush _innerBorderBrush = new SolidColorBrush(Color.FromRgb(255, 253, 249));
         private SolidColorBrush _processNameForeground = new SolidColorBrush(Colors.Orange); 
         private SolidColorBrush _processDescriptionForeground = new SolidColorBrush(Colors.Gray); 
         private string _nextBtnImage = "/Views/Assets/Icon_GoToNext_Orange.png";
-        private double _borderThickness = 1.5;
+        private double _borderThickness = 1.5; 
+        private double _borderOpacity = 1.0; 
         public int ProcessID
         {
             get => _processID;
@@ -111,8 +113,7 @@ namespace UneoWebApplicationAutoInstaller.Models
                 _backgroundColor = value;
                 OnPropertyChanged("BackgroundColor");
             }
-        }       
-
+        }      
         public string NextBtnImage
         {
             get => _nextBtnImage;
@@ -122,5 +123,23 @@ namespace UneoWebApplicationAutoInstaller.Models
                 OnPropertyChanged("NextBtnImage");
             }
         }
+        public bool IsEnabled
+        {
+            get => _isEnabled;
+            set
+            {
+                _isEnabled = value;
+                OnPropertyChanged("IsEnabled");
+            }
+        }
+        public double BorderOpacity
+        {
+            get => _borderOpacity;
+            set
+            {
+                _borderOpacity = value;
+                OnPropertyChanged("BorderOpacity");
+            }
+        }        
     }
 }

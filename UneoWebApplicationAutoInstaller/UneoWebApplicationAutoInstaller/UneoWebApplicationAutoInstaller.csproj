@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<AssemblyVersion>1.0.1</AssemblyVersion>
+	<AssemblyVersion>1.0.0</AssemblyVersion>
 	<OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -25,8 +25,8 @@
     <None Remove="Views\Assets\Icon_Fail_FFFF0000.png" />
     <None Remove="Views\Assets\Icon_GoToNext_Orange.png" />
     <None Remove="Views\Assets\Icon_GoToNext_White.png" />
-    <None Remove="Views\Assets\Icon_Info_00FFFFFF.png" />
     <None Remove="Views\Assets\Icon_Info_B0470F.png" />
+    <None Remove="Views\Assets\Icon_Info_FFFFD700.png" />
     <None Remove="Views\Assets\Icon_LatestVersion_00FFFFFF.png" />
     <None Remove="Views\Assets\Icon_LatestVersion_FF00FF7F.png" />
     <None Remove="Views\Assets\Icon_Option_FFD3D3D3.png" />
@@ -67,7 +67,7 @@
     <Resource Include="Views\Assets\Icon_Fail_FFFF0000.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Views\Assets\Icon_Info_00FFFFFF.png">
+    <Resource Include="Views\Assets\Icon_Info_FFFFD700.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Views\Assets\Icon_LatestVersion_00FFFFFF.png">
