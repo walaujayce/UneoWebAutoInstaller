@@ -140,7 +140,10 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 ProgressSelected.ExpandImage = "/Views/Assets/Icon_Expand.png";
             }
         }
-
+        public void GoToHomePage()
+        {
+            delegateNavigate?.Invoke((int)ENavigatePage.ProcessSelectionPage);
+        }
         #region TEST AREA
         public void Test_Click()
         {

@@ -875,9 +875,10 @@ namespace UneoWebApplicationAutoInstaller.Command
                     try
                     {
                         int searchPostgreSQLPathAttempTimes = 0;
-                        DirectoryInfo di = Directory.GetParent(AppContext.BaseDirectory).Parent;
-                        while (!File.Exists(postgreSQLPath) && searchPostgreSQLPathAttempTimes <= 10)
+                        DirectoryInfo? di = Directory.GetParent(AppContext.BaseDirectory)?.Parent;
+                        while (!File.Exists(postgreSQLPath) && searchPostgreSQLPathAttempTimes <= 15)
                         {
+                            searchPostgreSQLPathAttempTimes++;
                             if (di == null || di.Parent == null)
                             {
                                 continue;
@@ -887,7 +888,6 @@ namespace UneoWebApplicationAutoInstaller.Command
                                 string projectRoot = di.FullName;
                                 postgreSQLPath = Path.Combine(projectRoot, "PostgreSQL", "dump-postgres.sql");
                                 di = di.Parent;
-                                searchPostgreSQLPathAttempTimes++;
                             }                            
                         }
                         if (!File.Exists(postgreSQLPath))
@@ -1473,9 +1473,10 @@ namespace UneoWebApplicationAutoInstaller.Command
                     try
                     {
                         int searchUMonitorSocketServerPathAttempTimes = 0;
-                        DirectoryInfo di = Directory.GetParent(AppContext.BaseDirectory).Parent;
-                        while (!File.Exists(uMonitorSocketServerExeFilePath) && searchUMonitorSocketServerPathAttempTimes <= 10)
+                        DirectoryInfo? di = Directory.GetParent(AppContext.BaseDirectory)?.Parent;
+                        while (!File.Exists(uMonitorSocketServerExeFilePath) && searchUMonitorSocketServerPathAttempTimes <= 15)
                         {
+                            searchUMonitorSocketServerPathAttempTimes++;
                             if (di == null || di.Parent == null)
                             {
                                 continue;
@@ -1485,9 +1486,9 @@ namespace UneoWebApplicationAutoInstaller.Command
                                 string projectRoot = di.FullName;
                                 uMonitorSocketServerExeFilePath = Path.Combine(projectRoot, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
                                 di = di.Parent;
-                                searchUMonitorSocketServerPathAttempTimes++;
                             }
                         }
+
                         if (!File.Exists(uMonitorSocketServerExeFilePath))
                         {
                             progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";

@@ -126,7 +126,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
             _navigationService = navigationService;
             NavigateToSelectedPage((int)ENavigatePage.ProcessSelectionPage);
+
             _processSelectionPage.SetDelegate(new DelegateNavigate(NavigateToSelectedPage));
+
             _installProcessPage.SetDelegate(new DelegateNavigate(NavigateToSelectedPage));
             _installProcessPage.SetDelegateSelectedInstallation(new DelegateSelectedInstallation(InstallSettingModalListener));
 

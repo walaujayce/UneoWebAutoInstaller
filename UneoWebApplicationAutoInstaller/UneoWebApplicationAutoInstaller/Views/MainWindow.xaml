@@ -108,6 +108,6 @@
                 </Border>
             </Grid>
         </Border>
-        <Border x:Name="Overlay" Visibility="{Binding OverlayVisibility}" BorderBrush="Black" BorderThickness="1" CornerRadius="10" Background="Black" Opacity="0.3" Panel.ZIndex="99"/>
+        <Border x:Name="Overlay" Visibility="{Binding OverlayVisibility}" BorderBrush="Black" BorderThickness="1" CornerRadius="10" Background="Black" Opacity="0.5" Panel.ZIndex="99"/>
     </Grid>
 </Window>

@@ -8451,8 +8451,8 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:UneoWebApplicationSetupInstaller"
-        "ProductCode" = "8:{F05F14EC-55B0-466D-AFBE-00EBDAE95924}"
-        "PackageCode" = "8:{F2C2AC26-EEAA-42CE-BD40-6B4A44EEBA7A}"
+        "ProductCode" = "8:{81B3464A-66A2-4253-82C8-841ED98179EE}"
+        "PackageCode" = "8:{14D44877-A413-4478-A1B9-CF14EEBBF429}"
         "UpgradeCode" = "8:{3582E975-6D1B-4B61-9200-5DB1C7758CEC}"
         "AspNetVersion" = "8:"
         "RestartWWWService" = "11:FALSE"
@@ -8987,7 +8987,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_FF32A167315C43D6874075D43F466E21"
             {
-            "SourcePath" = "8:..\\UneoWebApplicationAutoInstaller\\obj\\Debug\\net8.0-windows\\apphost.exe"
+            "SourcePath" = "8:..\\UneoWebApplicationAutoInstaller\\obj\\Release\\net8.0-windows\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_4FC78C331426454D87A3F206F23A7215"

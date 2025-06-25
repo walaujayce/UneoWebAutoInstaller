@@ -14,6 +14,7 @@
         <Style x:Key="TitleTextblockStyle" TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="#876D5A"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontFamily" Value="Tahoma"/>
             <Setter Property="FontWeight" Value="Bold"/>
@@ -32,18 +33,26 @@
             <Setter Property="TextWrapping" Value="Wrap"/>
             <Setter Property="TextAlignment" Value="Center"/>
             <Setter Property="FontFamily" Value="Arial"/>
-            <Setter Property="Padding" Value="5,0"/>
+            <Setter Property="Padding" Value="10,0"/>
+        </Style>
+        <!-- Select button Outer border style -->
+        <Style x:Key="SelectBtnOuterBorderStyle" TargetType="Border">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="BorderBrush" Value="#CDA581"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="15"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="10,5"/>
         </Style>
         <!-- Select button border style -->
         <Style x:Key="SelectBtnBorderStyle" TargetType="Border">
-            <Setter Property="Margin" Value="5"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="15"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="13"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Background">
                 <Setter.Value>
-                    <SolidColorBrush Color="#fccb3a"/>
+                    <SolidColorBrush Color="#CDA581"/>
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
@@ -53,7 +62,7 @@
                             <Storyboard>
                                 <ColorAnimation
                     Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                    To="Orange"
+                    To="#A98B73"
                     Duration="0:0:0.1"/>
                             </Storyboard>
                         </BeginStoryboard>
@@ -63,7 +72,7 @@
                             <Storyboard>
                                 <ColorAnimation
                     Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                    To="#fccb3a"
+                    To="#CDA581"
                     Duration="0:0:0.1"/>
                             </Storyboard>
                         </BeginStoryboard>
@@ -82,6 +91,7 @@
             <Setter Property="TextWrapping" Value="Wrap"/>
             <Setter Property="TextAlignment" Value="Center"/>
         </Style>
+        
     </Page.Resources>
     
     <Grid>
@@ -99,7 +109,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Margin="10" BorderBrush="Black" BorderThickness="0.3" CornerRadius="10" Padding="5">
+                        <Border Margin="10" BorderBrush="#CDA581" BorderThickness="1" CornerRadius="20" Padding="5">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="5.5*"/>
@@ -113,8 +123,10 @@
                                     <TextBlock Text="{Binding UpdateDescription}" Style="{DynamicResource DescriptionTextblockStyle}"/>
                                 </Grid>
                                 <Grid Grid.Row="2">
-                                    <Border x:Name="SelectButton" Style="{DynamicResource SelectBtnBorderStyle}" MouseLeftButtonUp="SelectBtn_Clicked" >
-                                        <TextBlock Text="Select" Style="{DynamicResource SelectBtnTextblockStyle}"/>
+                                    <Border Style="{DynamicResource SelectBtnOuterBorderStyle}">
+                                        <Border x:Name="SelectButton" Style="{DynamicResource SelectBtnBorderStyle}" MouseLeftButtonUp="SelectBtn_Clicked" >
+                                            <TextBlock Text="Select" Style="{DynamicResource SelectBtnTextblockStyle}"/>
+                                        </Border>
                                     </Border>
                                 </Grid>
                             </Grid>

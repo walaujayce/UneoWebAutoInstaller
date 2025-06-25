@@ -140,21 +140,21 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             switch (updateID)
             {
                 case (int)EUpdateID.Website_CONTAINER:
-                    return "Modify Website IP Address";
+                    return "Website IP Address";
                 case (int)EUpdateID.Website_IMAGE:
-                    return "Update Website version";
+                    return "Website version";
                 case (int)EUpdateID.UMonitorSocketServer_APPSETTINGS:
-                    return "Modify USocketServer settings";
+                    return "USocketServer settings";
                 case (int)EUpdateID.UMonitorSocketServer_ALL:
-                    return "Update USocketServer version";
+                    return "USocketServer version";
                 case (int)EUpdateID.WebAPI_CONTAINER:
-                    return "Remake WebAPI container";
+                    return "WebAPI container";
                 case (int)EUpdateID.WebAPI_IMAGE:
-                    return "Update WebAPI version";
+                    return "WebAPI version";
                 case (int)EUpdateID.UMonitorService_CONTAINER:
-                    return "Remake UMonitorService container";
+                    return "UMonitorService container";
                 case (int)EUpdateID.UMonitorService_IMAGE:
-                    return "Update UMonitorService version";
+                    return "UMonitorService version";
                 default:
                     return "Undefined";
             }
@@ -226,7 +226,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                 // Ignore vEthernet interfaces
                 if (networkInterface.Name.StartsWith("vEthernet")) continue;
                 if (networkInterface.Name.StartsWith("Loopback")) continue;
-                //if (networkInterface.Name.StartsWith("Wi-Fi")) continue; z
+                //if (networkInterface.Name.StartsWith("Wi-Fi")) continue;
 
                 // Only check interfaces that are up
                 if (networkInterface.OperationalStatus == OperationalStatus.Up)
