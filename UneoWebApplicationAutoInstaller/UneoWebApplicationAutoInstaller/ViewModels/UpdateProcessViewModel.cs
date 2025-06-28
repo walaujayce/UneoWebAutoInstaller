@@ -296,7 +296,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 },
                                 new DictionaryInput()
                                 {
-                                    DictionaryKey = "LOCAL_IP",
+                                    DictionaryKey = "SOCKETSERVER_IP",
                                     DictionaryValue = ipAddress_WIFI,
                                 },
                                 new DictionaryInput()
@@ -341,7 +341,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 },
                                 new DictionaryInput()
                                 {
-                                    DictionaryKey = "LOCAL_IP",
+                                    DictionaryKey = "SOCKETSERVER_IP",
                                     DictionaryValue = ipAddress_WIFI,
                                 },
                                 new DictionaryInput()

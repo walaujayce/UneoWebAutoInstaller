@@ -773,7 +773,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 #if DEBUG
                 await ContainerizeDatabaseImage(imageName_PostgreSQL, containterName_PostgreSQL, databaseLocalFolder, "-p 5430:5432 ");
 #else
-                ContainerizeDatabaseImage(imageName_PostgreSQL, containterName_PostgreSQL, databaseLocalFolder, portScript, environmentVariableScript);
+                await ContainerizeDatabaseImage(imageName_PostgreSQL, containterName_PostgreSQL, databaseLocalFolder, portScript, environmentVariableScript);
 #endif
                 //Check again if the container is running
                 int checkContainerRunningAttemptTimes = 0;
@@ -802,106 +802,96 @@ namespace UneoWebApplicationAutoInstaller.Command
                     // failed then return
                     return;
                 }
-            
+            }
 
 
-                // Create database "uneo_web"
-                progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
-                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
-                delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
+            // Create database "uneo_web"
+            progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
+            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
+            delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
-                //Get container ID from image name
-                string containerIdFile = "container_id.txt";
+            //Get container ID from image name
+            string containerIdFile = "container_id.txt";
 
-                // Retrieve the container ID and store it temporarily
+            // Retrieve the container ID and store it temporarily
+            await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
+                $"docker ps -q -l -f \"ancestor={imageName_PostgreSQL}\" > {containerIdFile}",
+                "Get PostgreSQL container ID from image name");
+
+            // Read the container ID from file
+            string containerId = File.ReadAllText(containerIdFile).Trim();
+
+            //Use container ID to create database
+#if DEBUG
+            string checkDbCommand = $"docker exec {containerId} psql -U postgres -tAc \"SELECT 1 FROM pg_database WHERE datname=\'{DATABASE_NAME}\';\"";
+#else
+            string checkDbCommand = $"docker exec {environmentVariableScript}{containerId} psql -U postgres -tAc \"SELECT 1 FROM pg_database WHERE datname=\'{DATABASE_NAME}\';\"";
+#endif
+            int databaseExistAttemtpTimes = 0;
+            while (!((await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkDbCommand, $"Check if {DATABASE_NAME} database exists")).Trim() == "1"))
+            {
+                databaseExistAttemtpTimes++;
+                await Task.Delay(5000);
+#if DEBUG
                 await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
-                    $"docker ps -q -l -f \"ancestor={imageName_PostgreSQL}\" > {containerIdFile}",
-                    "Get PostgreSQL container ID from image name");
-
-                // Read the container ID from file
-                string containerId = File.ReadAllText(containerIdFile).Trim();
-
-                //Use container ID to create database
-#if DEBUG
-                string checkDbCommand = $"docker exec {containerId} psql -U postgres -tAc \"SELECT 1 FROM pg_database WHERE datname=\'{DATABASE_NAME}\';\"";
+                    $"docker exec {containerId} psql -U postgres -c \"CREATE DATABASE {DATABASE_NAME};\"",
+                    $"Creating database {DATABASE_NAME}");
 #else
-                string checkDbCommand = $"docker exec {environmentVariableScript}{containerId} psql -U postgres -tAc \"SELECT 1 FROM pg_database WHERE datname=\'{DATABASE_NAME}\';\"";
+                await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
+                    $"docker exec {environmentVariableScript}{containerId} psql -U postgres -c \"CREATE DATABASE {DATABASE_NAME};\"",
+                    $"Creating database {DATABASE_NAME}");
 #endif
-                int databaseExistAttemtpTimes = 0;
-                while (!((await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkDbCommand, $"Check if {DATABASE_NAME} database exists")).Trim() == "1"))
+                if (databaseExistAttemtpTimes >= 20)
                 {
-                    databaseExistAttemtpTimes++;
-                    await Task.Delay(5000);
-#if DEBUG
-                    await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
-                        $"docker exec {containerId} psql -U postgres -c \"CREATE DATABASE {DATABASE_NAME};\"",
-                        $"Creating database {DATABASE_NAME}");
-#else
-                    await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
-                        $"docker exec {environmentVariableScript}{containerId} psql -U postgres -c \"CREATE DATABASE {DATABASE_NAME};\"",
-                        $"Creating database {DATABASE_NAME}");
-#endif
-                    if (databaseExistAttemtpTimes >= 20)
-                    {
-                        Log.E(TAG, $"Failed to create {DATABASE_NAME}, please check Docker.");
-                        databaseExistAttemtpTimes = 0;
-                        // Fail to create database then return
-                        progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
-                        progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
-                        progressDetail_PostgreSQL.IsFinish = true;
-                        delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
-                        return;
-                    }
-                };
+                    Log.E(TAG, $"Failed to create {DATABASE_NAME}, please check Docker.");
+                    databaseExistAttemtpTimes = 0;
+                    // Fail to create database then return
+                    progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
+                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
+                    progressDetail_PostgreSQL.IsFinish = true;
+                    delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
+                    return;
+                }
+            };
 
-                // database "uneo_web" exist, then delegate pass
-                progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
-                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
-                delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
+            // database "uneo_web" exist, then delegate pass
+            progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
+            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
+            delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
-                // Cleanup the temp file
-                File.Delete(containerIdFile);
+            // Cleanup the temp file
+            File.Delete(containerIdFile);
 
-                // Init database tables by dump-postgres file
-                progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
-                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
-                delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
+            // Init database tables by dump-postgres file
+            progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
+            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
+            delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
-                string containerSqlFilePath = "/tmp/dump.sql";
-                string postgreSQLPath = Path.Combine(AppContext.BaseDirectory, "PostgreSQL", "dump-postgres.sql");
+            string containerSqlFilePath = "/tmp/dump.sql";
+            string postgreSQLPath = Path.Combine(AppContext.BaseDirectory, "PostgreSQL", "dump-postgres.sql");
 
-                if (!File.Exists(postgreSQLPath))
+            if (!File.Exists(postgreSQLPath))
+            {
+                try
                 {
-                    try
+                    int searchPostgreSQLPathAttempTimes = 0;
+                    DirectoryInfo? di = Directory.GetParent(AppContext.BaseDirectory)?.Parent;
+                    while (!File.Exists(postgreSQLPath) && searchPostgreSQLPathAttempTimes <= 15)
                     {
-                        int searchPostgreSQLPathAttempTimes = 0;
-                        DirectoryInfo? di = Directory.GetParent(AppContext.BaseDirectory)?.Parent;
-                        while (!File.Exists(postgreSQLPath) && searchPostgreSQLPathAttempTimes <= 15)
+                        searchPostgreSQLPathAttempTimes++;
+                        if (di == null || di.Parent == null)
                         {
-                            searchPostgreSQLPathAttempTimes++;
-                            if (di == null || di.Parent == null)
-                            {
-                                continue;
-                            }
-                            else
-                            {
-                                string projectRoot = di.FullName;
-                                postgreSQLPath = Path.Combine(projectRoot, "PostgreSQL", "dump-postgres.sql");
-                                di = di.Parent;
-                            }                            
+                            continue;
                         }
-                        if (!File.Exists(postgreSQLPath))
+                        else
                         {
-                            progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
-                            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
-                            progressDetail_PostgreSQL.IsFinish = true;
-                            delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
-                            return;
-                        }
+                            string projectRoot = di.FullName;
+                            postgreSQLPath = Path.Combine(projectRoot, "PostgreSQL", "dump-postgres.sql");
+                            di = di.Parent;
+                        }                            
                     }
-                    catch (Exception ex)
+                    if (!File.Exists(postgreSQLPath))
                     {
-                        Log.E(TAG, "Cant find dump-postgreSQL file path.");
                         progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
                         progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
                         progressDetail_PostgreSQL.IsFinish = true;
@@ -909,47 +899,9 @@ namespace UneoWebApplicationAutoInstaller.Command
                         return;
                     }
                 }
-
-                //Debug.WriteLine("File Path: " + postgreSQLPath);
-                //Debug.WriteLine("File Path: " + File.Exists(postgreSQLPath));
-
-                //if database already has any tables, it cant be restore with SQL dump-temp
-                string checkTablesCommand = $"docker exec {environmentVariableScript}{containerId} psql -U postgres -d {DATABASE_NAME} -tAc \"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';\"";
-                string result = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkTablesCommand, "Checking if uneo_web has any tables");
-                int table_existed_count = int.TryParse(result.Trim(), out int tableCount) ? tableCount : 0;
-                if (table_existed_count == 0)
+                catch (Exception ex)
                 {
-                    // Check again after initialize database
-                    int checkDatabaseHasTablesAttemptTimes = 0;
-                    string checkAgainResult;
-                    do
-                    {
-                        //Copy SQL dump file to container
-                        await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
-                            $"docker cp \"{postgreSQLPath}\" {containerId}:{containerSqlFilePath}",
-                            "Copy SQL dump into container");
-
-                        //Restore SQL dump into the new database
-                        await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(
-                            $"docker exec {environmentVariableScript}{containerId} pg_restore -U postgres -d {DATABASE_NAME} {containerSqlFilePath}",
-                            $"Restore database {DATABASE_NAME}");
-
-                        await Task.Delay(1000);
-                        checkAgainResult = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkTablesCommand, "Checking if uneo_web has any tables");
-                        table_existed_count = int.TryParse(checkAgainResult.Trim(), out int tableCountAgain) ? tableCountAgain : 0;
-
-                    } while (table_existed_count == 0 && checkDatabaseHasTablesAttemptTimes <= OVERALL_ATTEMPT_TIMES);
-                    if(table_existed_count > 0)
-                    {
-                        progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
-                        progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
-                        delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
-                    }
-
-                }
-                else
-                {
-                    Log.E(TAG, $"Database {DATABASE_NAME} with tables has already existed, delete it first before restore process continue to execute.");
+                    Log.E(TAG, "Cant find dump-postgreSQL file path.");
                     progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
                     progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
                     progressDetail_PostgreSQL.IsFinish = true;
@@ -957,6 +909,54 @@ namespace UneoWebApplicationAutoInstaller.Command
                     return;
                 }
             }
+
+            //Debug.WriteLine("File Path: " + postgreSQLPath);
+            //Debug.WriteLine("File Path: " + File.Exists(postgreSQLPath));
+
+            //if database already has any tables, it cant be restore with SQL dump-temp
+            string checkTablesCommand = $"docker exec {environmentVariableScript}{containerId} psql -U postgres -d {DATABASE_NAME} -tAc \"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';\"";
+            string result = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkTablesCommand, "Checking if uneo_web has any tables");
+            int table_existed_count = int.TryParse(result.Trim(), out int tableCount) ? tableCount : 0;
+            if (table_existed_count == 0)
+            {
+                // Check again after initialize database
+                int checkDatabaseHasTablesAttemptTimes = 0;
+                string checkAgainResult;
+                do
+                {
+                    //Copy SQL dump file to container
+                    await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
+                        $"docker cp \"{postgreSQLPath}\" {containerId}:{containerSqlFilePath}",
+                        "Copy SQL dump into container");
+
+                    //Restore SQL dump into the new database
+                    await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(
+                        $"docker exec {environmentVariableScript}{containerId} pg_restore -U postgres -d {DATABASE_NAME} {containerSqlFilePath}",
+                        $"Restore database {DATABASE_NAME}");
+
+                    await Task.Delay(1000);
+                    checkAgainResult = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkTablesCommand, "Checking if uneo_web has any tables");
+                    table_existed_count = int.TryParse(checkAgainResult.Trim(), out int tableCountAgain) ? tableCountAgain : 0;
+
+                } while (table_existed_count == 0 && checkDatabaseHasTablesAttemptTimes <= OVERALL_ATTEMPT_TIMES);
+                if(table_existed_count > 0)
+                {
+                    progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
+                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
+                    delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
+                }
+
+            }
+            else
+            {
+                Log.E(TAG, $"Database {DATABASE_NAME} with tables has already existed, delete it first before restore process continue to execute.");
+                progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
+                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
+                progressDetail_PostgreSQL.IsFinish = true;
+                delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
+                return;
+            }
+            
 
             // invoke progress monitor that all process finish
             progressDetail_PostgreSQL.IsFinish = true;

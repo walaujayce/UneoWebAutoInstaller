@@ -7,6 +7,9 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="Views\Configuration.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\DiagnosticProcess.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -34,6 +37,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Styles\ScrollBar.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Configuration.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\DiagnosticProcess.xaml">

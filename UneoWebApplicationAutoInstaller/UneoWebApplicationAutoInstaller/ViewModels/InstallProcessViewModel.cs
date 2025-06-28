@@ -96,6 +96,11 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 {
                                     DictionaryKey = "POSTGRESQL_PASSWORD",
                                     DictionaryValue = "uccc07568009",
+                                },
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "PGPASSWORD",
+                                    DictionaryValue = "uccc07568009",
                                 }
                             }
                         },
@@ -237,7 +242,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 },
                                 new DictionaryInput()
                                 {
-                                    DictionaryKey = "LOCAL_IP",
+                                    DictionaryKey = "SOCKETSERVER_IP",
                                     DictionaryValue = ipAddress_WIFI,
                                 },
                                 new DictionaryInput()

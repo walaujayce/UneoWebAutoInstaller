@@ -117,6 +117,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         private UpdateProcess _updateProcessPage = new();
         private DiagnosticProcess _diagnosticProcessPage = new();
         private ProgressMonitor _progressMonitorPage = new();
+        private Configuration _configurationPage = new();
 
         private Version currentVersion, latestVersion;
         private string newInstallerUrl;
@@ -158,6 +159,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     break;
                 case (int)ENavigatePage.ProgressMonitorPage:
                     _navigationService.NavigateTo(_progressMonitorPage);
+                    break;
+                case (int)ENavigatePage.ConfigurationPage:
+                    _navigationService.NavigateTo(_configurationPage);
                     break;
                 default:
                     MessageBox.Show("No such page!", "Alert", MessageBoxButton.OK);
