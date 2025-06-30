@@ -145,7 +145,9 @@ namespace UneoWebApplicationAutoInstaller.Host
             byte[] readBuffer = new byte[128];
             byte[] buffer;
 
-            while (ec == ErrorCode.None || ec == ErrorCode.IoTimedOut && !_cts.IsCancellationRequested)
+            ec = new ErrorCode();
+
+            while ((ec == ErrorCode.None || ec == ErrorCode.IoTimedOut) && !_cts.IsCancellationRequested)
             {
                 if (epReader == null) return;
                 // If the device hasn't sent data in the last 1000 milliseconds,
@@ -164,6 +166,11 @@ namespace UneoWebApplicationAutoInstaller.Host
                 else
                 {
                     Debug.WriteLine("讀取數據結束" + ec);
+                    // error code win32 error means disconnection
+                    if (ec.Equals(ErrorCode.Win32Error))
+                    {
+                        delegateLibUSBStatus?.Invoke(false);
+                    }                    
                 }
             }
         }

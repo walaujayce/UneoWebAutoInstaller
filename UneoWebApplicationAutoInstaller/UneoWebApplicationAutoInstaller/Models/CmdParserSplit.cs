@@ -61,7 +61,10 @@
 //                        await WebAPIInstallProcess(settingList);
 //                        break;
 //                    case (int)EInstallID.Website:
-//                        await WebsiteInstallProcess(settingList);
+//                        // Init progress result and send to progress monitor
+//                        ProgressDetail progressDetail_Website = new ProgressDetail();
+//                        progressDetail_Website.ProgressParentID = (int)EInstallID.Website;
+//                        await WebsiteInstallProcess(settingList, progressDetail_Website);
 //                        break;
 //                    case (int)EInstallID.UMonitorSocketServer:
 //                        await UMonitorSocketServerInstallProcess(settingList);
@@ -112,11 +115,138 @@
 //            Debug.WriteLine("End of update process!");
 //        }
 //        // IP changes, remake website container
-//        private async Task RemakeWebsiteContainer(List<Setting> settingList)
+//private async Task RemakeWebsiteContainer(List<Setting> settingList)
+//{
+//    // Init progress result and send to progress monitor
+//    ProgressDetail progressDetail_RemakeWebsiteContainer = new ProgressDetail();
+//    progressDetail_RemakeWebsiteContainer.ProgressParentID = (int)EUpdateID.Website_CONTAINER;
+
+//    // Get setting param - image name, container name, ports, envirionment variables
+//    imageName_Website = settingList.First(s => s.SettingName == "Image Name").SettingValue;
+
+//    List<DictionaryInput> portsList = settingList.First(s => s.SettingName == "Ports").InputList.ToList();
+//    string portScript = "";
+//    foreach (var port in portsList)
+//    {
+//        portScript += $"-p {port.DictionaryValue} ";
+//    }
+//    List<DictionaryInput> environmentVariablesList = settingList.First(s => s.SettingName == "Environment Variables").KeyValueItems.ToList();
+//    string environmentVariableScript = "";
+//    foreach (var ev in environmentVariablesList)
+//    {
+//        environmentVariableScript += $"-e {ev.DictionaryKey}={ev.DictionaryValue} ";
+//    }
+//    containerName_Website = settingList.First(s => s.SettingName == "Container Name").SettingValue;
+
+//    progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
+//    progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
+//    delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+
+//    // check image existence using image name
+//    bool isImageExists_Website = await CheckImageExistence(imageName_Website);
+//    if (isImageExists_Website)
+//    {
+//        // check container existence using image name
+//        bool isContainerExist = await CheckContainerExistenceUsingImageName(imageName_Website);
+//        if (isContainerExist)
+//        {
+//            Log.I(TAG, "Container WEBSITE exists locally.");
+//            // get container name using image name
+//            string currentExistedContainerName = await GetExistedContainerNameUsingImageName(imageName_Website);
+//            // get running container ID using image name
+//            bool isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_Website);
+//            if (isContainerRunning_Website)
+//            {
+//                // if running, then stop and delete container
+//                string containerId = await GetContainerIdUsingImageName(imageName_Website);
+//                // use container id to remove current container
+//                await StopContainerUsingContainerName(currentExistedContainerName);
+
+//                //check again 
+//                isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_Website);
+//                if (!isContainerRunning_Website)
+//                {
+//                    progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
+//                    progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
+//                    delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//                    await Task.Delay(100);
+//                    progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
+//                    progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
+//                    delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//                }
+//                else
+//                {
+//                    progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
+//                    progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Fail;
+//                    progressDetail_RemakeWebsiteContainer.IsFinish = true;
+//                    delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//                    return;
+//                }
+
+//            }
+//            // if not running, then delete container using container name
+//            await DeleteContainerUsingContainerName(currentExistedContainerName);
+
+//            bool isCurrentContainerExisted = await CheckContainerExistenceUsingImageName(imageName_Website);
+//            if (!isCurrentContainerExisted)
+//            {
+//                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
+//                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
+//                delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//            }
+//            else
+//            {
+//                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
+//                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Fail;
+//                progressDetail_RemakeWebsiteContainer.IsFinish = true;
+//                delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//                return;
+//            }
+//        }
+//        // use image name to containerize 
+//        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
+//        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
+//        delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+
+//        await ContainerizeImage(imageName_Website, containerName_Website, portScript, environmentVariableScript);
+
+//    }
+//    else
+//    {
+//        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
+//        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
+//        delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//        await Task.Delay(100);
+//        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
+//        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
+//        delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//        await Task.Delay(100);
+//        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
+//        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
+//        delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+
+//        await WebsiteInstallProcess(settingList, progressDetail_RemakeWebsiteContainer);
+//    }
+//    // confirm container is running            
+//    bool isWebsiteContainerRunning = await CheckContainerRunningUsingImage(imageName_Website);
+//    if (isWebsiteContainerRunning)
+//    {
+//        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
+//        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
+//    }
+//    else
+//    {
+//        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
+//        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Fail;
+//    }
+//    progressDetail_RemakeWebsiteContainer.IsFinish = true;
+//    delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//}
+//        private async Task UpdateWebsiteImage(List<Setting> settingList)
 //        {
 //            // Init progress result and send to progress monitor
-//            ProgressDetail progressDetail_RemakeWebsiteContainer = new ProgressDetail();
-//            progressDetail_RemakeWebsiteContainer.ProgressParentID = (int)EUpdateID.Website_CONTAINER;
+//            ProgressDetail progressDetail_UpdateWebsite = new ProgressDetail();
+//            progressDetail_UpdateWebsite.ProgressParentID = (int)EUpdateID.Website_IMAGE;
 
 //            // Get setting param - image name, container name, ports, envirionment variables
 //            imageName_Website = settingList.First(s => s.SettingName == "Image Name").SettingValue;
@@ -135,9 +265,9 @@
 //            }
 //            containerName_Website = settingList.First(s => s.SettingName == "Container Name").SettingValue;
 
-//            progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
-//            progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
-//            delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//            progressDetail_UpdateWebsite.ProgressDescription = "Stopping current existed container";
+//            progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Ongoing;
+//            delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
 
 //            // check image existence using image name
 //            bool isImageExists_Website = await CheckImageExistence(imageName_Website);
@@ -156,6 +286,7 @@
 //                    {
 //                        // if running, then stop and delete container
 //                        string containerId = await GetContainerIdUsingImageName(imageName_Website);
+
 //                        // use container id to remove current container
 //                        await StopContainerUsingContainerName(currentExistedContainerName);
 
@@ -163,23 +294,22 @@
 //                        isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_Website);
 //                        if (!isContainerRunning_Website)
 //                        {
-//                            progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
-//                            progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
-//                            delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//                            progressDetail_UpdateWebsite.ProgressDescription = "Stopping current existed container";
+//                            progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Pass;
+//                            delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
 //                            await Task.Delay(100);
-//                            progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
-//                            progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
-//                            delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//                            progressDetail_UpdateWebsite.ProgressDescription = "Deleting current existed container";
+//                            progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Ongoing;
+//                            delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
 //                        }
 //                        else
 //                        {
-//                            progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
-//                            progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Fail;
-//                            progressDetail_RemakeWebsiteContainer.IsFinish = true;
-//                            delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//                            progressDetail_UpdateWebsite.ProgressDescription = "Stopping current existed container";
+//                            progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Fail;
+//                            progressDetail_UpdateWebsite.IsFinish = true;
+//                            delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
 //                            return;
 //                        }
-
 //                    }
 //                    // if not running, then delete container using container name
 //                    await DeleteContainerUsingContainerName(currentExistedContainerName);
@@ -187,130 +317,78 @@
 //                    bool isCurrentContainerExisted = await CheckContainerExistenceUsingImageName(imageName_Website);
 //                    if (!isCurrentContainerExisted)
 //                    {
-//                        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
-//                        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
-//                        delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//                        progressDetail_UpdateWebsite.ProgressDescription = "Deleting current existed container";
+//                        progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Pass;
+//                        delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
 //                    }
 //                    else
 //                    {
-//                        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
-//                        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Fail;
-//                        progressDetail_RemakeWebsiteContainer.IsFinish = true;
-//                        delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//                        progressDetail_UpdateWebsite.ProgressDescription = "Deleting current existed container";
+//                        progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Fail;
+//                        progressDetail_UpdateWebsite.IsFinish = true;
+//                        delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
 //                        return;
 //                    }
 //                }
-//                // use image name to containerize 
-//                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
-//                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
-//                delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//                // delete image 
+//                progressDetail_UpdateWebsite.ProgressDescription = "Deleting Website image";
+//                progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Ongoing;
+//                delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
+//                await DeleteImage(imageName_Website);
 
-//                await ContainerizeImage(imageName_Website, containerName_Website, portScript, environmentVariableScript);
-
+//                // check image is deleted
+//                bool isImageDeleted = await CheckImageExistence(imageName_Website);
+//                if (!isImageDeleted)
+//                {
+//                    progressDetail_UpdateWebsite.ProgressDescription = "Deleting Website image";
+//                    progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Pass;
+//                    delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
+//                }
+//                else
+//                {
+//                    progressDetail_UpdateWebsite.ProgressDescription = "Deleting Website image";
+//                    progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Fail;
+//                    progressDetail_UpdateWebsite.IsFinish = true;
+//                    delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
+//                }
 //            }
-//            else
-//            {
-//                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
-//                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
-//                delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
-//                await Task.Delay(100);
-//                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
-//                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
-//                delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
-//                await Task.Delay(100);
-//                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
-//                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
-//                delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
 
-//                await WebsiteInstallProcess(settingList);
-//            }
+//            await WebsiteInstallProcess(settingList, progressDetail_UpdateWebsite);
 //            // confirm container is running
-//            //todo - send confirmation message
-
 //            bool isWebsiteContainerRunning = await CheckContainerRunningUsingImage(imageName_Website);
 //            if (isWebsiteContainerRunning)
 //            {
-//                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
-//                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
+//                progressDetail_UpdateWebsite.ProgressDescription = "Containerize Website image";
+//                progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Pass;
 //            }
 //            else
 //            {
-//                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
-//                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Fail;
+//                progressDetail_UpdateWebsite.ProgressDescription = "Containerize Website image";
+//                progressDetail_UpdateWebsite.StatusStatePD = (int)EProgressStatus.Fail;
 //            }
-//            progressDetail_RemakeWebsiteContainer.IsFinish = true;
-//            delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
-//        }
-//        private async Task UpdateWebsiteImage(List<Setting> settingList)
-//        {
-//            // Get setting param - image name, container name, ports, envirionment variables
-//            imageName_Website = settingList.First(s => s.SettingName == "Image Name").SettingValue;
-
-//            List<DictionaryInput> portsList = settingList.First(s => s.SettingName == "Ports").InputList.ToList();
-//            string portScript = "";
-//            foreach (var port in portsList)
-//            {
-//                portScript += $"-p {port.DictionaryValue} ";
-//            }
-//            List<DictionaryInput> environmentVariablesList = settingList.First(s => s.SettingName == "Environment Variables").KeyValueItems.ToList();
-//            string environmentVariableScript = "";
-//            foreach (var ev in environmentVariablesList)
-//            {
-//                environmentVariableScript += $"-e {ev.DictionaryKey}={ev.DictionaryValue} ";
-//            }
-//            containerName_Website = settingList.First(s => s.SettingName == "Container Name").SettingValue;
-
-//            // check image existence using image name
-//            bool isImageExists_Website = await CheckImageExistence(imageName_Website);
-//            if (isImageExists_Website)
-//            {
-//                // check container existence using image name
-//                bool isContainerExist = await CheckContainerExistenceUsingImageName(imageName_Website);
-//                if (isContainerExist)
-//                {
-//                    Log.I(TAG, "Container WEBSITE exists locally.");
-//                    // get container name using image name
-//                    string currentExistedContainerName = await GetExistedContainerNameUsingImageName(imageName_Website);
-//                    // get running container ID using image name
-//                    bool isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_Website);
-//                    if (isContainerRunning_Website)
-//                    {
-//                        // if running, then stop and delete container
-//                        string containerId = await GetContainerIdUsingImageName(imageName_Website);
-//                        // use container id to remove current container
-//                        await StopContainerUsingContainerName(currentExistedContainerName);
-//                    }
-//                    // if not running, then delete container using container name
-//                    await DeleteContainerUsingContainerName(currentExistedContainerName);
-//                }
-//                // delete image 
-//                await DeleteImage(imageName_Website);
-//            }
-//            await WebsiteInstallProcess(settingList);
-//            // confirm container is running
-//            //todo - send confirmation message
-//            await CheckContainerRunningUsingImage(imageName_Website);
+//            progressDetail_UpdateWebsite.IsFinish = true;
+//            delegateProgressResult?.Invoke(progressDetail_UpdateWebsite);
 //        }
 //        private async Task ModifySocketServerAppSettings(List<Setting> settingList)
 //        {
 //            // Init progress result and send to progress monitor
 //            ProgressDetail progressDetail_UMonitorSocketServer = new ProgressDetail();
-//            //progressDetail_UMonitorSocketServer.ProgressParentID = (int)EUpdateID.UMonitorSocketServer_APPSETTINGS;
+//            progressDetail_UMonitorSocketServer.ProgressParentID = (int)EUpdateID.UMonitorSocketServer_APPSETTINGS;
 
-//            //// Initialize UMonitorSocketServer appsettings
-//            //await Task.Delay(100); // system run too fast, need to wait it delegate
-//            //progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
-//            //progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Ongoing;
-//            //delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+//            // Initialize UMonitorSocketServer appsettings
+//            await Task.Delay(100); // system run too fast, need to wait it delegate
+//            progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
+//            progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Ongoing;
+//            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
 
-//            //// load and 
-//            //ObservableCollection<DictionaryInput> appSettingList = new ObservableCollection<DictionaryInput>();
-//            //List<DictionaryInput> temp_appSettingList = settingList.First(s => s.SettingName == "App Settings").KeyValueItems.ToList();
-//            //foreach (var appSetting in temp_appSettingList)
-//            //{
-//            //    appSettingList.Add(appSetting);
-//            //}
-//            //PublicFunction.WriteJsonFile(appSettingList, PublicFunction.USocketServer_AppSettings_JSON_FilePath);
+//            // load and 
+//            ObservableCollection<DictionaryInput> appSettingList = new ObservableCollection<DictionaryInput>();
+//            List<DictionaryInput> temp_appSettingList = settingList.First(s => s.SettingName == "App Settings").KeyValueItems.ToList();
+//            foreach (var appSetting in temp_appSettingList)
+//            {
+//                appSettingList.Add(appSetting);
+//            }
+//            PublicFunction.WriteJsonFile(appSettingList, PublicFunction.USocketServer_AppSettings_JSON_FilePath);
 
 //            // call setting modal to read json then write again
 //            await StopUMonitorSocketServerAsync();
@@ -321,7 +399,32 @@
 //        }
 //        private async Task UpdateSocketServer(List<Setting> settingList)
 //        {
+//            // Init progress result and send to progress monitor
+//            ProgressDetail progressDetail_UMonitorSocketServerUpdateAll = new ProgressDetail();
+//            progressDetail_UMonitorSocketServerUpdateAll.ProgressParentID = (int)EUpdateID.UMonitorSocketServer_ALL;
 
+//            await StopUMonitorSocketServerAsync();
+
+//            PublicFunction.SelectFolderAndDeleteContents();
+
+//            // Initialize UMonitorSocketServer appsettings
+//            await Task.Delay(100); // system run too fast, need to wait it delegate
+//            progressDetail_UMonitorSocketServerUpdateAll.ProgressDescription = "Initialize UMonitorSocketServer";
+//            progressDetail_UMonitorSocketServerUpdateAll.StatusStatePD = (int)EProgressStatus.Ongoing;
+//            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServerUpdateAll);
+
+//            // load and 
+//            ObservableCollection<DictionaryInput> appSettingList = new ObservableCollection<DictionaryInput>();
+//            List<DictionaryInput> temp_appSettingList = settingList.First(s => s.SettingName == "App Settings").KeyValueItems.ToList();
+//            foreach (var appSetting in temp_appSettingList)
+//            {
+//                appSettingList.Add(appSetting);
+//            }
+//            PublicFunction.WriteJsonFile(appSettingList, PublicFunction.USocketServer_AppSettings_JSON_FilePath);
+
+//            await StartUMonitorSocketServer(progressDetail_UMonitorSocketServerUpdateAll);
+//            progressDetail_UMonitorSocketServerUpdateAll.IsFinish = true;
+//            delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServerUpdateAll);
 //        }
 //        private async Task RemakeWebAPI(List<Setting> settingList)
 //        {
@@ -670,7 +773,7 @@
 //#if DEBUG
 //                await ContainerizeDatabaseImage(imageName_PostgreSQL, containterName_PostgreSQL, databaseLocalFolder, "-p 5430:5432 ");
 //#else
-//                ContainerizeDatabaseImage(imageName_PostgreSQL, containterName_PostgreSQL, databaseLocalFolder, portScript, environmentVariableScript);
+//                await ContainerizeDatabaseImage(imageName_PostgreSQL, containterName_PostgreSQL, databaseLocalFolder, portScript, environmentVariableScript);
 //#endif
 //                //Check again if the container is running
 //                int checkContainerRunningAttemptTimes = 0;
@@ -699,106 +802,96 @@
 //                    // failed then return
 //                    return;
 //                }
+//            }
 
 
+//            // Create database "uneo_web"
+//            progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
+//            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
+//            delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
-//                // Create database "uneo_web"
-//                progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
-//                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
-//                delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
+//            //Get container ID from image name
+//            string containerIdFile = "container_id.txt";
 
-//                //Get container ID from image name
-//                string containerIdFile = "container_id.txt";
+//            // Retrieve the container ID and store it temporarily
+//            await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
+//                $"docker ps -q -l -f \"ancestor={imageName_PostgreSQL}\" > {containerIdFile}",
+//                "Get PostgreSQL container ID from image name");
 
-//                // Retrieve the container ID and store it temporarily
+//            // Read the container ID from file
+//            string containerId = File.ReadAllText(containerIdFile).Trim();
+
+//            //Use container ID to create database
+//#if DEBUG
+//            string checkDbCommand = $"docker exec {containerId} psql -U postgres -tAc \"SELECT 1 FROM pg_database WHERE datname=\'{DATABASE_NAME}\';\"";
+//#else
+//            string checkDbCommand = $"docker exec {environmentVariableScript}{containerId} psql -U postgres -tAc \"SELECT 1 FROM pg_database WHERE datname=\'{DATABASE_NAME}\';\"";
+//#endif
+//            int databaseExistAttemtpTimes = 0;
+//            while (!((await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkDbCommand, $"Check if {DATABASE_NAME} database exists")).Trim() == "1"))
+//            {
+//                databaseExistAttemtpTimes++;
+//                await Task.Delay(5000);
+//#if DEBUG
 //                await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
-//                    $"docker ps -q -l -f \"ancestor={imageName_PostgreSQL}\" > {containerIdFile}",
-//                    "Get PostgreSQL container ID from image name");
-
-//                // Read the container ID from file
-//                string containerId = File.ReadAllText(containerIdFile).Trim();
-
-//                //Use container ID to create database
-//#if DEBUG
-//                string checkDbCommand = $"docker exec {containerId} psql -U postgres -tAc \"SELECT 1 FROM pg_database WHERE datname=\'{DATABASE_NAME}\';\"";
+//                    $"docker exec {containerId} psql -U postgres -c \"CREATE DATABASE {DATABASE_NAME};\"",
+//                    $"Creating database {DATABASE_NAME}");
 //#else
-//                string checkDbCommand = $"docker exec {environmentVariableScript}{containerId} psql -U postgres -tAc \"SELECT 1 FROM pg_database WHERE datname=\'{DATABASE_NAME}\';\"";
+//                await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
+//                    $"docker exec {environmentVariableScript}{containerId} psql -U postgres -c \"CREATE DATABASE {DATABASE_NAME};\"",
+//                    $"Creating database {DATABASE_NAME}");
 //#endif
-//                int databaseExistAttemtpTimes = 0;
-//                while (!((await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkDbCommand, $"Check if {DATABASE_NAME} database exists")).Trim() == "1"))
+//                if (databaseExistAttemtpTimes >= 20)
 //                {
-//                    databaseExistAttemtpTimes++;
-//                    await Task.Delay(5000);
-//#if DEBUG
-//                    await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
-//                        $"docker exec {containerId} psql -U postgres -c \"CREATE DATABASE {DATABASE_NAME};\"",
-//                        $"Creating database {DATABASE_NAME}");
-//#else
-//                    await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
-//                        $"docker exec {environmentVariableScript}{containerId} psql -U postgres -c \"CREATE DATABASE {DATABASE_NAME};\"",
-//                        $"Creating database {DATABASE_NAME}");
-//#endif
-//                    if (databaseExistAttemtpTimes >= 20)
-//                    {
-//                        Log.E(TAG, $"Failed to create {DATABASE_NAME}, please check Docker.");
-//                        databaseExistAttemtpTimes = 0;
-//                        // Fail to create database then return
-//                        progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
-//                        progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
-//                        progressDetail_PostgreSQL.IsFinish = true;
-//                        delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
-//                        return;
-//                    }
-//                };
+//                    Log.E(TAG, $"Failed to create {DATABASE_NAME}, please check Docker.");
+//                    databaseExistAttemtpTimes = 0;
+//                    // Fail to create database then return
+//                    progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
+//                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
+//                    progressDetail_PostgreSQL.IsFinish = true;
+//                    delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
+//                    return;
+//                }
+//            };
 
-//                // database "uneo_web" exist, then delegate pass
-//                progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
-//                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
-//                delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
+//            // database "uneo_web" exist, then delegate pass
+//            progressDetail_PostgreSQL.ProgressDescription = $"Create database \"{DATABASE_NAME}\"";
+//            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
+//            delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
-//                // Cleanup the temp file
-//                File.Delete(containerIdFile);
+//            // Cleanup the temp file
+//            File.Delete(containerIdFile);
 
-//                // Init database tables by dump-postgres file
-//                progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
-//                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
-//                delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
+//            // Init database tables by dump-postgres file
+//            progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
+//            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Ongoing;
+//            delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
 
-//                string containerSqlFilePath = "/tmp/dump.sql";
-//                string postgreSQLPath = Path.Combine(AppContext.BaseDirectory, "PostgreSQL", "dump-postgres.sql");
+//            string containerSqlFilePath = "/tmp/dump.sql";
+//            string postgreSQLPath = Path.Combine(AppContext.BaseDirectory, "PostgreSQL", "dump-postgres.sql");
 
-//                if (!File.Exists(postgreSQLPath))
+//            if (!File.Exists(postgreSQLPath))
+//            {
+//                try
 //                {
-//                    try
+//                    int searchPostgreSQLPathAttempTimes = 0;
+//                    DirectoryInfo? di = Directory.GetParent(AppContext.BaseDirectory)?.Parent;
+//                    while (!File.Exists(postgreSQLPath) && searchPostgreSQLPathAttempTimes <= 15)
 //                    {
-//                        int searchPostgreSQLPathAttempTimes = 0;
-//                        DirectoryInfo di = Directory.GetParent(AppContext.BaseDirectory).Parent;
-//                        while (!File.Exists(postgreSQLPath) && searchPostgreSQLPathAttempTimes <= 10)
+//                        searchPostgreSQLPathAttempTimes++;
+//                        if (di == null || di.Parent == null)
 //                        {
-//                            if (di == null || di.Parent == null)
-//                            {
-//                                continue;
-//                            }
-//                            else
-//                            {
-//                                string projectRoot = di.FullName;
-//                                postgreSQLPath = Path.Combine(projectRoot, "PostgreSQL", "dump-postgres.sql");
-//                                di = di.Parent;
-//                                searchPostgreSQLPathAttempTimes++;
-//                            }
+//                            continue;
 //                        }
-//                        if (!File.Exists(postgreSQLPath))
+//                        else
 //                        {
-//                            progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
-//                            progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
-//                            progressDetail_PostgreSQL.IsFinish = true;
-//                            delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
-//                            return;
+//                            string projectRoot = di.FullName;
+//                            postgreSQLPath = Path.Combine(projectRoot, "PostgreSQL", "dump-postgres.sql");
+//                            di = di.Parent;
 //                        }
 //                    }
-//                    catch (Exception ex)
+//                    if (!File.Exists(postgreSQLPath))
 //                    {
-//                        Log.E(TAG, "Cant find dump-postgreSQL file path.");
 //                        progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
 //                        progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
 //                        progressDetail_PostgreSQL.IsFinish = true;
@@ -806,47 +899,9 @@
 //                        return;
 //                    }
 //                }
-
-//                //Debug.WriteLine("File Path: " + postgreSQLPath);
-//                //Debug.WriteLine("File Path: " + File.Exists(postgreSQLPath));
-
-//                //if database already has any tables, it cant be restore with SQL dump-temp
-//                string checkTablesCommand = $"docker exec {environmentVariableScript}{containerId} psql -U postgres -d {DATABASE_NAME} -tAc \"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';\"";
-//                string result = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkTablesCommand, "Checking if uneo_web has any tables");
-//                int table_existed_count = int.TryParse(result.Trim(), out int tableCount) ? tableCount : 0;
-//                if (table_existed_count == 0)
+//                catch (Exception ex)
 //                {
-//                    // Check again after initialize database
-//                    int checkDatabaseHasTablesAttemptTimes = 0;
-//                    string checkAgainResult;
-//                    do
-//                    {
-//                        //Copy SQL dump file to container
-//                        await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
-//                            $"docker cp \"{postgreSQLPath}\" {containerId}:{containerSqlFilePath}",
-//                            "Copy SQL dump into container");
-
-//                        //Restore SQL dump into the new database
-//                        await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(
-//                            $"docker exec {environmentVariableScript}{containerId} pg_restore -U postgres -d {DATABASE_NAME} {containerSqlFilePath}",
-//                            $"Restore database {DATABASE_NAME}");
-
-//                        await Task.Delay(1000);
-//                        checkAgainResult = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkTablesCommand, "Checking if uneo_web has any tables");
-//                        table_existed_count = int.TryParse(checkAgainResult.Trim(), out int tableCountAgain) ? tableCountAgain : 0;
-
-//                    } while (table_existed_count == 0 && checkDatabaseHasTablesAttemptTimes <= OVERALL_ATTEMPT_TIMES);
-//                    if (table_existed_count > 0)
-//                    {
-//                        progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
-//                        progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
-//                        delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
-//                    }
-
-//                }
-//                else
-//                {
-//                    Log.E(TAG, $"Database {DATABASE_NAME} with tables has already existed, delete it first before restore process continue to execute.");
+//                    Log.E(TAG, "Cant find dump-postgreSQL file path.");
 //                    progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
 //                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
 //                    progressDetail_PostgreSQL.IsFinish = true;
@@ -854,6 +909,54 @@
 //                    return;
 //                }
 //            }
+
+//            //Debug.WriteLine("File Path: " + postgreSQLPath);
+//            //Debug.WriteLine("File Path: " + File.Exists(postgreSQLPath));
+
+//            //if database already has any tables, it cant be restore with SQL dump-temp
+//            string checkTablesCommand = $"docker exec {environmentVariableScript}{containerId} psql -U postgres -d {DATABASE_NAME} -tAc \"SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';\"";
+//            string result = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkTablesCommand, "Checking if uneo_web has any tables");
+//            int table_existed_count = int.TryParse(result.Trim(), out int tableCount) ? tableCount : 0;
+//            if (table_existed_count == 0)
+//            {
+//                // Check again after initialize database
+//                int checkDatabaseHasTablesAttemptTimes = 0;
+//                string checkAgainResult;
+//                do
+//                {
+//                    //Copy SQL dump file to container
+//                    await CommandExecutor.Instance.RunCommandAsAdminReturnBoolAsync(
+//                        $"docker cp \"{postgreSQLPath}\" {containerId}:{containerSqlFilePath}",
+//                        "Copy SQL dump into container");
+
+//                    //Restore SQL dump into the new database
+//                    await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(
+//                        $"docker exec {environmentVariableScript}{containerId} pg_restore -U postgres -d {DATABASE_NAME} {containerSqlFilePath}",
+//                        $"Restore database {DATABASE_NAME}");
+
+//                    await Task.Delay(1000);
+//                    checkAgainResult = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkTablesCommand, "Checking if uneo_web has any tables");
+//                    table_existed_count = int.TryParse(checkAgainResult.Trim(), out int tableCountAgain) ? tableCountAgain : 0;
+
+//                } while (table_existed_count == 0 && checkDatabaseHasTablesAttemptTimes <= OVERALL_ATTEMPT_TIMES);
+//                if (table_existed_count > 0)
+//                {
+//                    progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
+//                    progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Pass;
+//                    delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
+//                }
+
+//            }
+//            else
+//            {
+//                Log.E(TAG, $"Database {DATABASE_NAME} with tables has already existed, delete it first before restore process continue to execute.");
+//                progressDetail_PostgreSQL.ProgressDescription = $"Initialize database \"{DATABASE_NAME}\"";
+//                progressDetail_PostgreSQL.StatusStatePD = (int)EProgressStatus.Fail;
+//                progressDetail_PostgreSQL.IsFinish = true;
+//                delegateProgressResult?.Invoke(progressDetail_PostgreSQL);
+//                return;
+//            }
+
 
 //            // invoke progress monitor that all process finish
 //            progressDetail_PostgreSQL.IsFinish = true;
@@ -997,11 +1100,9 @@
 //            progressDetail_WebAPI.IsFinish = true;
 //            delegateProgressResult?.Invoke(progressDetail_WebAPI);
 //        }
-//        private async Task WebsiteInstallProcess(List<Setting> settingList)
+//        private async Task WebsiteInstallProcess(List<Setting> settingList, ProgressDetail progressDetail_Website)
 //        {
-//            // Init progress result and send to progress monitor
-//            ProgressDetail progressDetail_Website = new ProgressDetail();
-//            progressDetail_Website.ProgressParentID = (int)EInstallID.Website;
+
 
 //            // Get setting param - image name, container name, ports, envirionment variables
 //            imageName_Website = settingList.First(s => s.SettingName == "Image Name").SettingValue;
@@ -1346,28 +1447,36 @@
 //                        delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
 //                    }
 //                }
+//                else
+//                {
+//                    // skip checking webapi container running, so "initialize" porgress detail delegate fake "PASS"
+//                    progressDetail_UMonitorSocketServer.ProgressDescription = "Initialize UMonitorSocketServer";
+//                    progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Pass;
+//                    delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
+//                }
 
 //                // START umonitorsocketserver
-//                /*
+
 //                progressDetail_UMonitorSocketServer.ProgressDescription = "Start UMonitorSocketServer";
 //                progressDetail_UMonitorSocketServer.StatusStatePD = (int)EProgressStatus.Ongoing;
 //                delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
 
 //                string uMonitorSocketServerExeFilePath = Path.Combine(AppContext.BaseDirectory, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
 
-//                if (!File.Exists(uMonitorSocketServerExeFilePath))
-//                {
-//                    string projectRoot = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
-//                    uMonitorSocketServerExeFilePath = Path.Combine(projectRoot, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
-//                }
+//                //if (!File.Exists(uMonitorSocketServerExeFilePath))
+//                //{
+//                //    string projectRoot = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
+//                //    uMonitorSocketServerExeFilePath = Path.Combine(projectRoot, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
+//                //}
 //                if (!File.Exists(uMonitorSocketServerExeFilePath))
 //                {
 //                    try
 //                    {
 //                        int searchUMonitorSocketServerPathAttempTimes = 0;
-//                        DirectoryInfo di = Directory.GetParent(AppContext.BaseDirectory).Parent;
-//                        while (!File.Exists(uMonitorSocketServerExeFilePath) && searchUMonitorSocketServerPathAttempTimes <= 10)
+//                        DirectoryInfo? di = Directory.GetParent(AppContext.BaseDirectory)?.Parent;
+//                        while (!File.Exists(uMonitorSocketServerExeFilePath) && searchUMonitorSocketServerPathAttempTimes <= 15)
 //                        {
+//                            searchUMonitorSocketServerPathAttempTimes++;
 //                            if (di == null || di.Parent == null)
 //                            {
 //                                continue;
@@ -1377,9 +1486,9 @@
 //                                string projectRoot = di.FullName;
 //                                uMonitorSocketServerExeFilePath = Path.Combine(projectRoot, "UMonitorSocketServer", "publish", "UMonitorSocketServer.exe");
 //                                di = di.Parent;
-//                                searchUMonitorSocketServerPathAttempTimes++;
 //                            }
 //                        }
+
 //                        if (!File.Exists(uMonitorSocketServerExeFilePath))
 //                        {
 //                            progressDetail_UMonitorSocketServer.ProgressDescription = $"Start UMonitorSocketServer";
@@ -1420,7 +1529,7 @@
 //                    delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
 //                    return;
 //                }
-//                */
+
 //            }
 //            else
 //            {

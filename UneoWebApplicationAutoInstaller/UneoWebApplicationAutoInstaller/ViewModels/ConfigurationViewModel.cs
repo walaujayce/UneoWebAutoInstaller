@@ -108,8 +108,10 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 OnPropertyChanged(nameof(InputBoxSelected));
             }
         }
-        
+
         #endregion
+
+        private bool _isConnecting = false;
         public ConfigurationViewModel()
         {
             WifiSettingsList = new ObservableCollection<WifiSetting>()
@@ -209,36 +211,45 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         //////////////////////////////////////// CONNECT with LibUSB ////////////////////////////////////////
         private LibUSB? libUSB = null;
         public delegate void DelegateLibUSBData(byte[] data);
-
         public delegate void DelegateLibUSBStatus(bool isConnected);
-        public async Task ConnecLibUSB()
-        {
-            var task = Task.Run(() =>
+        public void ConnectAndReadLibUSB()
+        {            
+            // if not connecting then connect
+            if (!_isConnecting)
             {
-                try
+                ConnectLibUSB();
+            }
+            // if connecting then read only
+            else
+            {
+                ReadWiFiConfigLibUSBAsync();
+            }
+        }
+        private async void ConnectLibUSB()
+        {
+            try
+            {
+                UsbRegDeviceList allDevices = UsbDevice.AllDevices;
+                Debug.WriteLine("Found {0} devices", allDevices.Count);
+                foreach (UsbRegistry usb in allDevices)
                 {
-                    UsbRegDeviceList allDevices = UsbDevice.AllDevices;
-                    Debug.WriteLine("Found {0} devices", allDevices.Count);
-                    foreach (UsbRegistry usb in allDevices)
-                    {
-                        Debug.WriteLine("----------------");
-                        Debug.WriteLine($"PID: {usb.Pid}, VID: {usb.Vid}");
+                    Debug.WriteLine("----------------");
+                    Debug.WriteLine($"PID: {usb.Pid}, VID: {usb.Vid}");
 
-                        if(usb.Device.DriverMode == UsbDevice.DriverModeType.LibUsb && usb.Pid == 1 && usb.Vid == 3930)
-                        {
-                            libUSB = LibUSB.Instance;
-                            libUSB.SetDelegate(new DelegateLibUSBData(LibUSBDataListener));
-                            libUSB.SetDelegate(new DelegateLibUSBStatus(LibUSBStatusListener));
-                            libUSB.Open(0x0F5A, 0x0001);
-                        }
+                    if (usb.Device.DriverMode == UsbDevice.DriverModeType.LibUsb && usb.Pid == 1 && usb.Vid == 3930)
+                    {
+                        libUSB = LibUSB.Instance;
+                        libUSB.SetDelegate(new DelegateLibUSBData(LibUSBDataListener));
+                        libUSB.SetDelegate(new DelegateLibUSBStatus(LibUSBStatusListener));
+                        libUSB.Open(0x0F5A, 0x0001);
                     }
                 }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                }
-            });
-            await task;
+                await Task.Delay(100);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
         }
         private void LibUSBDataListener(byte[] data)
         {
@@ -278,12 +289,14 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         {
             if (isConnected)
             {
+                _isConnecting = true;
                 ReadWiFiConfigLibUSBAsync();
             }
             else
             {
-                
-
+                _isConnecting = false;
+                libUSB?.Close();
+                libUSB = null;
             }
         }
 
@@ -405,6 +418,12 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         //////////////////////////////////////// WIFI WRITE ////////////////////////////////////////
         public async Task WriteWiFiConfigAsync()
         {
+            // if not connect but click write button then go connect and write without read 
+            if (isTemplateSave && !_isConnecting)
+            {
+                ConnectLibUSB();
+            }
+
             foreach(var item in WifiSettingsList)
             {
                 List<DictionaryInput> settingList = item.SettingList.ToList();
@@ -413,7 +432,15 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     Debug.WriteLine($"Key: {value.DictionaryKey} | Value: {value.DictionaryValue}");
                 }
             }
-            List<DictionaryInput> WirelessApSettingList = WifiSettingsList.FirstOrDefault(w => w.SettingID == (int)EWifiSettingID.WirelessAP).SettingList.ToList();
+            List<DictionaryInput> WirelessApSettingList;
+            if (isTemplateSave)
+            {
+                WirelessApSettingList = tempWifiSettingLIst.FirstOrDefault(w => w.SettingID == (int)EWifiSettingID.WirelessAP).SettingList.ToList();
+            }
+            else
+            {
+                WirelessApSettingList = WifiSettingsList.FirstOrDefault(w => w.SettingID == (int)EWifiSettingID.WirelessAP).SettingList.ToList();
+            }
             foreach (var item in WirelessApSettingList)
             {
                 switch (item.DictionaryKey)
@@ -444,7 +471,15 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             Array.Copy(pskArr, 0, ap, 34, pskArr.Length);
             Array.Copy(newLine, 0, ap, 34 + pskArr.Length, newLine.Length);
 
-            List<DictionaryInput> LanSettingList = WifiSettingsList.FirstOrDefault(w => w.SettingID == (int)EWifiSettingID.LAN).SettingList.ToList();
+            List<DictionaryInput> LanSettingList;
+            if (isTemplateSave)
+            {
+                LanSettingList = tempWifiSettingLIst.FirstOrDefault(w => w.SettingID == (int)EWifiSettingID.LAN).SettingList.ToList();
+            }
+            else
+            {
+                LanSettingList = WifiSettingsList.FirstOrDefault(w => w.SettingID == (int)EWifiSettingID.LAN).SettingList.ToList();
+            }
             foreach (var item in LanSettingList)
             {
                 switch (item.DictionaryKey)
@@ -475,7 +510,15 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             Array.Copy(netMaskArr, 0, lan, 10, netMaskArr.Length);
             Array.Copy(gateWayArr, 0, lan, 14, gateWayArr.Length);
 
-            List<DictionaryInput> ServerSettingList = WifiSettingsList.FirstOrDefault(w => w.SettingID == (int)EWifiSettingID.SERVER).SettingList.ToList();
+            List<DictionaryInput> ServerSettingList;
+            if (isTemplateSave)
+            {
+                ServerSettingList = tempWifiSettingLIst.FirstOrDefault(w => w.SettingID == (int)EWifiSettingID.SERVER).SettingList.ToList();
+            }
+            else
+            {
+                ServerSettingList = WifiSettingsList.FirstOrDefault(w => w.SettingID == (int)EWifiSettingID.SERVER).SettingList.ToList();
+            }
             foreach (var item in ServerSettingList)
             {
                 switch (item.DictionaryKey)
@@ -522,9 +565,12 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
         }
         //////////////////////////////////////// Save Template ////////////////////////////////////////
+        private List<WifiSetting> tempWifiSettingLIst = new List<WifiSetting>();
+        private bool isTemplateSave = false;
         public void SaveCurrentValueAsTemplate()
         {
-
+            isTemplateSave = true;
+            tempWifiSettingLIst = WifiSettingsList.ToList();
         }
         //////////////////////////////////////// METHOD ////////////////////////////////////////
         private byte[] IPAddressToBytes(string ipString)

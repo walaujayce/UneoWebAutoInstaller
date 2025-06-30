@@ -27,7 +27,7 @@ namespace UneoWebApplicationAutoInstaller.Command
 
         private const string TAG = "CmdDataParser";
         private const int OVERALL_ATTEMPT_TIMES = 30;
-        private const int DEBUG_WAITING_TIME = 3000;
+        private const int DEBUG_WAITING_TIME = 500;
         private string imageName_PostgreSQL = "bitnami/postgresql:latest";
         private string containterName_PostgreSQL = "UNEO_DATABASE";
         private const string DATABASE_LOCAL_FOLDER_NAME = "postgres_data";
@@ -428,6 +428,13 @@ namespace UneoWebApplicationAutoInstaller.Command
         }
         private async Task RemakeWebAPI(List<Setting> settingList)
         {
+            // Stop UMonitor Socket Server before update webapi image
+            await StopUMonitorSocketServerAsync();
+
+            // Init progress result and send to progress monitor
+            ProgressDetail progressDetail_RemakeWebAPIContainer = new ProgressDetail();
+            progressDetail_RemakeWebAPIContainer.ProgressParentID = (int)EUpdateID.WebAPI_CONTAINER;
+
             // Get setting param - image name, container name, ports
             imageName_WebAPI = settingList.First(s => s.SettingName == "Image Name").SettingValue;
 
@@ -440,6 +447,10 @@ namespace UneoWebApplicationAutoInstaller.Command
             
             containerName_WebAPI = settingList.First(s => s.SettingName == "Container Name").SettingValue;
 
+            progressDetail_RemakeWebAPIContainer.ProgressDescription = "Stopping current existed container";
+            progressDetail_RemakeWebAPIContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
+            delegateProgressResult?.Invoke(progressDetail_RemakeWebAPIContainer);
+
             // check image existence using image name
             bool isImageExists_WebAPI = await CheckImageExistence(imageName_WebAPI);
             if (isImageExists_WebAPI)
@@ -459,23 +470,95 @@ namespace UneoWebApplicationAutoInstaller.Command
                         string containerId = await GetContainerIdUsingImageName(imageName_WebAPI);
                         // use container id to remove current container
                         await StopContainerUsingContainerName(currentExistedContainerName);
+
+                        //check again 
+                        isContainerRunning_WebAPI = await CheckContainerRunningUsingImage(imageName_WebAPI);
+                        if (!isContainerRunning_WebAPI)
+                        {
+                            progressDetail_RemakeWebAPIContainer.ProgressDescription = "Stopping current existed container";
+                            progressDetail_RemakeWebAPIContainer.StatusStatePD = (int)EProgressStatus.Pass;
+                            delegateProgressResult?.Invoke(progressDetail_RemakeWebAPIContainer);
+                            await Task.Delay(100);
+                            progressDetail_RemakeWebAPIContainer.ProgressDescription = "Deleting current existed container";
+                            progressDetail_RemakeWebAPIContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
+                            delegateProgressResult?.Invoke(progressDetail_RemakeWebAPIContainer);
+                        }
+                        else
+                        {
+                            progressDetail_RemakeWebAPIContainer.ProgressDescription = "Stopping current existed container";
+                            progressDetail_RemakeWebAPIContainer.StatusStatePD = (int)EProgressStatus.Fail;
+                            progressDetail_RemakeWebAPIContainer.IsFinish = true;
+                            delegateProgressResult?.Invoke(progressDetail_RemakeWebAPIContainer);
+                            return;
+                        }
                     }
                     // if not running, then delete container using container name
                     await DeleteContainerUsingContainerName(currentExistedContainerName);
+
+                    bool isCurrentContainerExisted = await CheckContainerExistenceUsingImageName(imageName_WebAPI);
+                    if (!isCurrentContainerExisted)
+                    {
+                        progressDetail_RemakeWebAPIContainer.ProgressDescription = "Deleting current existed container";
+                        progressDetail_RemakeWebAPIContainer.StatusStatePD = (int)EProgressStatus.Pass;
+                        delegateProgressResult?.Invoke(progressDetail_RemakeWebAPIContainer);
+                    }
+                    else
+                    {
+                        progressDetail_RemakeWebAPIContainer.ProgressDescription = "Deleting current existed container";
+                        progressDetail_RemakeWebAPIContainer.StatusStatePD = (int)EProgressStatus.Fail;
+                        progressDetail_RemakeWebAPIContainer.IsFinish = true;
+                        delegateProgressResult?.Invoke(progressDetail_RemakeWebAPIContainer);
+                        return;
+                    }
                 }
                 // use image name to containerize 
+                progressDetail_RemakeWebAPIContainer.ProgressDescription = "Containerize WebAPI image";
+                progressDetail_RemakeWebAPIContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
+                delegateProgressResult?.Invoke(progressDetail_RemakeWebAPIContainer);
+
                 await ContainerizeImage(imageName_WebAPI, containerName_WebAPI, portScript);
             }
             else
             {
+                progressDetail_RemakeWebAPIContainer.ProgressDescription = "Stopping current existed container";
+                progressDetail_RemakeWebAPIContainer.StatusStatePD = (int)EProgressStatus.Pass;
+                delegateProgressResult?.Invoke(progressDetail_RemakeWebAPIContainer);
+                await Task.Delay(100);
+                progressDetail_RemakeWebAPIContainer.ProgressDescription = "Deleting current existed container";
+                progressDetail_RemakeWebAPIContainer.StatusStatePD = (int)EProgressStatus.Pass;
+                delegateProgressResult?.Invoke(progressDetail_RemakeWebAPIContainer);
+                await Task.Delay(100);
+                progressDetail_RemakeWebAPIContainer.ProgressDescription = "Containerize WebAPI image";
+                progressDetail_RemakeWebAPIContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
+                delegateProgressResult?.Invoke(progressDetail_RemakeWebAPIContainer);
                 await WebAPIInstallProcess(settingList);
             }
             // confirm container is running
-            //todo - send confirmation message
-            await CheckContainerRunningUsingImage(imageName_WebAPI);
+            bool isWebAPIContainerRunning = await CheckContainerRunningUsingImage(imageName_WebAPI);
+            if (isWebAPIContainerRunning)
+            {
+                progressDetail_RemakeWebAPIContainer.ProgressDescription = "Containerize WebAPI image";
+                progressDetail_RemakeWebAPIContainer.StatusStatePD = (int)EProgressStatus.Pass;
+            }
+            else
+            {
+                progressDetail_RemakeWebAPIContainer.ProgressDescription = "Containerize WebAPI image";
+                progressDetail_RemakeWebAPIContainer.StatusStatePD = (int)EProgressStatus.Fail;
+            }
+
+            await StartUMonitorSocketServer(progressDetail_RemakeWebAPIContainer);
+            progressDetail_RemakeWebAPIContainer.IsFinish = true;
+            delegateProgressResult?.Invoke(progressDetail_RemakeWebAPIContainer);
         }
         private async Task UpdateWebApiImage(List<Setting> settingList)
-        {
+        {            
+            // Stop UMonitor Socket Server before update webapi image
+            await StopUMonitorSocketServerAsync();
+
+            // Init progress result and send to progress monitor
+            ProgressDetail progressDetail_UpdateWebAPI = new ProgressDetail();
+            progressDetail_UpdateWebAPI.ProgressParentID = (int)EUpdateID.WebAPI_IMAGE;
+
             // Get setting param - image name, container name, ports
             imageName_WebAPI = settingList.First(s => s.SettingName == "Image Name").SettingValue;
 
@@ -488,6 +571,10 @@ namespace UneoWebApplicationAutoInstaller.Command
 
             containerName_WebAPI = settingList.First(s => s.SettingName == "Container Name").SettingValue;
 
+            progressDetail_UpdateWebAPI.ProgressDescription = "Stopping current existed container";
+            progressDetail_UpdateWebAPI.StatusStatePD = (int)EProgressStatus.Ongoing;
+            delegateProgressResult?.Invoke(progressDetail_UpdateWebAPI);
+
             // check image existence using image name
             bool isImageExists_WebAPI = await CheckImageExistence(imageName_WebAPI);
             if (isImageExists_WebAPI)
@@ -507,17 +594,87 @@ namespace UneoWebApplicationAutoInstaller.Command
                         string containerId = await GetContainerIdUsingImageName(imageName_WebAPI);
                         // use container id to remove current container
                         await StopContainerUsingContainerName(currentExistedContainerName);
+                        
+                        //check again 
+                        isContainerRunning_WebAPI = await CheckContainerRunningUsingImage(imageName_WebAPI);
+                        if (!isContainerRunning_WebAPI)
+                        {
+                            progressDetail_UpdateWebAPI.ProgressDescription = "Stopping current existed container";
+                            progressDetail_UpdateWebAPI.StatusStatePD = (int)EProgressStatus.Pass;
+                            delegateProgressResult?.Invoke(progressDetail_UpdateWebAPI);
+                            await Task.Delay(100);
+                            progressDetail_UpdateWebAPI.ProgressDescription = "Deleting current existed container";
+                            progressDetail_UpdateWebAPI.StatusStatePD = (int)EProgressStatus.Ongoing;
+                            delegateProgressResult?.Invoke(progressDetail_UpdateWebAPI);
+                        }
+                        else
+                        {
+                            progressDetail_UpdateWebAPI.ProgressDescription = "Stopping current existed container";
+                            progressDetail_UpdateWebAPI.StatusStatePD = (int)EProgressStatus.Fail;
+                            progressDetail_UpdateWebAPI.IsFinish = true;
+                            delegateProgressResult?.Invoke(progressDetail_UpdateWebAPI);
+                            return;
+                        }
                     }
                     // if not running, then delete container using container name
                     await DeleteContainerUsingContainerName(currentExistedContainerName);
+                    
+                    bool isCurrentContainerExisted = await CheckContainerExistenceUsingImageName(imageName_WebAPI);
+                    if (!isCurrentContainerExisted)
+                    {
+                        progressDetail_UpdateWebAPI.ProgressDescription = "Deleting current existed container";
+                        progressDetail_UpdateWebAPI.StatusStatePD = (int)EProgressStatus.Pass;
+                        delegateProgressResult?.Invoke(progressDetail_UpdateWebAPI);
+                    }
+                    else
+                    {
+                        progressDetail_UpdateWebAPI.ProgressDescription = "Deleting current existed container";
+                        progressDetail_UpdateWebAPI.StatusStatePD = (int)EProgressStatus.Fail;
+                        progressDetail_UpdateWebAPI.IsFinish = true;
+                        delegateProgressResult?.Invoke(progressDetail_UpdateWebAPI);
+                        return;
+                    }
                 }
                 // delete image 
+                progressDetail_UpdateWebAPI.ProgressDescription = "Deleting WebAPI image";
+                progressDetail_UpdateWebAPI.StatusStatePD = (int)EProgressStatus.Ongoing;
+                delegateProgressResult?.Invoke(progressDetail_UpdateWebAPI);
+
                 await DeleteImage(imageName_WebAPI);
+
+                // check image is deleted
+                bool isImageDeleted = await CheckImageExistence(imageName_WebAPI);
+                if (!isImageDeleted)
+                {
+                    progressDetail_UpdateWebAPI.ProgressDescription = "Deleting WebAPI image";
+                    progressDetail_UpdateWebAPI.StatusStatePD = (int)EProgressStatus.Pass;
+                    delegateProgressResult?.Invoke(progressDetail_UpdateWebAPI);
+                }
+                else
+                {
+                    progressDetail_UpdateWebAPI.ProgressDescription = "Deleting WebAPI image";
+                    progressDetail_UpdateWebAPI.StatusStatePD = (int)EProgressStatus.Fail;
+                    progressDetail_UpdateWebAPI.IsFinish = true;
+                    delegateProgressResult?.Invoke(progressDetail_UpdateWebAPI);
+                }
             }
             await WebAPIInstallProcess(settingList);
             // confirm container is running
-            //todo - send confirmation message
-            await CheckContainerRunningUsingImage(imageName_WebAPI);
+            bool isWebAPIContainerRunning = await CheckContainerRunningUsingImage(imageName_WebAPI);
+            if (isWebAPIContainerRunning)
+            {
+                progressDetail_UpdateWebAPI.ProgressDescription = "Containerize WebAPI image";
+                progressDetail_UpdateWebAPI.StatusStatePD = (int)EProgressStatus.Pass;
+            }
+            else
+            {
+                progressDetail_UpdateWebAPI.ProgressDescription = "Containerize WebAPI image";
+                progressDetail_UpdateWebAPI.StatusStatePD = (int)EProgressStatus.Fail;
+            }
+
+            await StartUMonitorSocketServer(progressDetail_UpdateWebAPI);
+            progressDetail_UpdateWebAPI.IsFinish = true;
+            delegateProgressResult?.Invoke(progressDetail_UpdateWebAPI);
         }
         private async Task RemakeMonitorService(List<Setting> settingList)
         {

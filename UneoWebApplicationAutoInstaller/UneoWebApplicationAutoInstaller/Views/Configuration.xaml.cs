@@ -64,12 +64,12 @@ namespace UneoWebApplicationAutoInstaller.Views
         }
         private void ConnectButton_Clicked(object sender, MouseButtonEventArgs e)
         {
-            configurationVM.ConnecLibUSB();
+            configurationVM.ConnectAndReadLibUSB();
         }
 
         private void WriteButton_Clicked(object sender, MouseButtonEventArgs e)
         {
-            configurationVM.WriteWiFiConfigAsync();
+            _=configurationVM.WriteWiFiConfigAsync();
         }
 
         private void SaveButton_Clicked(object sender, MouseButtonEventArgs e)
@@ -87,7 +87,8 @@ namespace UneoWebApplicationAutoInstaller.Views
         private void SelectedInputBox_Clicked(object sender, MouseButtonEventArgs e)
         {
             var button = (Border)sender;
-            configurationVM.InputBoxSelected.DictionaryValue = (DictionaryInput)button.DataContext;  
+            configurationVM.InputBoxSelected = (DictionaryInput)button.DataContext;  
+            //configurationVM.InputBoxSelected.DictionaryValue = (DictionaryInput)button.DataContext;  
         }
 
         private void CheckBox_Clicked(object sender, RoutedEventArgs e)

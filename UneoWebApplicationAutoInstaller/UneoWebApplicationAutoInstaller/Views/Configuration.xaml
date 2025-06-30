@@ -104,6 +104,45 @@
             </Setter>
         </Style>
 
+        <Style TargetType="ComboBox" x:Key="stlComboBox">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid Background="#F7FDF7">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0.7*"/>
+                                <ColumnDefinition Width="0.3*" MaxWidth="30"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox  Grid.Column="0" IsReadOnly="True" Text="{TemplateBinding Text}"></TextBox>
+                            <Border  Grid.Column="0" BorderThickness="1,1,0,1" BorderBrush="#81D779" CornerRadius="1,0,0,1">
+                            </Border>
+                            
+                            <Border Grid.Column="1" BorderThickness="0,1,1,1" BorderBrush="#81D779" CornerRadius="0,1,1,0">
+                            </Border>
+                           
+                            <Popup IsOpen="True" Placement="Bottom" x:Name="Popup" Focusable="False" AllowsTransparency="True" PopupAnimation="Slide">
+                                <Border CornerRadius="1" MaxHeight="{TemplateBinding MaxDropDownHeight}" MinWidth="{TemplateBinding ActualWidth}" x:Name="DropDown" SnapsToDevicePixels="True">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="Black" BlurRadius="2" ShadowDepth="0" Opacity="0.5"/>
+                                    </Border.Effect>
+                                    <ScrollViewer Margin="4,6,4,6" MaxHeight="{TemplateBinding MaxDropDownHeight}" SnapsToDevicePixels="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" CanContentScroll="True">
+                                        <!-- StackPanel 用于显示子级，方法是将 IsItemsHost 设置为 True -->
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" Background="White"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
         <!-- Check box template -->
         <DataTemplate x:Key="CheckBoxTemplate">
             <CheckBox x:Name="InstallCheckbox" Style="{DynamicResource CheckButtonStyle}" IsChecked="{Binding IsChecked}"/>
@@ -111,21 +150,19 @@
         
         <!-- Combo box template -->
         <DataTemplate x:Key="ComboBoxTemplate">
-            <Border Background="Blue" CornerRadius="10">
-                <ComboBox Name="SecurityComboBox" 
-                  VerticalContentAlignment="Center"
-                  Height="Auto"
-                  Width="Auto"
-                  Background="Red"
-                  BorderThickness="0"
-                  Padding="5"
-                  SelectedValuePath="Tag" 
-                  SelectedValue="{Binding DictionaryValue, Mode=TwoWay}">
-                    <ComboBoxItem Content="None" Tag="0"/>
-                    <ComboBoxItem Content="WPA" Tag="1"/>
-                    <ComboBoxItem Content="WPA2" Tag="2"/>
-                </ComboBox>
-            </Border>
+            <ComboBox Name="SecurityComboBox" 
+                      VerticalContentAlignment="Center"
+                        Height="Auto"
+                        Width="Auto"
+                        Opacity="1" 
+                        BorderThickness="1"
+                      Cursor="Hand"
+                      SelectedValuePath="Tag" 
+                      SelectedValue="{Binding DictionaryValue, Mode=TwoWay}">
+                <ComboBoxItem Content="None" Tag="0"/>
+                <ComboBoxItem Content="WPA" Tag="1"/>
+                <ComboBoxItem Content="WPA2" Tag="2"/>
+            </ComboBox>
         </DataTemplate>
         
         <!-- Input box template -->        
@@ -134,14 +171,14 @@
                 <TextBox Text="{Binding DictionaryValue}" Padding="5,0" VerticalContentAlignment="Center" Background="Transparent" BorderThickness="0" TextChanged="InputBox_TextChanged"/>
             </Border>
         </DataTemplate>
-        
+
         <vm:InputTypeTemplateSelector x:Key="InputTypeTemplateSelector"
             CheckBoxTemplate="{StaticResource CheckBoxTemplate}"
             ComboBoxTemplate="{StaticResource ComboBoxTemplate}"
             InputBoxTemplate="{StaticResource InputBoxTemplate}"
         />
-        
     </Page.Resources>
+    
     <Grid>
          <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*"/>
@@ -169,7 +206,7 @@
                 </Border>
                 <!-- Connect button -->
                 <Border Style="{DynamicResource ButtonBorderStyle}" MouseLeftButtonUp="ConnectButton_Clicked" >
-                    <TextBlock Text="CONNECT" Style="{DynamicResource ButtonTextBlockStyle}"/>
+                    <TextBlock Text="CONNECT / READ" Style="{DynamicResource ButtonTextBlockStyle}"/>
                 </Border>
                 <!-- Write button -->
                 <Border Style="{DynamicResource ButtonBorderStyle}" MouseLeftButtonUp="WriteButton_Clicked">
@@ -203,7 +240,7 @@
                                                 <TextBlock Grid.Column="0" Text="{Binding DictionaryKey}" VerticalAlignment="Center" FontFamily="arial"/>
                                                 <ContentControl Grid.Column="1" 
                                                 Content="{Binding}" 
-                                                ContentTemplateSelector="{StaticResource InputTypeTemplateSelector}" />
+                                                ContentTemplateSelector="{StaticResource InputTypeTemplateSelector}"/>
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
