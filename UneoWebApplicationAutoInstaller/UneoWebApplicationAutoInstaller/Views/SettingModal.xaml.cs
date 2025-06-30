@@ -81,34 +81,10 @@ namespace UneoWebApplicationAutoInstaller.Views
         
         private void AddInputBtn_Clicked(object sender, MouseButtonEventArgs e)
         {
-            //var button = (Border)sender;
-            //settingVM.InputSelected = (DictionaryInput)button.DataContext;
-            ////settingVM.AddInputItems(settingVM.InputSelected);
-            //if (sender is Border border)
-            //{
-            //    var setting = FindAncestorDataContext<Setting>(border);
-            //    if (setting != null)
-            //    {
-            //        settingVM.AddInputItems(setting);
-            //    }
-            //}
             var button = (Border)sender;
             settingVM.InputSelected = (DictionaryInput)button.DataContext;
             settingVM.AddInputItems();
         }
-        private T? FindAncestorDataContext<T>(DependencyObject obj) where T : class
-        {
-            while (obj != null)
-            {
-                if (obj is FrameworkElement fe && fe.DataContext is T t)
-                {
-                    return t;
-                }
-                obj = VisualTreeHelper.GetParent(obj);
-            }
-            return null;
-        }
-
         private void AddKeyValuePairBtn_Clicked(object sender, MouseButtonEventArgs e)
         {
             var button = (Border)sender;
@@ -131,18 +107,18 @@ namespace UneoWebApplicationAutoInstaller.Views
             var button = (TextBox)sender;
             settingVM.KeyValuePairSelected = (DictionaryInput)button.DataContext;
             settingVM.KeyValuePairSelected.DictionaryKey = (string)button.Text;
-            settingVM.CheckSelectedObject();
+            //settingVM.CheckSelectedObject();
         }
         private void DictionaryValue_TextChanged(object sender, TextChangedEventArgs e)
         {
             var button = (TextBox)sender;
             settingVM.KeyValuePairSelected = (DictionaryInput)button.DataContext;
             settingVM.KeyValuePairSelected.DictionaryValue = (string)button.Text;
-            settingVM.CheckSelectedObject();
+            //settingVM.CheckSelectedObject();
         }
         private void OnOptionSelectedChanged(object? sender, OptionSelectedEventArgs e)
         {
-            settingVM.CheckSelectedObject();
+            //settingVM.CheckSelectedObject();
             settingVM.KeyValuePairSelected.DictionaryValue = e.SelectedValue;
         }
         private void OptionBtn_Clicked(object sender, MouseButtonEventArgs e)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UneoWebApplicationAutoInstaller.Models;
 using UneoWebApplicationAutoInstaller.ViewModels;
 using static UneoWebApplicationAutoInstaller.Utilities.Enums;
 
@@ -59,6 +61,46 @@ namespace UneoWebApplicationAutoInstaller.Views
         private void BackToPrevious_Configuration_Clicked(object sender, MouseButtonEventArgs e)
         {
             NavigationService.GoBack();
+        }
+        private void ConnectButton_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            configurationVM.ConnecLibUSB();
+        }
+
+        private void WriteButton_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            configurationVM.WriteWiFiConfigAsync();
+        }
+
+        private void SaveButton_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            configurationVM.SaveCurrentValueAsTemplate();
+        }
+
+        private void InputBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var inputBox = (TextBox)sender;
+            configurationVM.InputBoxSelected = (DictionaryInput)inputBox.DataContext;
+            configurationVM.InputBoxSelected.DictionaryValue = (string)inputBox.Text;
+        }
+
+        private void SelectedInputBox_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            var button = (Border)sender;
+            configurationVM.InputBoxSelected.DictionaryValue = (DictionaryInput)button.DataContext;  
+        }
+
+        private void CheckBox_Clicked(object sender, RoutedEventArgs e)
+        {
+            //Debug.WriteLine("AAAAAAAAAAAAAAAAAAAAAAAAaaaa");
+            //if (configurationVM.IsChecked)
+            //{
+            //    configurationVM.IsChecked = false;
+            //}
+            //else
+            //{
+            //    configurationVM.IsChecked = true;
+            //}
         }
     }
 }

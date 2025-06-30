@@ -9,35 +9,214 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="Configuration">
 
+    <Page.Resources>
+        <Style x:Key="ButtonBorderStyle" TargetType="Border">
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Background" Value="LightGray"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="CornerRadius" Value="22.5"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        
+        <Style x:Key="ButtonTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontFamily" Value="tahoma"/>
+        </Style>
+
+        <Style x:Key="CheckboxBorderStyle" TargetType="Border">
+            <Setter Property="Margin" Value="0,0,0,0"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="Transparent"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+            To="Transparent"
+            Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+            To="Transparent"
+            Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="CheckButtonStyle" TargetType="CheckBox">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border Style="{DynamicResource CheckboxBorderStyle}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0">
+                                <!-- Rectangle -->
+                                <Grid>
+                                    <Rectangle 
+                                        x:Name="Rectangle"
+                                        Margin="-5,0,0,0"
+                                        Width="15"
+                                        Height="15"
+                                        Stroke="Black"
+                                        StrokeThickness="0.5"
+                                        Fill="Transparent"
+                                        VerticalAlignment="Center"/>
+                                    <Border Height="20" Width="20" Margin="0,0,0,3" BorderBrush="Transparent" BorderThickness="1.5" Panel.ZIndex="10" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Image Source="{Binding CheckboxImage}"/>
+                                    </Border>
+
+                                </Grid>
+                                <!-- Space between circle and text -->
+                                <ContentPresenter Margin="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        RecognizesAccessKey="True"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <!-- Optional: MouseOver effect -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Rectangle" Property="StrokeThickness" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Check box template -->
+        <DataTemplate x:Key="CheckBoxTemplate">
+            <CheckBox x:Name="InstallCheckbox" Style="{DynamicResource CheckButtonStyle}" IsChecked="{Binding IsChecked}"/>
+        </DataTemplate>
+        
+        <!-- Combo box template -->
+        <DataTemplate x:Key="ComboBoxTemplate">
+            <Border Background="Blue" CornerRadius="10">
+                <ComboBox Name="SecurityComboBox" 
+                  VerticalContentAlignment="Center"
+                  Height="Auto"
+                  Width="Auto"
+                  Background="Red"
+                  BorderThickness="0"
+                  Padding="5"
+                  SelectedValuePath="Tag" 
+                  SelectedValue="{Binding DictionaryValue, Mode=TwoWay}">
+                    <ComboBoxItem Content="None" Tag="0"/>
+                    <ComboBoxItem Content="WPA" Tag="1"/>
+                    <ComboBoxItem Content="WPA2" Tag="2"/>
+                </ComboBox>
+            </Border>
+        </DataTemplate>
+        
+        <!-- Input box template -->        
+        <DataTemplate x:Key="InputBoxTemplate">
+            <Border Grid.Column="1" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" MouseLeftButtonUp="SelectedInputBox_Clicked">
+                <TextBox Text="{Binding DictionaryValue}" Padding="5,0" VerticalContentAlignment="Center" Background="Transparent" BorderThickness="0" TextChanged="InputBox_TextChanged"/>
+            </Border>
+        </DataTemplate>
+        
+        <vm:InputTypeTemplateSelector x:Key="InputTypeTemplateSelector"
+            CheckBoxTemplate="{StaticResource CheckBoxTemplate}"
+            ComboBoxTemplate="{StaticResource ComboBoxTemplate}"
+            InputBoxTemplate="{StaticResource InputBoxTemplate}"
+        />
+        
+    </Page.Resources>
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Margin="10">
-            <Border Padding="5" Background="LightGray" Height="45" Width="150" CornerRadius="22.5" VerticalAlignment="Center" HorizontalAlignment="Center" Cursor="Hand">
-                <Grid>
-                    <Border x:Name="SlideHighlight" Background="#0078D3" Width="70" Height="35" CornerRadius="17.5" HorizontalAlignment="Left" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
-                        <Border.RenderTransform>
-                            <TranslateTransform x:Name="HighlightTransform" />
-                        </Border.RenderTransform>
-                    </Border>
-                    <StackPanel Orientation="Horizontal">
-                        <Border x:Name="LibUSB" Background="Transparent" Width="70"  MouseLeftButtonUp="SelectLibUSB_Clicked">
-                            <TextBlock Foreground="{Binding LibUsbForeground}" Text="LibUSB" VerticalAlignment="Center" HorizontalAlignment="Center" FontFamily="Roboto" FontWeight="Bold"/>
+         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="7*"/>
+        </Grid.ColumnDefinitions>        
+        <Grid Grid.Column="0" Margin="0" VerticalAlignment="Top">
+            <StackPanel Orientation="Vertical">
+                <!-- Connection Mode Toggle Button -->
+                <Border Style="{DynamicResource ButtonBorderStyle}">
+                    <Grid>
+                        <Border x:Name="SlideHighlight" Background="#0078D3" Width="70" Height="35" CornerRadius="17.5" HorizontalAlignment="Left" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <TranslateTransform x:Name="HighlightTransform" />
+                            </Border.RenderTransform>
                         </Border>
-                        <Border x:Name="Ft4222h" Background="Transparent" Width="70" MouseLeftButtonUp="SelectFt4222h_Clicked">
-                            <TextBlock Foreground="{Binding Ft4222hForeground}" Text="Ft4222h" VerticalAlignment="Center" HorizontalAlignment="Center" FontFamily="Roboto" FontWeight="Bold"/>
-                        </Border>
-                    </StackPanel>
-                </Grid>
+                        <StackPanel Orientation="Horizontal">
+                            <Border x:Name="LibUSB" Background="Transparent" Width="70"  MouseLeftButtonUp="SelectLibUSB_Clicked">
+                                <TextBlock Foreground="{Binding LibUsbForeground}" Text="LibUSB" VerticalAlignment="Center" HorizontalAlignment="Center" FontFamily="tahoma" FontWeight="Bold"/>
+                            </Border>
+                            <Border x:Name="FT4222h" Background="Transparent" Width="70" MouseLeftButtonUp="SelectFt4222h_Clicked">
+                                <TextBlock Foreground="{Binding Ft4222hForeground}" Text="FT4222h" VerticalAlignment="Center" HorizontalAlignment="Center" FontFamily="tahoma" FontWeight="Bold"/>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <!-- Connect button -->
+                <Border Style="{DynamicResource ButtonBorderStyle}" MouseLeftButtonUp="ConnectButton_Clicked" >
+                    <TextBlock Text="CONNECT" Style="{DynamicResource ButtonTextBlockStyle}"/>
+                </Border>
+                <!-- Write button -->
+                <Border Style="{DynamicResource ButtonBorderStyle}" MouseLeftButtonUp="WriteButton_Clicked">
+                    <TextBlock Text="WRITE" Style="{DynamicResource ButtonTextBlockStyle}"/>
+                </Border>
+                <!-- Save template -->
+                <Border Style="{DynamicResource ButtonBorderStyle}" MouseLeftButtonUp="SaveButton_Clicked" >
+                    <TextBlock Text="SAVE TEMPLATE" Style="{DynamicResource ButtonTextBlockStyle}"/>
+                </Border>
+            </StackPanel>
+        </Grid>
+        <!-- Main Content -->
+        <Grid Grid.Column="1" VerticalAlignment="Top">
+            <Border Width="400" BorderBrush="Black" BorderThickness="0.3" CornerRadius="20" Padding="15,10">
+                <ItemsControl ItemsSource="{Binding WifiSettingsList}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Vertical">
+                                <Border Height="20">
+                                    <TextBlock VerticalAlignment="Center" Text="{Binding SettingTitle}" FontWeight="Bold" FontFamily="tahoma"/>
+                                </Border>
+                                <Separator BorderThickness="1" BorderBrush="Black" Opacity="0.5" Margin="0,5,0,5"/>
+                                <ItemsControl ItemsSource="{Binding SettingList}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Height="30" Margin="0,0,0,5">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding DictionaryKey}" VerticalAlignment="Center" FontFamily="arial"/>
+                                                <ContentControl Grid.Column="1" 
+                                                Content="{Binding}" 
+                                                ContentTemplateSelector="{StaticResource InputTypeTemplateSelector}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>                                
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </Border>
         </Grid>
+        <!-- Control button -->
+        <!--
         <Grid Grid.Row="1">
-
-        </Grid>
-        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -77,5 +256,6 @@
                 
             </Grid>
         </Grid>
+        -->
     </Grid>
 </Page>

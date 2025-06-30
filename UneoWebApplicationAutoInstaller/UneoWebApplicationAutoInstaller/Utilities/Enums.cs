@@ -61,8 +61,19 @@ namespace UneoWebApplicationAutoInstaller.Utilities
         public enum EUcbConfigurationMode
         {
             LibUSB = 0,
-            FT4222h = 1,
-            
+            FT4222h = 1,            
+        }
+        public enum EWifiSettingID
+        {
+            WirelessAP = 0,
+            LAN = 1,
+            SERVER = 2,
+        }
+        public enum EWifiInputType
+        {
+            CheckBox = 0,
+            ComboBox = 1,
+            InputBox = 2,
         }
     }
 }

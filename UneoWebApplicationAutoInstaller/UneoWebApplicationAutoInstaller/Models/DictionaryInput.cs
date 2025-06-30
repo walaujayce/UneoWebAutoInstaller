@@ -13,6 +13,7 @@ namespace UneoWebApplicationAutoInstaller.Models
         private object _dictionaryValue = "";
         private string _addBtnImageSource = "/Views/Assets/Icon_Add_FFD3D3D3.png";
         private bool _isRemovable = false;
+        private int _inputType;
 
         public string DictionaryKey
         {
@@ -51,6 +52,43 @@ namespace UneoWebApplicationAutoInstaller.Models
                 _isRemovable = value;
                 if (_isRemovable) _addBtnImageSource = "/Views/Assets/Icon_Remove_FFD3D3D3.png";
                 OnPropertyChanged(nameof(IsRemovable));
+            }
+        }
+        public int InputType
+        {
+            get => _inputType;
+            set
+            {
+                _inputType = value;
+                OnPropertyChanged(nameof(InputType));
+            }
+        }
+        private string _checkboxImage = "/Views/Assets/Icon_Tick.png";
+        public string CheckboxImage
+        {
+            get => _checkboxImage;
+            set
+            {
+                _checkboxImage = value;
+                OnPropertyChanged("CheckboxImage");
+            }
+        }
+        private bool _isChecked = true;
+        public bool IsChecked
+        {
+            get => _isChecked;
+            set
+            {
+                _isChecked = value;
+                if (_isChecked)
+                {
+                    CheckboxImage = "/Views/Assets/Icon_Tick.png";
+                }
+                else
+                {
+                    CheckboxImage = "";
+                }
+                OnPropertyChanged("IsChecked");
             }
         }
     }

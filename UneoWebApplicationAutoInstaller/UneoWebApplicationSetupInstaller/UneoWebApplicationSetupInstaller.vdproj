@@ -8574,7 +8574,7 @@
         {
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_BA8C763E467E428883D001CAFB19179D"
             {
-            "Name" = "8:UneoWebApplication"
+            "Name" = "8:Uneo Web Application"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
@@ -8987,7 +8987,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_FF32A167315C43D6874075D43F466E21"
             {
-            "SourcePath" = "8:..\\UneoWebApplicationAutoInstaller\\obj\\Release\\net8.0-windows\\apphost.exe"
+            "SourcePath" = "8:..\\UneoWebApplicationAutoInstaller\\obj\\Debug\\net8.0-windows\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_4FC78C331426454D87A3F206F23A7215"

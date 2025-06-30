@@ -166,21 +166,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
             ProgressItems = new ObservableCollection<ProgressBarItem>();
 
-            //_keyValueItems = new ObservableCollection<DictionaryInput>()
-            //{
-            //    new DictionaryInput()
-            //    {
-            //        DictionaryKey = "DictionaryKey1",
-            //        DictionaryValue = "DictionaryValue1",
-            //    },               
-            //    new DictionaryInput()
-            //    {
-            //        DictionaryKey = "DictionaryKey2",
-            //        DictionaryValue = "DictionaryValue2",
-            //    },               
-
-            //};
-
             SettingList = new ObservableCollection<Setting>();
 
         }
@@ -251,21 +236,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             NextBtnLabel = "Run";
             NextBtnLabelForeground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF212121")); ;
 
-        }
-        
-
-        //Button of adding single input box to inputlist
-        //public void AddInputItems(Setting setting)
-        //{
-        //    Debug.WriteLine("count of InputList " + InputSelected.DictionaryValue);
-        //    if (setting.InputList == null)
-        //    {
-        //        setting.InputList = new ObservableCollection<DictionaryInput>();
-        //    }
-
-        //    setting.InputList.Add(new DictionaryInput() { DictionaryValue = "Value"});
-        //    Debug.WriteLine("count of InputList " + setting.InputList.Count);
-        //}
+        }       
         public void AddInputItems()
         {
             if (!InputSelected.IsRemovable)
@@ -419,8 +390,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         }
         public void CheckSelectedObject()
         {
-            //Debug.WriteLine($"SettingName : {SettingSelected.SettingName}");
-            //Debug.WriteLine($"Key : {KeyValuePairSelected.DictionaryKey} | Value : {KeyValuePairSelected.DictionaryValue}");
+            Debug.WriteLine($"SettingName : {SettingSelected.SettingName}");
+            Debug.WriteLine($"Key : {KeyValuePairSelected.DictionaryKey} | Value : {KeyValuePairSelected.DictionaryValue}");
         }
     }
 }

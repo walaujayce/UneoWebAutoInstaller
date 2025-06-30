@@ -59,9 +59,9 @@
                     <ControlTemplate TargetType="CheckBox">
                         <Border Style="{DynamicResource CheckboxBorderStyle}">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="4">
-                                <!-- Circle -->
+                                <!-- Rectangle -->
                                 <Grid>
-                                    <Rectangle x:Name="Circle"
+                                    <Rectangle x:Name="Rectangle"
                                             Width="15"
                                             Height="15"
                                             Stroke="Black"
@@ -80,24 +80,15 @@
                             </StackPanel>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <!-- When Checked: fill with blue -->
-                            <!--
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="Circle" Property="Fill" Value="orange" />
-                                    <Setter TargetName="Circle" Property="Stroke" Value="orange" />
-                                </Trigger>
-                                -->
                             <!-- Optional: MouseOver effect -->
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Circle" Property="StrokeThickness" Value="0.5" />
+                                <Setter TargetName="Rectangle" Property="StrokeThickness" Value="0.5" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-        </Style>
-        
-
+        </Style>       
     </Page.Resources>
     
     <Grid Margin="15,0">
