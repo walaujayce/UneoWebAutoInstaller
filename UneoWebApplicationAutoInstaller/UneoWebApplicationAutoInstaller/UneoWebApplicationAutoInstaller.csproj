@@ -55,7 +55,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FTD2XX.Net" Version="1.2.1" />
     <PackageReference Include="LibUsbDotNet" Version="2.2.29" />
     <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

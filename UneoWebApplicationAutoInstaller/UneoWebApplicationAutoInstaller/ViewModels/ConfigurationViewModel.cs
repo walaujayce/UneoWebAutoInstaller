@@ -343,15 +343,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 libUSB = null;
             }
         }
-        //////////////////////////////////////// CONNECT with FT4222H ////////////////////////////////////////
-        private FT4222H? ft4222h = null;
-        public delegate void DelegateFt4222Data(Dictionary<string, byte[]> data);
-        public delegate void DelegateFt4222Status(bool isConnected);
-
-
-
-
-
         //////////////////////////////////////// WIFI READ ////////////////////////////////////////
         public async void ReadWiFiConfigLibUSBAsync()
         {

@@ -13,13 +13,41 @@
         <Style x:Key="ButtonBorderStyle" TargetType="Border">
             <Setter Property="Margin" Value="10"/>
             <Setter Property="Padding" Value="5"/>
-            <Setter Property="Background" Value="LightGray"/>
             <Setter Property="Height" Value="45"/>
             <Setter Property="Width" Value="150"/>
             <Setter Property="CornerRadius" Value="22.5"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="#0078D3"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                To="#0C49C2"
+                Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                To="#0078D3"
+                Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>                
+            </Style.Triggers>
         </Style>
         
         <Style x:Key="ButtonTextBlockStyle" TargetType="TextBlock">
@@ -27,8 +55,9 @@
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="FontFamily" Value="tahoma"/>
+            <Setter Property="Foreground" Value="white"/>
         </Style>
-
+                
         <Style x:Key="CheckboxBorderStyle" TargetType="Border">
             <Setter Property="Margin" Value="0,0,0,0"/>
             <Setter Property="CornerRadius" Value="10"/>
@@ -186,16 +215,14 @@
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0" Margin="0" Background="Transparent">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0" Orientation="Vertical" Background="Red" VerticalAlignment="Center">
-                <!-- Back button -->
-                <Border Style="{DynamicResource ButtonBorderStyle}" MouseLeftButtonUp="BackToPrevious_Configuration_Clicked" >
-                    <TextBlock Text="Back" Style="{DynamicResource ButtonTextBlockStyle}"/>
-                </Border>
+            <StackPanel Grid.Row="1" Orientation="Vertical" VerticalAlignment="Center">
+                
                 <!-- Connection Mode Toggle Button -->
-                <Border Style="{DynamicResource ButtonBorderStyle}">
+                <Border Style="{DynamicResource ButtonBorderStyle}" Visibility="Collapsed">
                     <Grid>
                         <Border x:Name="SlideHighlight" Background="#0078D3" Width="70" Height="35" CornerRadius="17.5" HorizontalAlignment="Left" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
                             <Border.RenderTransform>
@@ -225,7 +252,7 @@
                     <TextBlock Text="SAVE TEMPLATE" Style="{DynamicResource ButtonTextBlockStyle}"/>
                 </Border>
             </StackPanel>
-            <Border Grid.Row="1" Background="Beige" BorderBrush="Black" BorderThickness="0.5" CornerRadius="15" Margin="50,5" Padding="10,10,10,5">
+            <Border Grid.Row="0" Background="Beige" BorderBrush="Black" BorderThickness="0.5" CornerRadius="15" Margin="50,0" Padding="10,10,10,5">
                 <StackPanel Orientation="Vertical" VerticalAlignment="Top">
                     <Grid x:Name="Wifi_And_Password">
                         <Grid.ColumnDefinitions>
@@ -293,6 +320,47 @@
                     </ItemsControl>
                 </StackPanel>
             </Border>
+            <!-- Control button -->
+            <Grid Grid.Row="2" Margin="15,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0">
+                    <Border Style="{DynamicResource BackButtonStyle}" MouseLeftButtonUp="BackToPrevious_Configuration_Clicked">
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="Border.MouseEnter">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="BackLabel"
+                 Storyboard.TargetProperty="(Label.Foreground).(SolidColorBrush.Color)"
+                 To="Black" Duration="0:0:0.1"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="Border.MouseLeave">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="BackLabel"
+                 Storyboard.TargetProperty="(Label.Foreground).(SolidColorBrush.Color)"
+                 To="Gray" Duration="0:0:0.1"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
+                        <Label x:Name="BackLabel"
+                FontSize="18"
+                Content="Back"
+                Foreground="Gray"
+                VerticalContentAlignment="Center"
+                HorizontalContentAlignment="Center"/>
+                    </Border>
+                </Grid>
+                <Grid Grid.Column="2">
+
+                </Grid>
+            </Grid>
         </Grid>
         <!-- Main Content -->
         <Grid Grid.Column="1" VerticalAlignment="Top" Background="Transparent" HorizontalAlignment="Left">
@@ -327,48 +395,6 @@
                 </ItemsControl>
             </Border>
         </Grid>
-        <!-- Control button -->
-        <!--
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <Grid Grid.Column="0">
-                <Border Style="{DynamicResource BackButtonStyle}" MouseLeftButtonUp="BackToPrevious_Configuration_Clicked">
-                    <Border.Triggers>
-                        <EventTrigger RoutedEvent="Border.MouseEnter">
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <ColorAnimation Storyboard.TargetName="BackLabel"
-                         Storyboard.TargetProperty="(Label.Foreground).(SolidColorBrush.Color)"
-                         To="Black" Duration="0:0:0.1"/>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                        <EventTrigger RoutedEvent="Border.MouseLeave">
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <ColorAnimation Storyboard.TargetName="BackLabel"
-                         Storyboard.TargetProperty="(Label.Foreground).(SolidColorBrush.Color)"
-                         To="Gray" Duration="0:0:0.1"/>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </Border.Triggers>
-                    <Label x:Name="BackLabel"
-                        FontSize="18"
-                        Content="Back"
-                        Foreground="Gray"
-                        VerticalContentAlignment="Center"
-                        HorizontalContentAlignment="Center"/>
-                </Border>
-            </Grid>
-            <Grid Grid.Column="2">
-                
-            </Grid>
-        </Grid>
-        -->
+        
     </Grid>
 </Page>
