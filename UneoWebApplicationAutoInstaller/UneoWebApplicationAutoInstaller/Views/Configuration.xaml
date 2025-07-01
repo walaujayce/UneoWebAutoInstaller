@@ -181,11 +181,19 @@
     
     <Grid>
          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="7*"/>
-        </Grid.ColumnDefinitions>        
-        <Grid Grid.Column="0" Margin="0" VerticalAlignment="Top">
-            <StackPanel Orientation="Vertical">
+            <ColumnDefinition Width="4.5*"/>
+            <ColumnDefinition Width="5.5*"/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0" Margin="0" Background="Transparent">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Orientation="Vertical" Background="Red" VerticalAlignment="Center">
+                <!-- Back button -->
+                <Border Style="{DynamicResource ButtonBorderStyle}" MouseLeftButtonUp="BackToPrevious_Configuration_Clicked" >
+                    <TextBlock Text="Back" Style="{DynamicResource ButtonTextBlockStyle}"/>
+                </Border>
                 <!-- Connection Mode Toggle Button -->
                 <Border Style="{DynamicResource ButtonBorderStyle}">
                     <Grid>
@@ -217,9 +225,77 @@
                     <TextBlock Text="SAVE TEMPLATE" Style="{DynamicResource ButtonTextBlockStyle}"/>
                 </Border>
             </StackPanel>
+            <Border Grid.Row="1" Background="Beige" BorderBrush="Black" BorderThickness="0.5" CornerRadius="15" Margin="50,5" Padding="10,10,10,5">
+                <StackPanel Orientation="Vertical" VerticalAlignment="Top">
+                    <Grid x:Name="Wifi_And_Password">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="SSID" FontWeight="Bold" FontFamily="roboto"/>
+                        <Grid Grid.Column="1" >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="9*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Password" FontWeight="Bold" FontFamily="roboto"/>
+                            <Border Grid.Column="1" Cursor="Hand" MouseLeftButtonUp="RefreshWifiAndIpv4List_Clicked" Padding="1">
+                                <Image Source="/Views/Assets/Icon_Refresh.png"/>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                    <Separator BorderThickness="1" BorderBrush="Black" Margin="0,5" Opacity="0.5"/>                    
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <TextBlock x:Name="WifiNameTextBlock" Text="{Binding ConnectedWifiName}" FontFamily="roboto" VerticalAlignment="Center"/>
+                            <Border Height="{Binding ActualHeight, ElementName=WifiNameTextBlock}" Margin="3,0,0,0" Opacity="0.3" Padding="2,0,0,2" MouseLeftButtonUp="CopyWifiName_Clicked">
+                                <Image Cursor="Hand" Source="/Views/Assets/Icon_Copy.png" VerticalAlignment="Center"/>
+                            </Border>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <TextBlock x:Name="WifiPasswordTextBlock" Text="{Binding ConnectedWifiPassword}" FontFamily="roboto" VerticalAlignment="Center"/>
+                            <Border Height="{Binding ActualHeight, ElementName=WifiPasswordTextBlock}" Margin="3,0,0,0" Opacity="0.3" Padding="2,0,0,2" MouseLeftButtonUp="CopyWifiPassword_Clicked">
+                                <Image Cursor="Hand" Source="/Views/Assets/Icon_Copy.png" VerticalAlignment="Center"/>
+                            </Border>
+                        </StackPanel>
+                    </Grid>                           
+                    <Grid x:Name="InterfaceName_And_Ipv4Address">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Interface Name" FontWeight="Bold" FontFamily="roboto"/>
+                        <TextBlock Grid.Column="1" Text="IPv4 Address" FontWeight="Bold" FontFamily="roboto"/>
+                    </Grid>
+                    <Separator BorderThickness="1" BorderBrush="Black" Margin="0,5" Opacity="0.5"/>
+                    <ItemsControl ItemsSource="{Binding IpAddressList}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding DictionaryKey}" FontFamily="roboto"/>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                        <TextBlock x:Name="IpAddressTextBlock" Text="{Binding DictionaryValue}" FontFamily="roboto" VerticalAlignment="Center"/>
+                                        <Border Height="{Binding ActualHeight, ElementName=IpAddressTextBlock}" Margin="3,0,0,0" Opacity="0.3" Padding="2,0,0,2" VerticalAlignment="Center" MouseLeftButtonUp="CopyIPv4Address_Clicked">
+                                            <Image Cursor="Hand" Source="/Views/Assets/Icon_Copy.png" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
         </Grid>
         <!-- Main Content -->
-        <Grid Grid.Column="1" VerticalAlignment="Top">
+        <Grid Grid.Column="1" VerticalAlignment="Top" Background="Transparent" HorizontalAlignment="Left">
             <Border Width="400" BorderBrush="Black" BorderThickness="0.3" CornerRadius="20" Padding="15,10">
                 <ItemsControl ItemsSource="{Binding WifiSettingsList}">
                     <ItemsControl.ItemTemplate>

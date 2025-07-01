@@ -19,9 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="LibFT4222.dll" />
     <None Remove="Views\Assets\Icon_Close.png" />
     <None Remove="Views\Assets\Icon_Close_FFD3D3D3.png" />
     <None Remove="Views\Assets\Icon_Contract.png" />
+    <None Remove="Views\Assets\Icon_Copy.png" />
     <None Remove="Views\Assets\Icon_Fail_FFFF0000.png" />
     <None Remove="Views\Assets\Icon_GoToNext_Orange.png" />
     <None Remove="Views\Assets\Icon_GoToNext_White.png" />
@@ -31,18 +33,29 @@
     <None Remove="Views\Assets\Icon_LatestVersion_FF00FF7F.png" />
     <None Remove="Views\Assets\Icon_Option_FFD3D3D3.png" />
     <None Remove="Views\Assets\Icon_Pass_FF7CFC00.png" />
+    <None Remove="Views\Assets\Icon_Refresh.png" />
     <None Remove="Views\Assets\Icon_Remove_FFD3D3D3.png" />
     <None Remove="Views\Assets\Icon_Tick.png" />
     <None Remove="Views\Assets\Icon_Warning_FFFCD700.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="LibFT4222.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Views\Assets\Icon_Copy.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Views\Assets\Icon_GoToNext_Orange.png" />
     <Resource Include="Views\Assets\Icon_GoToNext_White.png" />
     <Resource Include="Views\Assets\Icon_Info_B0470F.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FTD2XX.Net" Version="1.2.1" />
     <PackageReference Include="LibUsbDotNet" Version="2.2.29" />
     <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
@@ -84,6 +97,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Views\Assets\Icon_Pass_FF7CFC00.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Views\Assets\Icon_Refresh.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Views\Assets\Icon_Remove_FFD3D3D3.png">

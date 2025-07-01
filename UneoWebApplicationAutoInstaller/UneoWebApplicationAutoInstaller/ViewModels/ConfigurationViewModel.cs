@@ -15,6 +15,7 @@ using LibUsbDotNet.Main;
 using UneoWebApplicationAutoInstaller.Host;
 using UneoWebApplicationAutoInstaller.Models;
 using static UneoWebApplicationAutoInstaller.Utilities.Enums;
+using UneoWebApplicationAutoInstaller.Utilities;
 
 namespace UneoWebApplicationAutoInstaller.ViewModels
 {
@@ -108,12 +109,55 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 OnPropertyChanged(nameof(InputBoxSelected));
             }
         }
-
+        private ObservableCollection<DictionaryInput> ipAddressList;
+        public ObservableCollection<DictionaryInput> IpAddressList
+        {
+            get { return ipAddressList; }
+            set
+            {
+                ipAddressList = value;
+                OnPropertyChanged(nameof(IpAddressList));
+            }
+        }
+        private string _connectedWifiName;
+        public string ConnectedWifiName
+        {
+            get { return _connectedWifiName; }
+            set
+            {
+                _connectedWifiName = value;
+                OnPropertyChanged(nameof(ConnectedWifiName));
+            }
+        }
+        private string _connectedWifiPassword;
+        public string ConnectedWifiPassword
+        {
+            get { return _connectedWifiPassword; }
+            set
+            {
+                _connectedWifiPassword = value;
+                OnPropertyChanged(nameof(ConnectedWifiPassword));
+            }
+        }
+        private DictionaryInput _ipAddressSelected;
+        public DictionaryInput IpAddressSelected
+        {
+            get { return _ipAddressSelected; }
+            set
+            {
+                _ipAddressSelected = value;
+                OnPropertyChanged(nameof(IpAddressSelected));
+            }
+        }
         #endregion
 
         private bool _isConnecting = false;
         public ConfigurationViewModel()
         {
+            IpAddressList = new ObservableCollection<DictionaryInput>();
+            GetIpAddressList();
+            GetWifiNameAndPassword();
+
             WifiSettingsList = new ObservableCollection<WifiSetting>()
             {
                 new WifiSetting()
@@ -206,7 +250,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                         },
                     }
                 },
-            };
+            };            
         }
         //////////////////////////////////////// CONNECT with LibUSB ////////////////////////////////////////
         private LibUSB? libUSB = null;
@@ -299,6 +343,14 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 libUSB = null;
             }
         }
+        //////////////////////////////////////// CONNECT with FT4222H ////////////////////////////////////////
+        private FT4222H? ft4222h = null;
+        public delegate void DelegateFt4222Data(Dictionary<string, byte[]> data);
+        public delegate void DelegateFt4222Status(bool isConnected);
+
+
+
+
 
         //////////////////////////////////////// WIFI READ ////////////////////////////////////////
         public async void ReadWiFiConfigLibUSBAsync()
@@ -629,6 +681,53 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             else
             {
                 return 0; // fallback if parsing fails
+            }
+        }
+        public void GetWifiNameAndPassword()
+        {
+            //Get Connected Wifi Name and Password
+            var wifiNameAndPassword = PublicFunction.GetConnectedWifiNameAndPassword();
+            if (wifiNameAndPassword != null)
+            {
+                ConnectedWifiName = wifiNameAndPassword["SSID"];
+                ConnectedWifiPassword = wifiNameAndPassword["PASSWORD"];
+            }
+            else
+            {
+                ConnectedWifiName = "null";
+                ConnectedWifiPassword = "null";
+            }
+        }
+        public void GetIpAddressList()
+        {
+            Dictionary<string, string>? allInterfaceNameAndIP = PublicFunction.GetAllInterfaceNameAndIP();
+
+            //Dictionary<string, string>? allInterfaceNameAndIP = new()
+            //{
+            //    {"Wifi", "188.88.20.102" },
+            //    {"Ethernet", "192.9.120.145" },
+            //    {"Local Ip and WIFI", "168.2.200.202" },
+            //};
+
+            IpAddressList.Clear();
+            if (allInterfaceNameAndIP != null)
+            {
+                foreach (var ip in allInterfaceNameAndIP)
+                {
+                    IpAddressList.Add(new DictionaryInput()
+                    {
+                        DictionaryKey = ip.Key,
+                        DictionaryValue = ip.Value
+                    });
+                }
+            }
+            else
+            {
+                IpAddressList.Add(new DictionaryInput()
+                {
+                    DictionaryKey = "null",
+                    DictionaryValue = "null",
+                });
             }
         }
     }

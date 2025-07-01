@@ -42,7 +42,7 @@ namespace UneoWebApplicationAutoInstaller.Views
                 EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
             };
             HighlightTransform.BeginAnimation(TranslateTransform.XProperty, animation);
-            
+
             configurationVM.ConfigurationMode = (int)EUcbConfigurationMode.LibUSB;
         }
 
@@ -69,7 +69,7 @@ namespace UneoWebApplicationAutoInstaller.Views
 
         private void WriteButton_Clicked(object sender, MouseButtonEventArgs e)
         {
-            _=configurationVM.WriteWiFiConfigAsync();
+            _ = configurationVM.WriteWiFiConfigAsync();
         }
 
         private void SaveButton_Clicked(object sender, MouseButtonEventArgs e)
@@ -87,21 +87,36 @@ namespace UneoWebApplicationAutoInstaller.Views
         private void SelectedInputBox_Clicked(object sender, MouseButtonEventArgs e)
         {
             var button = (Border)sender;
-            configurationVM.InputBoxSelected = (DictionaryInput)button.DataContext;  
+            configurationVM.InputBoxSelected = (DictionaryInput)button.DataContext;
             //configurationVM.InputBoxSelected.DictionaryValue = (DictionaryInput)button.DataContext;  
         }
-
-        private void CheckBox_Clicked(object sender, RoutedEventArgs e)
+        private void CopyWifiName_Clicked(object sender, MouseButtonEventArgs e)
         {
-            //Debug.WriteLine("AAAAAAAAAAAAAAAAAAAAAAAAaaaa");
-            //if (configurationVM.IsChecked)
-            //{
-            //    configurationVM.IsChecked = false;
-            //}
-            //else
-            //{
-            //    configurationVM.IsChecked = true;
-            //}
+            if (!string.IsNullOrEmpty(configurationVM.ConnectedWifiName))
+            {
+                Clipboard.SetText(configurationVM.ConnectedWifiName);
+            }
+        }
+        private void CopyWifiPassword_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(configurationVM.ConnectedWifiPassword))
+            {
+                Clipboard.SetText(configurationVM.ConnectedWifiPassword);
+            }
+        }
+        private void CopyIPv4Address_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            var button = (Border)sender;
+            configurationVM.IpAddressSelected = (DictionaryInput)button.DataContext;
+            if (!string.IsNullOrEmpty(configurationVM.IpAddressSelected.DictionaryValue.ToString()))
+            {
+                Clipboard.SetText(configurationVM.IpAddressSelected.DictionaryValue.ToString());
+            }
+        }
+        private void RefreshWifiAndIpv4List_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            configurationVM.GetIpAddressList();
+            configurationVM.GetWifiNameAndPassword();
         }
     }
 }
