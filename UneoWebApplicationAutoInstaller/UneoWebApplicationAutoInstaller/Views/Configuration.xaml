@@ -332,13 +332,13 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Orientation="Horizontal">
                             <TextBlock x:Name="WifiNameTextBlock" Text="{Binding ConnectedWifiName}" FontFamily="roboto" VerticalAlignment="Center"/>
-                            <Border Height="{Binding ActualHeight, ElementName=WifiNameTextBlock}" Style="{DynamicResource CopyBorderStyle}" MouseLeftButtonUp="CopyWifiName_Clicked" MouseLeave="CursorStatus_MouseLeave">
+                            <Border ToolTip="Copy content" Height="{Binding ActualHeight, ElementName=WifiNameTextBlock}" Style="{DynamicResource CopyBorderStyle}" MouseLeftButtonUp="CopyWifiName_Clicked" MouseLeave="CursorStatus_MouseLeave">
                                 <Image Source="/Views/Assets/Icon_Copy.png" VerticalAlignment="Center"/>
                             </Border>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                             <TextBlock x:Name="WifiPasswordTextBlock" Text="{Binding ConnectedWifiPassword}" FontFamily="roboto" VerticalAlignment="Center"/>
-                            <Border Height="{Binding ActualHeight, ElementName=WifiPasswordTextBlock}" Style="{DynamicResource CopyBorderStyle}" MouseLeftButtonUp="CopyWifiPassword_Clicked" MouseLeave="CursorStatus_MouseLeave">
+                            <Border ToolTip="Copy content" Height="{Binding ActualHeight, ElementName=WifiPasswordTextBlock}" Style="{DynamicResource CopyBorderStyle}" MouseLeftButtonUp="CopyWifiPassword_Clicked" MouseLeave="CursorStatus_MouseLeave">
                                 <Image Source="/Views/Assets/Icon_Copy.png" VerticalAlignment="Center"/>
                             </Border>
                         </StackPanel>
@@ -363,7 +363,7 @@
                                     <TextBlock Grid.Column="0" Text="{Binding DictionaryKey}" FontFamily="roboto"/>
                                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                                         <TextBlock x:Name="IpAddressTextBlock" Text="{Binding DictionaryValue}" FontFamily="roboto" VerticalAlignment="Center"/>
-                                        <Border Height="{Binding ActualHeight, ElementName=IpAddressTextBlock}" Style="{DynamicResource CopyBorderStyle}" MouseLeftButtonUp="CopyIPv4Address_Clicked" MouseLeave="CursorStatus_MouseLeave">
+                                        <Border ToolTip="Copy content" Height="{Binding ActualHeight, ElementName=IpAddressTextBlock}" Style="{DynamicResource CopyBorderStyle}" MouseLeftButtonUp="CopyIPv4Address_Clicked" MouseLeave="CursorStatus_MouseLeave">
                                             <Image Source="/Views/Assets/Icon_Copy.png" VerticalAlignment="Center"/>
                                         </Border>
                                     </StackPanel>
@@ -393,20 +393,20 @@
             <Grid Grid.Row="2" Margin="0,20">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Center">
                     <!-- Connect button -->
-                    <Border Style="{DynamicResource Button2BorderStyle}" MouseLeftButtonUp="ConnectButton_Clicked" MouseLeftButtonDown="LeftMouseButtonDown_Clicked" MouseLeave="MouseLeaveCaptured">
+                    <Border Style="{DynamicResource Button2BorderStyle}" ToolTip="Connect/Read" MouseLeftButtonUp="ConnectButton_Clicked" MouseLeftButtonDown="LeftMouseButtonDown_Clicked" MouseLeave="MouseLeaveCaptured">
                         <Image Source="/Views/Assets/Icon_USB.png"/>                        
                     </Border>
                     <!-- Write button -->
-                    <Border Style="{DynamicResource Button2BorderStyle}" MouseLeftButtonUp="WriteButton_Clicked" MouseLeftButtonDown="LeftMouseButtonDown_Clicked" MouseLeave="MouseLeaveCaptured">
+                    <Border Style="{DynamicResource Button2BorderStyle}" ToolTip="Write" MouseLeftButtonUp="WriteButton_Clicked" MouseLeftButtonDown="LeftMouseButtonDown_Clicked" MouseLeave="MouseLeaveCaptured">
                         <Image Source="/Views/Assets/Icon_Write.png"/>
                     </Border>
                     <!-- Save template -->
-                    <Border Style="{DynamicResource Button2BorderStyle}" MouseLeftButtonUp="SaveButton_Clicked" MouseLeftButtonDown="LeftMouseButtonDown_Clicked" MouseLeave="MouseLeaveCaptured" >
-                        <Image Source="/Views/Assets/Icon_Save.png"/>
+                    <Border Style="{DynamicResource Button2BorderStyle}" ToolTip="Save template" MouseLeftButtonUp="SaveButton_Clicked" MouseLeftButtonDown="LeftMouseButtonDown_Clicked" MouseLeave="MouseLeaveCaptured" >
+                        <Image Source="{Binding SaveTemplateImage}"/>
                     </Border>
                     <!-- Write with template -->
-                    <Border Style="{DynamicResource Button2BorderStyle}" MouseLeftButtonUp="WriteWithTemplateButton_Clicked" MouseLeftButtonDown="LeftMouseButtonDown_Clicked" MouseLeave="MouseLeaveCaptured" >
-                        <Image Source="/Views/Assets/Icon_WriteTemplate.png"/>
+                    <Border Style="{DynamicResource Button2BorderStyle}" ToolTip="Write template" IsEnabled="{Binding IsWriteTemplateBtnEnabled}" MouseLeftButtonUp="WriteWithTemplateButton_Clicked" MouseLeftButtonDown="LeftMouseButtonDown_Clicked" MouseLeave="MouseLeaveCaptured" >
+                        <Image Source="/Views/Assets/Icon_WriteTemplate.png" Opacity="{Binding WriteTemplateImageOpacity}"/>
                     </Border>
                 </StackPanel>
             </Grid>            

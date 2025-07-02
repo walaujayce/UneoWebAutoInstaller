@@ -61,6 +61,7 @@ namespace UneoWebApplicationAutoInstaller.Views
         private void BackToPrevious_Configuration_Clicked(object sender, MouseButtonEventArgs e)
         {
             NavigationService.GoBack();
+            configurationVM.DeInit();
         }
         private void ConnectButton_Clicked(object sender, MouseButtonEventArgs e)
         {
@@ -132,17 +133,15 @@ namespace UneoWebApplicationAutoInstaller.Views
             DoubleAnimation rotation = new DoubleAnimation
             {
                 From = 0,
-                To = 180,
+                To = 360,
                 Duration = new Duration(TimeSpan.FromMilliseconds(500)),
                 RepeatBehavior = new RepeatBehavior(1)
             };
-            //rotation.EasingFunction = new CircleEase { EasingMode = EasingMode.EaseInOut };
-
             RefreshRotateTransform.BeginAnimation(RotateTransform.AngleProperty, rotation);
 
             configurationVM.GetIpAddressList();
             configurationVM.GetWifiNameAndPassword();
-        }
+        }   
         private void LeftMouseButtonDown_Clicked(object sender, MouseButtonEventArgs e)
         {
             var button = (Border)sender;

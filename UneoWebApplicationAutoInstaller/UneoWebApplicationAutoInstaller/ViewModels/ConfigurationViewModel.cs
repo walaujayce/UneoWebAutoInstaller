@@ -189,6 +189,37 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 OnPropertyChanged(nameof(StatusMessageText));
             }
         }
+        private string _saveTemplateImage = "/Views/Assets/Icon_Save.png";
+        public string SaveTemplateImage
+        {
+            get { return _saveTemplateImage; }
+            set
+            {
+                _saveTemplateImage = value;
+                OnPropertyChanged(nameof(SaveTemplateImage));
+            }
+        }
+        private bool _isWriteTemplateBtnEnabled = false;
+        public bool IsWriteTemplateBtnEnabled
+        {
+            get { return _isWriteTemplateBtnEnabled; }
+            set
+            {
+                _isWriteTemplateBtnEnabled = value;
+                OnPropertyChanged(nameof(IsWriteTemplateBtnEnabled));
+            }
+        }
+        private double _writeTemplateImageOpacity = 0.5;
+        public double WriteTemplateImageOpacity
+        {
+            get { return _writeTemplateImageOpacity; }
+            set
+            {
+                _writeTemplateImageOpacity = value;
+                OnPropertyChanged(nameof(WriteTemplateImageOpacity));
+            }
+        }      
+
         #endregion
 
         private bool _isConnecting = false;
@@ -679,13 +710,18 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 StatusMessageText = "One or more value is unavailable.";
                 return;
             }
-            foreach(var item in WifiSettingsList)
+            tempWifiSettingList.Clear();
+            foreach (var item in WifiSettingsList)
             {
                 tempWifiSettingList.Add(CloneWifiSetting(item));
             }
 
             // async the status message 
-            StatusMessageText = "Save curernt values as template.";
+            StatusMessageText = "Save current values as template.";
+            SaveTemplateImage = "/Views/Assets/Icon_SaveOK.png";
+            IsWriteTemplateBtnEnabled = true;
+            WriteTemplateImageOpacity = 1.0;
+
         }
         //////////////////////////////////////// METHOD ////////////////////////////////////////
         private byte[] IPAddressToBytes(string ipString)
@@ -834,6 +870,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             }
             await WriteWiFiConfigAsync();
             ReadWiFiConfigLibUSBAsync();
+            // async the status message 
+            await Task.Delay(1000);
+            StatusMessageText = "Write successfully.";
         }
         private bool CheckWifiSettingListIsNullOrEmpty()
         {
@@ -852,6 +891,14 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         public void PrintCurrentSelectedInputBoxValue()
         {
             Debug.WriteLine($"{InputBoxSelected.DictionaryKey} | {InputBoxSelected.DictionaryValue}");
+        }
+        public void DeInit()
+        {
+            LibUSBStatusListener(false);
+            tempWifiSettingList.Clear();
+            SaveTemplateImage = "/Views/Assets/Icon_Save.png";
+            IsWriteTemplateBtnEnabled = false;
+            WriteTemplateImageOpacity = 0.5;
         }
     }
 }
