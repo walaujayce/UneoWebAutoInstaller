@@ -14,6 +14,8 @@ namespace UneoWebApplicationAutoInstaller.Models
         private string _addBtnImageSource = "/Views/Assets/Icon_Add_FFD3D3D3.png";
         private bool _isRemovable = false;
         private int _inputType;
+        private bool _isChecked = true;
+        private string _checkboxImage = "/Views/Assets/Icon_Tick.png";
 
         public string DictionaryKey
         {
@@ -63,7 +65,6 @@ namespace UneoWebApplicationAutoInstaller.Models
                 OnPropertyChanged(nameof(InputType));
             }
         }
-        private string _checkboxImage = "/Views/Assets/Icon_Tick.png";
         public string CheckboxImage
         {
             get => _checkboxImage;
@@ -73,7 +74,6 @@ namespace UneoWebApplicationAutoInstaller.Models
                 OnPropertyChanged("CheckboxImage");
             }
         }
-        private bool _isChecked = true;
         public bool IsChecked
         {
             get => _isChecked;

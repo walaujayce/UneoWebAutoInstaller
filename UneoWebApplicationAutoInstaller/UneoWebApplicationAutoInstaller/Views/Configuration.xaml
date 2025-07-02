@@ -14,14 +14,16 @@
             <Setter Property="Margin" Value="10"/>
             <Setter Property="Padding" Value="5"/>
             <Setter Property="Height" Value="45"/>
-            <Setter Property="Width" Value="150"/>
-            <Setter Property="CornerRadius" Value="22.5"/>
+            <Setter Property="Width" Value="130"/>
+            <Setter Property="BorderBrush" Value="#0078D3"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="CornerRadius" Value="20"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Background">
                 <Setter.Value>
-                    <SolidColorBrush Color="#0078D3"/>
+                    <SolidColorBrush Color="White"/>
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
@@ -31,7 +33,7 @@
                             <Storyboard>
                                 <ColorAnimation
                 Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                To="#0C49C2"
+                To="#0078D3"
                 Duration="0:0:0.1"/>
                             </Storyboard>
                         </BeginStoryboard>
@@ -41,7 +43,7 @@
                             <Storyboard>
                                 <ColorAnimation
                 Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                To="#0078D3"
+                To="White"
                 Duration="0:0:0.1"/>
                             </Storyboard>
                         </BeginStoryboard>
@@ -49,13 +51,76 @@
                 </Trigger>                
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="Button2BorderStyle" TargetType="Border">
+            <Setter Property="Margin" Value="10,0"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Height" Value="60"/>
+            <Setter Property="Width" Value="60"/>
+            <Setter Property="BorderBrush" Value="LightGray"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="CornerRadius" Value="15"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect 
+                Color="Gray" 
+                BlurRadius="10" 
+                ShadowDepth="1" 
+                Direction="315" 
+                Opacity="0.3"/>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <Trigger Property="Tag" Value="MouseLeave">
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect 
+                                Color="Gray"
+                                BlurRadius="10"
+                                ShadowDepth="2"
+                                Direction="315"
+                                Opacity="0.3"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+                <Trigger Property="Tag" Value="LeftClickDown">
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect 
+                        Color="White"
+                        BlurRadius="10"
+                        ShadowDepth="2"
+                        Direction="315"
+                        Opacity="0.3"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+                <Trigger Property="Tag" Value="LeftClickUp">
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect 
+                        Color="Gray"
+                        BlurRadius="10"
+                        ShadowDepth="2"
+                        Direction="315"
+                        Opacity="0.3"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
         
         <Style x:Key="ButtonTextBlockStyle" TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="FontFamily" Value="tahoma"/>
-            <Setter Property="Foreground" Value="white"/>
+            <Setter Property="FontFamily" Value="arial"/>
+            <Setter Property="Foreground" Value="Black"/>
         </Style>
                 
         <Style x:Key="CheckboxBorderStyle" TargetType="Border">
@@ -109,7 +174,7 @@
                                         Height="15"
                                         Stroke="Black"
                                         StrokeThickness="0.5"
-                                        Fill="Transparent"
+                                        Fill="White"
                                         VerticalAlignment="Center"/>
                                     <Border Height="20" Width="20" Margin="0,0,0,3" BorderBrush="Transparent" BorderThickness="1.5" Panel.ZIndex="10" VerticalAlignment="Center" HorizontalAlignment="Center">
                                         <Image Source="{Binding CheckboxImage}"/>
@@ -133,6 +198,22 @@
             </Setter>
         </Style>
 
+        <!-- Copy Image Border-->
+        <Style x:Key="CopyBorderStyle" TargetType="Border">
+            <Setter Property="Margin" Value="3,0,0,0"/>
+            <Setter Property="Padding" Value="2,0,0,2"/>
+            <Setter Property="Opacity" Value="0.3"/>
+            <Setter Property="Cursor" Value="Hand"/>            
+            <Style.Triggers>
+                <Trigger Property="Tag" Value="MouseDown">
+                    <Setter Property="Cursor" Value="Arrow"/>
+                </Trigger>
+                <Trigger Property="Tag" Value="MouseLeave">
+                    <Setter Property="Cursor" Value="Hand"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
         <Style TargetType="ComboBox" x:Key="stlComboBox">
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
@@ -196,7 +277,7 @@
         
         <!-- Input box template -->        
         <DataTemplate x:Key="InputBoxTemplate">
-            <Border Grid.Column="1" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" MouseLeftButtonUp="SelectedInputBox_Clicked">
+            <Border Grid.Column="1" Background="White" BorderBrush="LightGray" BorderThickness="1" CornerRadius="5" MouseLeftButtonUp="SelectedInputBox_Clicked">
                 <TextBox Text="{Binding DictionaryValue}" Padding="5,0" VerticalContentAlignment="Center" Background="Transparent" BorderThickness="0" TextChanged="InputBox_TextChanged"/>
             </Border>
         </DataTemplate>
@@ -216,43 +297,11 @@
         <Grid Grid.Column="0" Margin="0" Background="Transparent">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <StackPanel Grid.Row="1" Orientation="Vertical" VerticalAlignment="Center">
-                
-                <!-- Connection Mode Toggle Button -->
-                <Border Style="{DynamicResource ButtonBorderStyle}" Visibility="Collapsed">
-                    <Grid>
-                        <Border x:Name="SlideHighlight" Background="#0078D3" Width="70" Height="35" CornerRadius="17.5" HorizontalAlignment="Left" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
-                            <Border.RenderTransform>
-                                <TranslateTransform x:Name="HighlightTransform" />
-                            </Border.RenderTransform>
-                        </Border>
-                        <StackPanel Orientation="Horizontal">
-                            <Border x:Name="LibUSB" Background="Transparent" Width="70"  MouseLeftButtonUp="SelectLibUSB_Clicked">
-                                <TextBlock Foreground="{Binding LibUsbForeground}" Text="LibUSB" VerticalAlignment="Center" HorizontalAlignment="Center" FontFamily="tahoma" FontWeight="Bold"/>
-                            </Border>
-                            <Border x:Name="FT4222h" Background="Transparent" Width="70" MouseLeftButtonUp="SelectFt4222h_Clicked">
-                                <TextBlock Foreground="{Binding Ft4222hForeground}" Text="FT4222h" VerticalAlignment="Center" HorizontalAlignment="Center" FontFamily="tahoma" FontWeight="Bold"/>
-                            </Border>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-                <!-- Connect button -->
-                <Border Style="{DynamicResource ButtonBorderStyle}" MouseLeftButtonUp="ConnectButton_Clicked" >
-                    <TextBlock Text="CONNECT / READ" Style="{DynamicResource ButtonTextBlockStyle}"/>
-                </Border>
-                <!-- Write button -->
-                <Border Style="{DynamicResource ButtonBorderStyle}" MouseLeftButtonUp="WriteButton_Clicked">
-                    <TextBlock Text="WRITE" Style="{DynamicResource ButtonTextBlockStyle}"/>
-                </Border>
-                <!-- Save template -->
-                <Border Style="{DynamicResource ButtonBorderStyle}" MouseLeftButtonUp="SaveButton_Clicked" >
-                    <TextBlock Text="SAVE TEMPLATE" Style="{DynamicResource ButtonTextBlockStyle}"/>
-                </Border>
-            </StackPanel>
-            <Border Grid.Row="0" Background="Beige" BorderBrush="Black" BorderThickness="0.5" CornerRadius="15" Margin="50,0" Padding="10,10,10,5">
+            <Border Grid.Row="0" Background="White" BorderBrush="Black" BorderThickness="0.5" CornerRadius="15" Margin="50,0" Padding="10,10,10,5">
                 <StackPanel Orientation="Vertical" VerticalAlignment="Top">
                     <Grid x:Name="Wifi_And_Password">
                         <Grid.ColumnDefinitions>
@@ -267,11 +316,15 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="Password" FontWeight="Bold" FontFamily="roboto"/>
                             <Border Grid.Column="1" Cursor="Hand" MouseLeftButtonUp="RefreshWifiAndIpv4List_Clicked" Padding="1">
-                                <Image Source="/Views/Assets/Icon_Refresh.png"/>
+                                <Image Source="/Views/Assets/Icon_Refresh.png" Loaded="RefreshIcon_Loaded">
+                                    <Image.RenderTransform>
+                                        <RotateTransform x:Name="RefreshRotateTransform" Angle="0" />
+                                    </Image.RenderTransform>
+                                </Image>
                             </Border>
                         </Grid>
                     </Grid>
-                    <Separator BorderThickness="1" BorderBrush="Black" Margin="0,5" Opacity="0.5"/>                    
+                    <Separator BorderThickness="1" BorderBrush="Black" Margin="0,5" Opacity="0.5"/>
                     <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -279,17 +332,17 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Orientation="Horizontal">
                             <TextBlock x:Name="WifiNameTextBlock" Text="{Binding ConnectedWifiName}" FontFamily="roboto" VerticalAlignment="Center"/>
-                            <Border Height="{Binding ActualHeight, ElementName=WifiNameTextBlock}" Margin="3,0,0,0" Opacity="0.3" Padding="2,0,0,2" MouseLeftButtonUp="CopyWifiName_Clicked">
-                                <Image Cursor="Hand" Source="/Views/Assets/Icon_Copy.png" VerticalAlignment="Center"/>
+                            <Border Height="{Binding ActualHeight, ElementName=WifiNameTextBlock}" Style="{DynamicResource CopyBorderStyle}" MouseLeftButtonUp="CopyWifiName_Clicked" MouseLeave="CursorStatus_MouseLeave">
+                                <Image Source="/Views/Assets/Icon_Copy.png" VerticalAlignment="Center"/>
                             </Border>
                         </StackPanel>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                             <TextBlock x:Name="WifiPasswordTextBlock" Text="{Binding ConnectedWifiPassword}" FontFamily="roboto" VerticalAlignment="Center"/>
-                            <Border Height="{Binding ActualHeight, ElementName=WifiPasswordTextBlock}" Margin="3,0,0,0" Opacity="0.3" Padding="2,0,0,2" MouseLeftButtonUp="CopyWifiPassword_Clicked">
-                                <Image Cursor="Hand" Source="/Views/Assets/Icon_Copy.png" VerticalAlignment="Center"/>
+                            <Border Height="{Binding ActualHeight, ElementName=WifiPasswordTextBlock}" Style="{DynamicResource CopyBorderStyle}" MouseLeftButtonUp="CopyWifiPassword_Clicked" MouseLeave="CursorStatus_MouseLeave">
+                                <Image Source="/Views/Assets/Icon_Copy.png" VerticalAlignment="Center"/>
                             </Border>
                         </StackPanel>
-                    </Grid>                           
+                    </Grid>
                     <Grid x:Name="InterfaceName_And_Ipv4Address">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -310,8 +363,8 @@
                                     <TextBlock Grid.Column="0" Text="{Binding DictionaryKey}" FontFamily="roboto"/>
                                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                                         <TextBlock x:Name="IpAddressTextBlock" Text="{Binding DictionaryValue}" FontFamily="roboto" VerticalAlignment="Center"/>
-                                        <Border Height="{Binding ActualHeight, ElementName=IpAddressTextBlock}" Margin="3,0,0,0" Opacity="0.3" Padding="2,0,0,2" VerticalAlignment="Center" MouseLeftButtonUp="CopyIPv4Address_Clicked">
-                                            <Image Cursor="Hand" Source="/Views/Assets/Icon_Copy.png" VerticalAlignment="Center"/>
+                                        <Border Height="{Binding ActualHeight, ElementName=IpAddressTextBlock}" Style="{DynamicResource CopyBorderStyle}" MouseLeftButtonUp="CopyIPv4Address_Clicked" MouseLeave="CursorStatus_MouseLeave">
+                                            <Image Source="/Views/Assets/Icon_Copy.png" VerticalAlignment="Center"/>
                                         </Border>
                                     </StackPanel>
                                 </Grid>
@@ -320,8 +373,45 @@
                     </ItemsControl>
                 </StackPanel>
             </Border>
+            <Border x:Name="StatusMessage" Grid.Row="1" Background="White" BorderBrush="Black" BorderThickness="0.5" CornerRadius="15" Margin="50,20,50,0" Padding="10">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel x:Name="TitleBar" Orientation="Horizontal">
+                        <TextBlock x:Name="TitleBarTextBlock" Text="Status message" FontWeight="Bold" FontFamily="roboto" VerticalAlignment="Center"/>
+                        <Border BorderBrush="Black" BorderThickness="0.2" CornerRadius="5" Margin="10,0" Padding="3" VerticalAlignment="Center" Opacity="{Binding ConnectStatusOpacity}">
+                            <StackPanel Orientation="Horizontal">
+                                <Border Height="{Binding ActualHeight, ElementName=TitleBarTextBlock}" Padding="3">
+                                    <Image Source="{Binding ConnectStatusImage}"/>                                    
+                                </Border>
+                                <TextBlock x:Name="StatusTextBlock" Text="{Binding ConnectStatusText}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                    <Separator BorderThickness="1" BorderBrush="Black" Margin="0,5" Opacity="0.5"/>
+                    <TextBlock Text="{Binding StatusMessageText}" Margin="0,5"/>                          
+                </StackPanel>
+            </Border>
+            <Grid Grid.Row="2" Margin="0,20">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Center">
+                    <!-- Connect button -->
+                    <Border Style="{DynamicResource Button2BorderStyle}" MouseLeftButtonUp="ConnectButton_Clicked" MouseLeftButtonDown="LeftMouseButtonDown_Clicked" MouseLeave="MouseLeaveCaptured">
+                        <Image Source="/Views/Assets/Icon_USB.png"/>                        
+                    </Border>
+                    <!-- Write button -->
+                    <Border Style="{DynamicResource Button2BorderStyle}" MouseLeftButtonUp="WriteButton_Clicked" MouseLeftButtonDown="LeftMouseButtonDown_Clicked" MouseLeave="MouseLeaveCaptured">
+                        <Image Source="/Views/Assets/Icon_Write.png"/>
+                    </Border>
+                    <!-- Save template -->
+                    <Border Style="{DynamicResource Button2BorderStyle}" MouseLeftButtonUp="SaveButton_Clicked" MouseLeftButtonDown="LeftMouseButtonDown_Clicked" MouseLeave="MouseLeaveCaptured" >
+                        <Image Source="/Views/Assets/Icon_Save.png"/>
+                    </Border>
+                    <!-- Write with template -->
+                    <Border Style="{DynamicResource Button2BorderStyle}" MouseLeftButtonUp="WriteWithTemplateButton_Clicked" MouseLeftButtonDown="LeftMouseButtonDown_Clicked" MouseLeave="MouseLeaveCaptured" >
+                        <Image Source="/Views/Assets/Icon_WriteTemplate.png"/>
+                    </Border>
+                </StackPanel>
+            </Grid>            
             <!-- Control button -->
-            <Grid Grid.Row="2" Margin="15,0">
+            <Grid Grid.Row="3" Margin="15,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -363,8 +453,8 @@
             </Grid>
         </Grid>
         <!-- Main Content -->
-        <Grid Grid.Column="1" VerticalAlignment="Top" Background="Transparent" HorizontalAlignment="Left">
-            <Border Width="400" BorderBrush="Black" BorderThickness="0.3" CornerRadius="20" Padding="15,10">
+        <Grid Grid.Column="1" VerticalAlignment="Top"  HorizontalAlignment="Left">
+            <Border Width="400" BorderBrush="Black" BorderThickness="0.3" Background="Beige" CornerRadius="20" Padding="15,10">
                 <ItemsControl ItemsSource="{Binding WifiSettingsList}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -396,5 +486,131 @@
             </Border>
         </Grid>
         
+        
+        <!-- template-->
+        <!-- Connection Mode Toggle Button -->
+        <!--
+        <Border Style="{DynamicResource ButtonBorderStyle}" Visibility="Collapsed">
+            <Grid>
+                <Border x:Name="SlideHighlight" Background="#0078D3" Width="70" Height="35" CornerRadius="17.5" HorizontalAlignment="Left" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                    <Border.RenderTransform>
+                        <TranslateTransform x:Name="HighlightTransform" />
+                    </Border.RenderTransform>
+                </Border>
+                <StackPanel Orientation="Horizontal">
+                    <Border x:Name="LibUSB" Background="Transparent" Width="70"  MouseLeftButtonUp="SelectLibUSB_Clicked">
+                        <TextBlock Foreground="{Binding LibUsbForeground}" Text="LibUSB" VerticalAlignment="Center" HorizontalAlignment="Center" FontFamily="tahoma" FontWeight="Bold"/>
+                    </Border>
+                    <Border x:Name="FT4222h" Background="Transparent" Width="70" MouseLeftButtonUp="SelectFt4222h_Clicked">
+                        <TextBlock Foreground="{Binding Ft4222hForeground}" Text="FT4222h" VerticalAlignment="Center" HorizontalAlignment="Center" FontFamily="tahoma" FontWeight="Bold"/>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+        -->
+        <!--
+        <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Margin="0,10">
+                <Border Style="{DynamicResource ButtonBorderStyle}" MouseLeftButtonUp="ConnectButton_Clicked" >
+            <Border.Triggers>
+                <EventTrigger RoutedEvent="Border.MouseEnter">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetName="ConnectTextBlock"
+                                Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
+                                To="White" Duration="0:0:0.1"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+                <EventTrigger RoutedEvent="Border.MouseLeave">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetName="ConnectTextBlock"
+                                Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
+                                To="Black" Duration="0:0:0.1"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Border.Triggers>
+            <TextBlock x:Name="ConnectTextBlock" Text="CONNECT / READ" Style="{DynamicResource ButtonTextBlockStyle}"/>
+
+                </Border>
+
+                <Border Style="{DynamicResource ButtonBorderStyle}" MouseLeftButtonUp="WriteButton_Clicked">
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="WriteTextBlock"
+    Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
+    To="White" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="Border.MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="WriteTextBlock"
+    Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
+    To="Black" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+                    <TextBlock x:Name="WriteTextBlock" Text="WRITE" Style="{DynamicResource ButtonTextBlockStyle}"/>
+                </Border>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,10">
+
+                <Border Style="{DynamicResource ButtonBorderStyle}" MouseLeftButtonUp="SaveButton_Clicked" >
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="SaveTemplateTextBlock"
+    Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
+    To="White" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="Border.MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="SaveTemplateTextBlock"
+    Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
+    To="Black" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+                    <TextBlock x:Name="SaveTemplateTextBlock" Text="SAVE TEMPLATE" Style="{DynamicResource ButtonTextBlockStyle}"/>
+                </Border>
+
+                <Border Style="{DynamicResource ButtonBorderStyle}" MouseLeftButtonUp="WriteWithTemplateButton_Clicked" >
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="WriteTemplateTextBlock"
+    Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
+    To="White" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="Border.MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="WriteTemplateTextBlock"
+    Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
+    To="Black" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+                    <TextBlock x:Name="WriteTemplateTextBlock" Text="WRITE TEMPLATE" Style="{DynamicResource ButtonTextBlockStyle}"/>
+                </Border>
+            </StackPanel>
+        </StackPanel>
+        -->
     </Grid>
 </Page>

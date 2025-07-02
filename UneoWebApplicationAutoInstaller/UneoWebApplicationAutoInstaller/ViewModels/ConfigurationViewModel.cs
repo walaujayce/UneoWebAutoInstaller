@@ -149,9 +149,50 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 OnPropertyChanged(nameof(IpAddressSelected));
             }
         }
+        private string _connectStatusImage = "/Views/Assets/Icon_RedCircle.png";
+        public string ConnectStatusImage
+        {
+            get { return _connectStatusImage; }
+            set
+            {
+                _connectStatusImage = value;
+                OnPropertyChanged(nameof(ConnectStatusImage));
+            }
+        }
+        private string _connectStatusText = "Offline"; 
+        public string ConnectStatusText
+        {
+            get { return _connectStatusText; }
+            set
+            {
+                _connectStatusText = value;
+                OnPropertyChanged(nameof(ConnectStatusText));
+            }
+        }
+        private double _connectStatusOpacity = 0.5;
+        public double ConnectStatusOpacity
+        {
+            get { return _connectStatusOpacity; }
+            set
+            {
+                _connectStatusOpacity = value;
+                OnPropertyChanged(nameof(ConnectStatusOpacity));
+            }
+        }
+        private string _statusMessageText = ""; 
+        public string StatusMessageText
+        {
+            get { return _statusMessageText; }
+            set
+            {
+                _statusMessageText = value;
+                OnPropertyChanged(nameof(StatusMessageText));
+            }
+        }
         #endregion
 
         private bool _isConnecting = false;
+        private bool isSkipReadWifiValue = false;
         public ConfigurationViewModel()
         {
             IpAddressList = new ObservableCollection<DictionaryInput>();
@@ -170,7 +211,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                         {
                             InputType = (int)EWifiInputType.CheckBox,
                             DictionaryKey = "DHCP",
-                            IsChecked = WifiSetting.DHCP
+                            IsChecked = WifiSetting.DHCP,
+                            DictionaryValue = WifiSetting.DHCP == true ? "1" : "0"
+
                         },
                         new DictionaryInput()
                         {
@@ -256,12 +299,14 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         private LibUSB? libUSB = null;
         public delegate void DelegateLibUSBData(byte[] data);
         public delegate void DelegateLibUSBStatus(bool isConnected);
-        public void ConnectAndReadLibUSB()
-        {            
+        public async void ConnectAndReadLibUSB()
+        {         
+            isSkipReadWifiValue = false;
+
             // if not connecting then connect
             if (!_isConnecting)
             {
-                ConnectLibUSB();
+                await ConnectLibUSB();
             }
             // if connecting then read only
             else
@@ -269,7 +314,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 ReadWiFiConfigLibUSBAsync();
             }
         }
-        private async void ConnectLibUSB()
+        private async Task ConnectLibUSB()
         {
             try
             {
@@ -313,12 +358,19 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     if (data[6] == 0x01)
                     {
                         Debug.WriteLine("WIFI CONFIG PASS");
-                        MessageBox.Show("WIFI CONFIG PASS", "Confirmation", MessageBoxButton.OK, MessageBoxImage.Information);
+                        //MessageBox.Show("WIFI CONFIG PASS", "Confirmation", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        // async the status message 
+                        StatusMessageText = "Write successfully.";
                     }
                     else if (data[6] == 0x00)
                     {
                         Debug.WriteLine("WIFI CONFIG FAIL");
-                        MessageBox.Show("WIFI CONFIG FAIL", "Alert", MessageBoxButton.OK, MessageBoxImage.Error);
+                        //MessageBox.Show("WIFI CONFIG FAIL", "Alert", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                        // async the status message 
+                        StatusMessageText = "Failed to write.";
+
                     }
                 }
                 else
@@ -335,17 +387,31 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             {
                 _isConnecting = true;
                 ReadWiFiConfigLibUSBAsync();
+
+                // async the status message 
+                ConnectStatusImage = "/Views/Assets/Icon_GreenCircle.png";
+                ConnectStatusText = "Online";
+                StatusMessageText = "Connected successfully.";
+                ConnectStatusOpacity = 1;
             }
             else
             {
                 _isConnecting = false;
                 libUSB?.Close();
                 libUSB = null;
+
+                // async the status message 
+                ConnectStatusImage = "/Views/Assets/Icon_RedCircle.png";
+                ConnectStatusText = "Offline";
+                StatusMessageText = string.Empty;
+                ConnectStatusOpacity = 0.5;
             }
         }
         //////////////////////////////////////// WIFI READ ////////////////////////////////////////
         public async void ReadWiFiConfigLibUSBAsync()
         {
+            // if not connecting and write button click directly, the latest values in input box will be replaced by default value in UCB
+            if (isSkipReadWifiValue) return;
             await Task.Delay(100);
             await Task.Run(() =>
             {
@@ -452,6 +518,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                         }
                     }
                 }
+
+                // async the status message 
+                StatusMessageText = "Read successfully.";
             }
             else
             {
@@ -461,12 +530,6 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         //////////////////////////////////////// WIFI WRITE ////////////////////////////////////////
         public async Task WriteWiFiConfigAsync()
         {
-            // if not connect but click write button then go connect and write without read 
-            if (isTemplateSave && !_isConnecting)
-            {
-                ConnectLibUSB();
-            }
-
             foreach(var item in WifiSettingsList)
             {
                 List<DictionaryInput> settingList = item.SettingList.ToList();
@@ -476,9 +539,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 }
             }
             List<DictionaryInput> WirelessApSettingList;
-            if (isTemplateSave)
+            if (isWriteWithTemplate)
             {
-                WirelessApSettingList = tempWifiSettingLIst.FirstOrDefault(w => w.SettingID == (int)EWifiSettingID.WirelessAP).SettingList.ToList();
+                WirelessApSettingList = tempWifiSettingList.FirstOrDefault(w => w.SettingID == (int)EWifiSettingID.WirelessAP).SettingList.ToList();
             }
             else
             {
@@ -515,9 +578,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             Array.Copy(newLine, 0, ap, 34 + pskArr.Length, newLine.Length);
 
             List<DictionaryInput> LanSettingList;
-            if (isTemplateSave)
+            if (isWriteWithTemplate)
             {
-                LanSettingList = tempWifiSettingLIst.FirstOrDefault(w => w.SettingID == (int)EWifiSettingID.LAN).SettingList.ToList();
+                LanSettingList = tempWifiSettingList.FirstOrDefault(w => w.SettingID == (int)EWifiSettingID.LAN).SettingList.ToList();
             }
             else
             {
@@ -554,9 +617,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             Array.Copy(gateWayArr, 0, lan, 14, gateWayArr.Length);
 
             List<DictionaryInput> ServerSettingList;
-            if (isTemplateSave)
+            if (isWriteWithTemplate)
             {
-                ServerSettingList = tempWifiSettingLIst.FirstOrDefault(w => w.SettingID == (int)EWifiSettingID.SERVER).SettingList.ToList();
+                ServerSettingList = tempWifiSettingList.FirstOrDefault(w => w.SettingID == (int)EWifiSettingID.SERVER).SettingList.ToList();
             }
             else
             {
@@ -604,16 +667,25 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             {
                 libUSB?.singleWrite(HostCmds.Read_Command_1());
             });
-            //MessageBox.Show(" Wifi config program successed");
 
         }
         //////////////////////////////////////// Save Template ////////////////////////////////////////
-        private List<WifiSetting> tempWifiSettingLIst = new List<WifiSetting>();
-        private bool isTemplateSave = false;
+        private List<WifiSetting> tempWifiSettingList = new List<WifiSetting>();
+        private bool isWriteWithTemplate = false;
         public void SaveCurrentValueAsTemplate()
         {
-            isTemplateSave = true;
-            tempWifiSettingLIst = WifiSettingsList.ToList();
+            if (CheckWifiSettingListIsNullOrEmpty())
+            {
+                StatusMessageText = "One or more value is unavailable.";
+                return;
+            }
+            foreach(var item in WifiSettingsList)
+            {
+                tempWifiSettingList.Add(CloneWifiSetting(item));
+            }
+
+            // async the status message 
+            StatusMessageText = "Save curernt values as template.";
         }
         //////////////////////////////////////// METHOD ////////////////////////////////////////
         private byte[] IPAddressToBytes(string ipString)
@@ -720,6 +792,66 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     DictionaryValue = "null",
                 });
             }
+        }
+        private WifiSetting CloneWifiSetting(WifiSetting original)
+        {
+            return new WifiSetting
+            {
+                SettingID = original.SettingID,
+                SettingTitle = original.SettingTitle,
+                SettingList = new ObservableCollection<DictionaryInput>(
+                original.SettingList.Select(i => new DictionaryInput()
+                {
+                    DictionaryKey = i.DictionaryKey,
+                    DictionaryValue = i.DictionaryValue,
+                    IsChecked = i.IsChecked,
+                    InputType = i.InputType,
+                    CheckboxImage = i.CheckboxImage,    
+                }))
+            };
+        }
+        public async void WriteWiFiConfig()
+        {
+            if (CheckWifiSettingListIsNullOrEmpty()) return;
+
+            isWriteWithTemplate = false;
+            isSkipReadWifiValue = true;
+            if (!_isConnecting)
+            {
+                await ConnectLibUSB();
+            }
+            await WriteWiFiConfigAsync();
+        }
+        public async void WriteWiFiConfigWithTemplate()
+        {
+            if (CheckWifiSettingListIsNullOrEmpty()) return;
+
+            isWriteWithTemplate = true;
+
+            if (!_isConnecting)
+            {
+                await ConnectLibUSB();
+            }
+            await WriteWiFiConfigAsync();
+            ReadWiFiConfigLibUSBAsync();
+        }
+        private bool CheckWifiSettingListIsNullOrEmpty()
+        {
+            foreach(var item in WifiSettingsList)
+            {
+                foreach (var settingList in item.SettingList)
+                {
+                    if (string.IsNullOrEmpty(settingList.DictionaryValue.ToString()))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        public void PrintCurrentSelectedInputBoxValue()
+        {
+            Debug.WriteLine($"{InputBoxSelected.DictionaryKey} | {InputBoxSelected.DictionaryValue}");
         }
     }
 }
