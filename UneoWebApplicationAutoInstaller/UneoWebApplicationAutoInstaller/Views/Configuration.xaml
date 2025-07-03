@@ -375,9 +375,14 @@
             </Border>
             <Border x:Name="StatusMessage" Grid.Row="1" Background="White" BorderBrush="Black" BorderThickness="0.5" CornerRadius="15" Margin="50,20,50,0" Padding="10">
                 <StackPanel Orientation="Vertical">
-                    <StackPanel x:Name="TitleBar" Orientation="Horizontal">
-                        <TextBlock x:Name="TitleBarTextBlock" Text="Status message" FontWeight="Bold" FontFamily="roboto" VerticalAlignment="Center"/>
-                        <Border BorderBrush="Black" BorderThickness="0.2" CornerRadius="5" Margin="10,0" Padding="3" VerticalAlignment="Center" Opacity="{Binding ConnectStatusOpacity}">
+                    <Grid x:Name="TitleBar">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" x:Name="TitleBarTextBlock" Text="Status message" FontWeight="Bold" FontFamily="roboto" VerticalAlignment="Center"/>
+                        <Border Grid.Column="2" BorderBrush="Black" BorderThickness="0.2" CornerRadius="5" Margin="0" Padding="3" VerticalAlignment="Center" Opacity="{Binding ConnectStatusOpacity}">
                             <StackPanel Orientation="Horizontal">
                                 <Border Height="{Binding ActualHeight, ElementName=TitleBarTextBlock}" Padding="3">
                                     <Image Source="{Binding ConnectStatusImage}"/>                                    
@@ -385,7 +390,7 @@
                                 <TextBlock x:Name="StatusTextBlock" Text="{Binding ConnectStatusText}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Border>
-                    </StackPanel>
+                    </Grid>
                     <Separator BorderThickness="1" BorderBrush="Black" Margin="0,5" Opacity="0.5"/>
                     <TextBlock Text="{Binding StatusMessageText}" Margin="0,5"/>                          
                 </StackPanel>
@@ -401,15 +406,32 @@
                         <Image Source="/Views/Assets/Icon_Write.png"/>
                     </Border>
                     <!-- Save template -->
-                    <Border Style="{DynamicResource Button2BorderStyle}" ToolTip="Save template" MouseLeftButtonUp="SaveButton_Clicked" MouseLeftButtonDown="LeftMouseButtonDown_Clicked" MouseLeave="MouseLeaveCaptured" >
-                        <Image Source="{Binding SaveTemplateImage}"/>
+                    <Border Style="{DynamicResource Button2BorderStyle}" ToolTip="Save template" MouseLeftButtonUp="SaveButton_Clicked" MouseLeftButtonDown="LeftMouseButtonDown_Clicked" MouseLeave="MouseLeaveCaptured">
+                        <Grid>
+                            <Border ToolTip="{Binding SaveTemplateText}" Visibility="{Binding SaveTemplateVisibility}" BorderBrush="DarkGray" Background="White" BorderThickness="1" Margin="28,-22,-20,30" CornerRadius="10" Panel.ZIndex="10" Cursor="Arrow">
+                                <Label Foreground="LimeGreen" FontSize="14" FontFamily="times new roman" FontWeight="Bold" FontStyle="Italic" Content="i" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="0"/>
+                            </Border>
+                            <Image Source="{Binding SaveTemplateImage}"/>
+                        </Grid>
                     </Border>
                     <!-- Write with template -->
-                    <Border Style="{DynamicResource Button2BorderStyle}" ToolTip="Write template" IsEnabled="{Binding IsWriteTemplateBtnEnabled}" MouseLeftButtonUp="WriteWithTemplateButton_Clicked" MouseLeftButtonDown="LeftMouseButtonDown_Clicked" MouseLeave="MouseLeaveCaptured" >
+                    <Border Style="{DynamicResource Button2BorderStyle}" ToolTip="Write template" IsEnabled="{Binding IsWriteTemplateBtnEnabled}" MouseLeftButtonUp="WriteWithTemplateButton_Clicked" MouseLeftButtonDown="LeftMouseButtonDown_Clicked" MouseLeave="MouseLeaveCaptured">
                         <Image Source="/Views/Assets/Icon_WriteTemplate.png" Opacity="{Binding WriteTemplateImageOpacity}"/>
                     </Border>
                 </StackPanel>
-            </Grid>            
+            </Grid>
+            <!-- TEMP message -->
+            <!--
+            <Border Grid.Row="3" BorderBrush="Black" BorderThickness="1" Margin="50,10" Padding="10">
+                <Grid VerticalAlignment="Top">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="{Binding SaveTemplateText}"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+            -->
             <!-- Control button -->
             <Grid Grid.Row="3" Margin="15,0">
                 <Grid.ColumnDefinitions>

@@ -92,7 +92,7 @@ namespace UneoWebApplicationAutoInstaller.Views
             var inputBox = (TextBox)sender;
             configurationVM.InputBoxSelected = (DictionaryInput)inputBox.DataContext;
             configurationVM.InputBoxSelected.DictionaryValue = (string)inputBox.Text;
-            configurationVM.PrintCurrentSelectedInputBoxValue();
+            //configurationVM.PrintCurrentSelectedInputBoxValue();
         }
         private void SelectedInputBox_Clicked(object sender, MouseButtonEventArgs e)
         {

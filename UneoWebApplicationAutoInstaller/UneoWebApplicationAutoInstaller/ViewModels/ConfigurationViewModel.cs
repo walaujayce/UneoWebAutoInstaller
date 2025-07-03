@@ -197,7 +197,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             {
                 _saveTemplateImage = value;
                 OnPropertyChanged(nameof(SaveTemplateImage));
-            }
+            }            
         }
         private bool _isWriteTemplateBtnEnabled = false;
         public bool IsWriteTemplateBtnEnabled
@@ -218,8 +218,28 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 _writeTemplateImageOpacity = value;
                 OnPropertyChanged(nameof(WriteTemplateImageOpacity));
             }
-        }      
-
+        }
+        private string _saveTemplateText = "";
+        public string SaveTemplateText
+        {
+            get { return _saveTemplateText; }
+            set
+            {
+                _saveTemplateText = value;
+                OnPropertyChanged(nameof(SaveTemplateText));
+            }            
+        }
+        private Visibility _saveTemplateVisibility = Visibility.Hidden;
+        public Visibility SaveTemplateVisibility
+        {
+            get { return _saveTemplateVisibility; }
+            set
+            {
+                _saveTemplateVisibility = value;
+                OnPropertyChanged(nameof(SaveTemplateVisibility));
+            }
+        }
+        
         #endregion
 
         private bool _isConnecting = false;
@@ -719,8 +739,19 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             // async the status message 
             StatusMessageText = "Save current values as template.";
             SaveTemplateImage = "/Views/Assets/Icon_SaveOK.png";
+            SaveTemplateVisibility = Visibility.Visible;
             IsWriteTemplateBtnEnabled = true;
             WriteTemplateImageOpacity = 1.0;
+
+            string _saveTemplateText = "";
+            foreach(var settingList in tempWifiSettingList)
+            {
+                foreach(var item in settingList.SettingList)
+                {
+                    _saveTemplateText += $"{item.DictionaryKey} : {item.DictionaryValue}\n";
+                }
+            }
+            SaveTemplateText = _saveTemplateText;
 
         }
         //////////////////////////////////////// METHOD ////////////////////////////////////////
@@ -869,9 +900,11 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 await ConnectLibUSB();
             }
             await WriteWiFiConfigAsync();
+
+            // need to set read wifi true again
+            isSkipReadWifiValue = false;
             ReadWiFiConfigLibUSBAsync();
             // async the status message 
-            await Task.Delay(1000);
             StatusMessageText = "Write successfully.";
         }
         private bool CheckWifiSettingListIsNullOrEmpty()
@@ -897,6 +930,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             LibUSBStatusListener(false);
             tempWifiSettingList.Clear();
             SaveTemplateImage = "/Views/Assets/Icon_Save.png";
+            SaveTemplateVisibility = Visibility.Hidden;
             IsWriteTemplateBtnEnabled = false;
             WriteTemplateImageOpacity = 0.5;
         }
