@@ -115,133 +115,133 @@
 //            Debug.WriteLine("End of update process!");
 //        }
 //        // IP changes, remake website container
-//private async Task RemakeWebsiteContainer(List<Setting> settingList)
-//{
-//    // Init progress result and send to progress monitor
-//    ProgressDetail progressDetail_RemakeWebsiteContainer = new ProgressDetail();
-//    progressDetail_RemakeWebsiteContainer.ProgressParentID = (int)EUpdateID.Website_CONTAINER;
-
-//    // Get setting param - image name, container name, ports, envirionment variables
-//    imageName_Website = settingList.First(s => s.SettingName == "Image Name").SettingValue;
-
-//    List<DictionaryInput> portsList = settingList.First(s => s.SettingName == "Ports").InputList.ToList();
-//    string portScript = "";
-//    foreach (var port in portsList)
-//    {
-//        portScript += $"-p {port.DictionaryValue} ";
-//    }
-//    List<DictionaryInput> environmentVariablesList = settingList.First(s => s.SettingName == "Environment Variables").KeyValueItems.ToList();
-//    string environmentVariableScript = "";
-//    foreach (var ev in environmentVariablesList)
-//    {
-//        environmentVariableScript += $"-e {ev.DictionaryKey}={ev.DictionaryValue} ";
-//    }
-//    containerName_Website = settingList.First(s => s.SettingName == "Container Name").SettingValue;
-
-//    progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
-//    progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
-//    delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
-
-//    // check image existence using image name
-//    bool isImageExists_Website = await CheckImageExistence(imageName_Website);
-//    if (isImageExists_Website)
-//    {
-//        // check container existence using image name
-//        bool isContainerExist = await CheckContainerExistenceUsingImageName(imageName_Website);
-//        if (isContainerExist)
+//        private async Task RemakeWebsiteContainer(List<Setting> settingList)
 //        {
-//            Log.I(TAG, "Container WEBSITE exists locally.");
-//            // get container name using image name
-//            string currentExistedContainerName = await GetExistedContainerNameUsingImageName(imageName_Website);
-//            // get running container ID using image name
-//            bool isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_Website);
-//            if (isContainerRunning_Website)
+//            // Init progress result and send to progress monitor
+//            ProgressDetail progressDetail_RemakeWebsiteContainer = new ProgressDetail();
+//            progressDetail_RemakeWebsiteContainer.ProgressParentID = (int)EUpdateID.Website_CONTAINER;
+
+//            // Get setting param - image name, container name, ports, envirionment variables
+//            imageName_Website = settingList.First(s => s.SettingName == "Image Name").SettingValue;
+
+//            List<DictionaryInput> portsList = settingList.First(s => s.SettingName == "Ports").InputList.ToList();
+//            string portScript = "";
+//            foreach (var port in portsList)
 //            {
-//                // if running, then stop and delete container
-//                string containerId = await GetContainerIdUsingImageName(imageName_Website);
-//                // use container id to remove current container
-//                await StopContainerUsingContainerName(currentExistedContainerName);
-
-//                //check again 
-//                isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_Website);
-//                if (!isContainerRunning_Website)
-//                {
-//                    progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
-//                    progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
-//                    delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
-//                    await Task.Delay(100);
-//                    progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
-//                    progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
-//                    delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
-//                }
-//                else
-//                {
-//                    progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
-//                    progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Fail;
-//                    progressDetail_RemakeWebsiteContainer.IsFinish = true;
-//                    delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
-//                    return;
-//                }
-
+//                portScript += $"-p {port.DictionaryValue} ";
 //            }
-//            // if not running, then delete container using container name
-//            await DeleteContainerUsingContainerName(currentExistedContainerName);
-
-//            bool isCurrentContainerExisted = await CheckContainerExistenceUsingImageName(imageName_Website);
-//            if (!isCurrentContainerExisted)
+//            List<DictionaryInput> environmentVariablesList = settingList.First(s => s.SettingName == "Environment Variables").KeyValueItems.ToList();
+//            string environmentVariableScript = "";
+//            foreach (var ev in environmentVariablesList)
 //            {
-//                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
-//                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
+//                environmentVariableScript += $"-e {ev.DictionaryKey}={ev.DictionaryValue} ";
+//            }
+//            containerName_Website = settingList.First(s => s.SettingName == "Container Name").SettingValue;
+
+//            progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
+//            progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
+//            delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+
+//            // check image existence using image name
+//            bool isImageExists_Website = await CheckImageExistence(imageName_Website);
+//            if (isImageExists_Website)
+//            {
+//                // check container existence using image name
+//                bool isContainerExist = await CheckContainerExistenceUsingImageName(imageName_Website);
+//                if (isContainerExist)
+//                {
+//                    Log.I(TAG, "Container WEBSITE exists locally.");
+//                    // get container name using image name
+//                    string currentExistedContainerName = await GetExistedContainerNameUsingImageName(imageName_Website);
+//                    // get running container ID using image name
+//                    bool isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_Website);
+//                    if (isContainerRunning_Website)
+//                    {
+//                        // if running, then stop and delete container
+//                        string containerId = await GetContainerIdUsingImageName(imageName_Website);
+//                        use container id to remove current container
+//                       await StopContainerUsingContainerName(currentExistedContainerName);
+
+//                        //check again 
+//                        isContainerRunning_Website = await CheckContainerRunningUsingImage(imageName_Website);
+//                        if (!isContainerRunning_Website)
+//                        {
+//                            progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
+//                            progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
+//                            delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//                            await Task.Delay(100);
+//                            progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
+//                            progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
+//                            delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//                        }
+//                        else
+//                        {
+//                            progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
+//                            progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Fail;
+//                            progressDetail_RemakeWebsiteContainer.IsFinish = true;
+//                            delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//                            return;
+//                        }
+
+//                    }
+//                    // if not running, then delete container using container name
+//                    await DeleteContainerUsingContainerName(currentExistedContainerName);
+
+//                    bool isCurrentContainerExisted = await CheckContainerExistenceUsingImageName(imageName_Website);
+//                    if (!isCurrentContainerExisted)
+//                    {
+//                        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
+//                        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
+//                        delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//                    }
+//                    else
+//                    {
+//                        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
+//                        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Fail;
+//                        progressDetail_RemakeWebsiteContainer.IsFinish = true;
+//                        delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//                        return;
+//                    }
+//                }
+//                // use image name to containerize 
+//                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
+//                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
 //                delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+
+//                await ContainerizeImage(imageName_Website, containerName_Website, portScript, environmentVariableScript);
+
 //            }
 //            else
 //            {
-//                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
-//                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Fail;
-//                progressDetail_RemakeWebsiteContainer.IsFinish = true;
+//                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
+//                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
 //                delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
-//                return;
+//                await Task.Delay(100);
+//                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
+//                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
+//                delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+//                await Task.Delay(100);
+//                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
+//                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
+//                delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
+
+//                await WebsiteInstallProcess(settingList, progressDetail_RemakeWebsiteContainer);
 //            }
+//            // confirm container is running            
+//            bool isWebsiteContainerRunning = await CheckContainerRunningUsingImage(imageName_Website);
+//            if (isWebsiteContainerRunning)
+//            {
+//                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
+//                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
+//            }
+//            else
+//            {
+//                progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
+//                progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Fail;
+//            }
+//            progressDetail_RemakeWebsiteContainer.IsFinish = true;
+//            delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
 //        }
-//        // use image name to containerize 
-//        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
-//        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
-//        delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
-
-//        await ContainerizeImage(imageName_Website, containerName_Website, portScript, environmentVariableScript);
-
-//    }
-//    else
-//    {
-//        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Stopping current existed container";
-//        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
-//        delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
-//        await Task.Delay(100);
-//        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Deleting current existed container";
-//        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
-//        delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
-//        await Task.Delay(100);
-//        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
-//        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
-//        delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
-
-//        await WebsiteInstallProcess(settingList, progressDetail_RemakeWebsiteContainer);
-//    }
-//    // confirm container is running            
-//    bool isWebsiteContainerRunning = await CheckContainerRunningUsingImage(imageName_Website);
-//    if (isWebsiteContainerRunning)
-//    {
-//        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
-//        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Pass;
-//    }
-//    else
-//    {
-//        progressDetail_RemakeWebsiteContainer.ProgressDescription = "Containerize Website image";
-//        progressDetail_RemakeWebsiteContainer.StatusStatePD = (int)EProgressStatus.Fail;
-//    }
-//    progressDetail_RemakeWebsiteContainer.IsFinish = true;
-//    delegateProgressResult?.Invoke(progressDetail_RemakeWebsiteContainer);
-//}
 //        private async Task UpdateWebsiteImage(List<Setting> settingList)
 //        {
 //            // Init progress result and send to progress monitor

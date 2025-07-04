@@ -304,6 +304,16 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                     DictionaryKey = "WEBAPI_URL",
                                     DictionaryValue = ipAddress_Ethernet,
                                 },
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "EMAIL",
+                                    DictionaryValue = "carlos.chu@uneotech.com,ted.fang@uneotech.com",
+                                },
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "EMAIL_CC",
+                                    DictionaryValue = "york_huang@uneotech.com,jayce@uneotech.com",
+                                },
                             }
                         },
                     }
@@ -348,6 +358,16 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 {
                                     DictionaryKey = "WEBAPI_URL",
                                     DictionaryValue = ipAddress_Ethernet,
+                                },
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "EMAIL",
+                                    DictionaryValue = "carlos.chu@uneotech.com,ted.fang@uneotech.com",
+                                },
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "EMAIL_CC",
+                                    DictionaryValue = "york_huang@uneotech.com,jayce@uneotech.com",
                                 },
                             }
                         },
