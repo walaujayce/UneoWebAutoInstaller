@@ -188,18 +188,26 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         private void UpdateSettingModalListener(Update selectedUpdate)
         {
             Debug.WriteLine("UpdateSettingModalListener");
+            SettingModal settingModal = new SettingModal()
+            {
+                Owner = Application.Current.MainWindow,
+            };
+            settingModal.SetProcessMode(1);
+            settingModal.SetSelectedUpdate(selectedUpdate);
+            settingModal.SetDelegateInstallationData(new DelegateInstallationData(UpdateDataListener));
+            settingModal.SetDelegateOverlayShow(new DelegateOverlayShow(OverlayShowListener));
             if (selectedUpdate.IsProceedToSettingModal)
             {
                 OverlayShowListener(true);
-                SettingModal settingModal = new SettingModal()
-                {
-                    Owner = Application.Current.MainWindow,
-                };
-                settingModal.SetProcessMode(1);
-                settingModal.SetDelegateOverlayShow(new DelegateOverlayShow(OverlayShowListener));
-                settingModal.SetSelectedUpdate(selectedUpdate);
-                settingModal.SetDelegateInstallationData(new DelegateInstallationData(UpdateDataListener));
                 settingModal.ShowDialog();
+            }
+            else
+            {
+                // no setting data from setting modal, so create a dummy data
+                Dictionary<int, List<Setting>> temp = new();
+                temp[selectedUpdate.UpdateID] = new List<Setting>();
+
+                UpdateDataListener(temp);
             }
             
         }

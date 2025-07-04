@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<AssemblyVersion>1.0.3</AssemblyVersion>
+	<AssemblyVersion>1.0.4</AssemblyVersion>
 	<OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -19,7 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="LibFT4222.dll" />
     <None Remove="Views\Assets\Icon_Close.png" />
     <None Remove="Views\Assets\Icon_Close_FFD3D3D3.png" />
     <None Remove="Views\Assets\Icon_Contract.png" />
@@ -44,12 +43,6 @@
     <None Remove="Views\Assets\Icon_Warning_FFFCD700.png" />
     <None Remove="Views\Assets\Icon_Write.png" />
     <None Remove="Views\Assets\Icon_WriteTemplate.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="LibFT4222.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

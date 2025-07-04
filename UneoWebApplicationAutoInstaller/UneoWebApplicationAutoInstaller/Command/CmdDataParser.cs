@@ -94,7 +94,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     await ModifySocketServerAppSettings(settingList);
                     break;
                 case (int)EUpdateID.UMonitorSocketServer_ALL:
-                    await UpdateSocketServer(settingList);
+                    await UpdateSocketServer();
                     break;
                 case (int)EUpdateID.WebAPI_CONTAINER:
                     await RemakeWebAPI(settingList);
@@ -397,7 +397,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             progressDetail_UMonitorSocketServer.IsFinish = true;
             delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServer);
         }
-        private async Task UpdateSocketServer(List<Setting> settingList)
+        private async Task UpdateSocketServer()
         {
             // Init progress result and send to progress monitor
             ProgressDetail progressDetail_UMonitorSocketServerUpdateAll = new ProgressDetail();
@@ -414,13 +414,13 @@ namespace UneoWebApplicationAutoInstaller.Command
             delegateProgressResult?.Invoke(progressDetail_UMonitorSocketServerUpdateAll);
 
             // load and 
-            ObservableCollection<DictionaryInput> appSettingList = new ObservableCollection<DictionaryInput>();
-            List<DictionaryInput> temp_appSettingList = settingList.First(s => s.SettingName == "App Settings").KeyValueItems.ToList();
-            foreach (var appSetting in temp_appSettingList)
-            {
-                appSettingList.Add(appSetting);
-            }
-            PublicFunction.WriteJsonFile(appSettingList, PublicFunction.USocketServer_AppSettings_JSON_FilePath);
+            //ObservableCollection<DictionaryInput> appSettingList = new ObservableCollection<DictionaryInput>();
+            //List<DictionaryInput> temp_appSettingList = settingList.First(s => s.SettingName == "App Settings").KeyValueItems.ToList();
+            //foreach (var appSetting in temp_appSettingList)
+            //{
+            //    appSettingList.Add(appSetting);
+            //}
+            //PublicFunction.WriteJsonFile(appSettingList, PublicFunction.USocketServer_AppSettings_JSON_FilePath);
 
             await StartUMonitorSocketServer(progressDetail_UMonitorSocketServerUpdateAll);
             progressDetail_UMonitorSocketServerUpdateAll.IsFinish = true;

@@ -489,7 +489,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             }
             else
             {
-                Log.I(TAG, "Folder is not exist.");
+                Log.I(TAG, "Folder does not exist.");
                 return false;
             }
         }
@@ -502,30 +502,48 @@ namespace UneoWebApplicationAutoInstaller.Utilities
 #else
             currentPublishFolderPath = Path.Combine(AppContext.BaseDirectory, "UMonitorSocketServer", "publish");
 #endif
-            // select the latest version of "publish" folder 
-            string newVersionPublishFolderPath;
-            
-            var dialog = new CommonOpenFileDialog
-            {
-                IsFolderPicker = true,
-                Title = "Select a folder to update.",
-            };
 
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            string? newVersionPublishFolderPath = null;
+            bool folderSelected = false;
+
+            while (!folderSelected)
             {
+                var dialog = new CommonOpenFileDialog
+                {
+                    IsFolderPicker = true,
+                    Title = "Select the folder containing \"UMonitorSocketServer.exe\"",
+                };
+
+                if (dialog.ShowDialog() != CommonFileDialogResult.Ok)
+                {
+                    // User cancelled
+                    return;
+                }
+
                 newVersionPublishFolderPath = dialog.FileName;
 
-                try
+                // Check if the .exe exists in the selected folder
+                string exePath = Path.Combine(newVersionPublishFolderPath, "UMonitorSocketServer.exe");
+                if (!File.Exists(exePath))
                 {
-                    CopyFolderToDestination(newVersionPublishFolderPath, currentPublishFolderPath);
-                    MessageBox.Show("Folder copied successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("The selected folder does not contain 'UMonitorSocketServer.exe'.\nPlease select the correct folder.", "Invalid Folder", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    continue;
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error copying folder: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+
+                folderSelected = true;
+            }
+
+            try
+            {
+                CopyFolderToDestination(newVersionPublishFolderPath, currentPublishFolderPath);
+                MessageBox.Show("UMonitorSocketServer update successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error updating UMonitorSocketServer: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         public static void CopyFolderToDestination(string sourceFolderPath, string destinationFolderPath)
         {

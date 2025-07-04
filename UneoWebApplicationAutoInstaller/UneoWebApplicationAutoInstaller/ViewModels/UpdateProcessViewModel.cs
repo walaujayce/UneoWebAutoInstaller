@@ -176,7 +176,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                     UpdateID = (int)EUpdateID.UMonitorSocketServer_ALL,
                     UpdateName = PublicFunction.GetUpdateName((int)EUpdateID.UMonitorSocketServer_ALL),
                     UpdateDescription = "Update UMonitorSocketServer version.",
-                    IsProceedToSettingModal = true,
+                    IsProceedToSettingModal = false,
                     SettingList = new()
                     {
                         new Setting()

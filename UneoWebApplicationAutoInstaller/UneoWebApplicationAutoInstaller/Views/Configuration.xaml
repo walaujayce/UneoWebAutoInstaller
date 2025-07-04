@@ -387,7 +387,7 @@
                                 <Border Height="{Binding ActualHeight, ElementName=TitleBarTextBlock}" Padding="3">
                                     <Image Source="{Binding ConnectStatusImage}"/>                                    
                                 </Border>
-                                <TextBlock x:Name="StatusTextBlock" Text="{Binding ConnectStatusText}" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="StatusTextBlock" Text="{Binding ConnectStatusText}" VerticalAlignment="Center" FontFamily="times new roman"/>
                             </StackPanel>
                         </Border>
                     </Grid>
