@@ -4,11 +4,178 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:UneoWebApplicationAutoInstaller.Views"
+      xmlns:vm="clr-namespace:UneoWebApplicationAutoInstaller.ViewModels" d:DataContext="{d:DesignInstance Type=vm:DiagnosticViewModel}"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="DiagnosticProcess">
 
-    <Grid>
-        
+    <Page.Resources>
+        <Style x:Key="CheckboxBorderStyle" TargetType="Border">
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="Transparent"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                To="#F6F7E8"
+                Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                To="Transparent"
+                Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="CheckButtonStyle" TargetType="CheckBox">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="Arial"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border Style="{DynamicResource CheckboxBorderStyle}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="4">
+                                <!-- Circle -->
+                                <Grid>
+                                    <Rectangle x:Name="Circle"
+                                        Width="15"
+                                        Height="15"
+                                        Stroke="Black"
+                                        StrokeThickness="0.5"
+                                        Fill="Transparent"
+                                        VerticalAlignment="Center"/>
+                                    <Border  Height="20" Width="20" Margin="3,0,0,3" BorderBrush="Transparent" BorderThickness="1.5" Panel.ZIndex="10" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Image Source="{Binding CheckboxImage}"/>
+                                    </Border>
+
+                                </Grid>
+                                <!-- Space between circle and text -->
+                                <ContentPresenter Margin="8,0,0,0"
+                                            VerticalAlignment="Center"
+                                            RecognizesAccessKey="True"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <!-- When Checked: fill with blue -->
+                            <!--
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Circle" Property="Fill" Value="orange" />
+                                <Setter TargetName="Circle" Property="Stroke" Value="orange" />
+                            </Trigger>
+                            -->
+                            <!-- Optional: MouseOver effect -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Circle" Property="StrokeThickness" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+    </Page.Resources>
+
+    <Grid Margin="15,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <!--Install Selection Radio Button-->
+        <Grid Grid.Row="0">
+            <ItemsControl ItemsSource="{Binding InstallSelection}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <CheckBox x:Name="InstallCheckbox" Style="{DynamicResource CheckButtonStyle}" Content="{Binding InstallName}" IsChecked="{Binding IsChecked}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+
+        <!--Control Button-->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Border Style="{DynamicResource BackButtonStyle}" MouseLeftButtonUp="BackToPrevious_Diagnostic_Clicked">
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="BackLabel"
+                                    Storyboard.TargetProperty="(Label.Foreground).(SolidColorBrush.Color)"
+                                    To="Black" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="Border.MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="BackLabel"
+                                    Storyboard.TargetProperty="(Label.Foreground).(SolidColorBrush.Color)"
+                                    To="Gray" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+                    <Label x:Name="BackLabel"
+           FontSize="18"
+           Content="Back"
+           Foreground="Gray"
+           VerticalContentAlignment="Center"
+           HorizontalContentAlignment="Center"/>
+                </Border>
+            </Grid>
+
+            <Grid Grid.Column="2">
+                <Border Style="{DynamicResource ContinueButtonStyle}">
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Border.MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="ContinueLabel"
+                Storyboard.TargetProperty="(Label.Foreground).(SolidColorBrush.Color)"
+                To="#0078D3" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="Border.MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="ContinueLabel"
+                Storyboard.TargetProperty="(Label.Foreground).(SolidColorBrush.Color)"
+                To="White" Duration="0:0:0.1"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+                    <Label x:Name="ContinueLabel" FontFamily="Arial" FontSize="18" Content="Continue" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                </Border>
+            </Grid>
+        </Grid>
     </Grid>
 </Page>

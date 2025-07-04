@@ -1,4 +1,6 @@
 ﻿1. version in UneoWebApplicationAutoInstaller.csproj
 2. version in config
 3. version in setupinstaller
-4. version in jUneoWebApplicationVersion.json
+4. version in UneoWebApplicationVersion.json
+
+upgrade code : {3582E975-6D1B-4B61-9200-5DB1C7758CEC}

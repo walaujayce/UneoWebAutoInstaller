@@ -63,7 +63,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <!--Title Bar-->
-                <Border Grid.Row="0" MouseLeftButtonDown="DragWindow_Click" Background="Transparent" Padding="15,15,15,0">
+                <Border Grid.Row="0" MouseLeftButtonDown="DragWindow_Click" Background="Transparent" Padding="15,10,15,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -108,6 +108,6 @@
                 </Border>
             </Grid>
         </Border>
-        <Border x:Name="Overlay" Visibility="{Binding OverlayVisibility}" BorderBrush="Black" BorderThickness="1" CornerRadius="10" Background="Black" Opacity="0.3" Panel.ZIndex="99"/>
+        <Border x:Name="Overlay" Visibility="{Binding OverlayVisibility}" BorderBrush="Black" BorderThickness="1" CornerRadius="10" Background="Black" Opacity="0.5" Panel.ZIndex="99"/>
     </Grid>
 </Window>

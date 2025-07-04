@@ -15,6 +15,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             UpdateProcessPage = 2,
             DiagnosticPage = 3,
             ProgressMonitorPage = 4,
+            ConfigurationPage = 5,
         }
         public enum ESettingType
         {
@@ -55,8 +56,24 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             Install = 0,
             Update = 1,
             Diagnostic = 2,
-            ConfigureProgram = 3,
+            Configuration = 3,
         }
-
+        public enum EUcbConfigurationMode
+        {
+            LibUSB = 0,
+            FT4222h = 1,            
+        }
+        public enum EWifiSettingID
+        {
+            WirelessAP = 0,
+            LAN = 1,
+            SERVER = 2,
+        }
+        public enum EWifiInputType
+        {
+            CheckBox = 0,
+            ComboBox = 1,
+            InputBox = 2,
+        }
     }
 }

@@ -47,7 +47,7 @@
             <ItemsControl ItemsSource="{Binding ProcessSelection}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border x:Name="ProcessSelection" Style="{DynamicResource ProcessBorderStyle}" MouseEnter="ProcessBorder_MouseEnter" MouseLeave="ProcessBorder_MouseLeave" MouseLeftButtonUp="SelectProcess_Clicked" MouseLeftButtonDown="ProcessBorder_MouseButtonDown" >
+                        <Border x:Name="ProcessSelection" Style="{DynamicResource ProcessBorderStyle}" MouseEnter="ProcessBorder_MouseEnter" MouseLeave="ProcessBorder_MouseLeave" MouseLeftButtonUp="SelectProcess_Clicked" MouseLeftButtonDown="ProcessBorder_MouseButtonDown" IsEnabled="{Binding IsEnabled}" Opacity="{Binding BorderOpacity}">
                             <Border x:Name="InnerBorder" Style="{DynamicResource InnerBorderStyle}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>

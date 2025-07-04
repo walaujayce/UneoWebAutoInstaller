@@ -22,6 +22,7 @@ using UneoWebApplicationAutoInstaller.Models;
 using UneoWebApplicationAutoInstaller.Utilities;
 using UneoWebApplicationAutoInstaller.Views;
 using static UneoWebApplicationAutoInstaller.Utilities.Enums;
+using static UneoWebApplicationAutoInstaller.ViewModels.MainWindowViewModel;
 using Color = System.Windows.Media.Color;
 using ProcessOrigin = System.Diagnostics.Process;
 
@@ -116,6 +117,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         private UpdateProcess _updateProcessPage = new();
         private DiagnosticProcess _diagnosticProcessPage = new();
         private ProgressMonitor _progressMonitorPage = new();
+        private Configuration _configurationPage = new();
 
         private Version currentVersion, latestVersion;
         private string newInstallerUrl;
@@ -125,7 +127,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
             _navigationService = navigationService;
             NavigateToSelectedPage((int)ENavigatePage.ProcessSelectionPage);
+
             _processSelectionPage.SetDelegate(new DelegateNavigate(NavigateToSelectedPage));
+
             _installProcessPage.SetDelegate(new DelegateNavigate(NavigateToSelectedPage));
             _installProcessPage.SetDelegateSelectedInstallation(new DelegateSelectedInstallation(InstallSettingModalListener));
 
@@ -156,6 +160,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 case (int)ENavigatePage.ProgressMonitorPage:
                     _navigationService.NavigateTo(_progressMonitorPage);
                     break;
+                case (int)ENavigatePage.ConfigurationPage:
+                    _navigationService.NavigateTo(_configurationPage);
+                    break;
                 default:
                     MessageBox.Show("No such page!", "Alert", MessageBoxButton.OK);
                     return;
@@ -181,18 +188,26 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         private void UpdateSettingModalListener(Update selectedUpdate)
         {
             Debug.WriteLine("UpdateSettingModalListener");
+            SettingModal settingModal = new SettingModal()
+            {
+                Owner = Application.Current.MainWindow,
+            };
+            settingModal.SetProcessMode(1);
+            settingModal.SetSelectedUpdate(selectedUpdate);
+            settingModal.SetDelegateInstallationData(new DelegateInstallationData(UpdateDataListener));
+            settingModal.SetDelegateOverlayShow(new DelegateOverlayShow(OverlayShowListener));
             if (selectedUpdate.IsProceedToSettingModal)
             {
                 OverlayShowListener(true);
-                SettingModal settingModal = new SettingModal()
-                {
-                    Owner = Application.Current.MainWindow,
-                };
-                settingModal.SetProcessMode(1);
-                settingModal.SetDelegateOverlayShow(new DelegateOverlayShow(OverlayShowListener));
-                settingModal.SetSelectedUpdate(selectedUpdate);
-                settingModal.SetDelegateInstallationData(new DelegateInstallationData(UpdateDataListener));
                 settingModal.ShowDialog();
+            }
+            else
+            {
+                // no setting data from setting modal, so create a dummy data
+                Dictionary<int, List<Setting>> temp = new();
+                temp[selectedUpdate.UpdateID] = new List<Setting>();
+
+                UpdateDataListener(temp);
             }
             
         }
@@ -381,6 +396,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             }
             catch (Exception ex)
             {
+                VersionImage = "/Views/Assets/Icon_Info_FFFFD700.png";
+                VersionTextBlock = "No internet connection";
+                VersionTextBlockForeground = new SolidColorBrush(Color.FromRgb(255, 215 , 0));
             }
         }
         public async void CheckVersion()
@@ -399,25 +417,64 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 }
             }
         }
-        private static async Task DownloadAndInstallAsync(string downloadUrl)
+        private async Task DownloadAndInstallAsync(string downloadUrl)
         {
             if(downloadUrl == null || downloadUrl == "") return; 
-            string tempFile = Path.Combine(Path.GetTempPath(), $"UneoWebApplicationSetupInstaller{DateTime.Now}.msi");
+            string tempFile = Path.Combine(Path.GetTempPath(), $"UneoWebApplicationSetupInstaller_{DateTime.Now:yyyyMMddHHmmss}.msi");
 
-            using var client = new HttpClient();
+            List<Progress> updateApplicationProgress = [new Progress() {
+                ProgressID = 0,
+                ProgressName = "Upgrade application to latest version"
+            }];
+
+            _progressMonitorPage.GetSelectedInstallationTodoList(updateApplicationProgress);
+
+            NavigateToSelectedPage((int)ENavigatePage.ProgressMonitorPage);
+
+            ProgressDetail progressDetail_UpdateAppVersion = new ProgressDetail();
+            progressDetail_UpdateAppVersion.ProgressParentID = 0;
+            progressDetail_UpdateAppVersion.ProgressDescription = "Downloading latest msi installer";
+            progressDetail_UpdateAppVersion.StatusStatePD = (int)EProgressStatus.Ongoing;
+            ProgressResultListener(progressDetail_UpdateAppVersion);
+
+            using var client = new HttpClient()
+            {
+                Timeout = TimeSpan.FromMinutes(15)
+            };
             var data = await client.GetByteArrayAsync(downloadUrl);
             await File.WriteAllBytesAsync(tempFile, data);
 
-            // Run MSI installer silently
-            ProcessOrigin.Start(new ProcessStartInfo
+            if (File.Exists(tempFile))
             {
-                FileName = "msiexec",
-                Arguments = $"/i \"{tempFile}\" /qn",
-                UseShellExecute = true,
-                Verb = "runas"
-            });
+                progressDetail_UpdateAppVersion.ProgressDescription = "Downloading latest msi installer";
+                progressDetail_UpdateAppVersion.StatusStatePD = (int)EProgressStatus.Pass;
+            }
+            else
+            {
+                progressDetail_UpdateAppVersion.ProgressDescription = "Downloading latest msi installer";
+                progressDetail_UpdateAppVersion.StatusStatePD = (int)EProgressStatus.Fail;                
+                return;
+            }
 
-            Application.Current.Shutdown(); // Close app so MSI can overwrite files
+            progressDetail_UpdateAppVersion.IsFinish = true;
+            ProgressResultListener(progressDetail_UpdateAppVersion);
+
+            var result = MessageBox.Show(
+                    $"This application will be closed.",
+                    "Message", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+
+            if (result == MessageBoxResult.OK)
+            {
+                ProcessOrigin.Start(new ProcessStartInfo
+                {
+                    FileName = "msiexec",
+                    Arguments = $"/i \"{tempFile}\"",
+                    UseShellExecute = true,
+                    Verb = "runas"
+                });
+            }
+
+            Application.Current.Shutdown(); 
         }
     }
 }

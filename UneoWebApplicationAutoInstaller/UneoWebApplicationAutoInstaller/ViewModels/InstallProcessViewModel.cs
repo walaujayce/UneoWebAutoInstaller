@@ -46,7 +46,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 {
                     InstallID = (int)EInstallID.PostgreSQLDatabase,
                     InstallName = "PostgreSQL Database", 
-                    IsChecked = false, 
+                    IsChecked = true, 
                     SettingList = new()
                     {
                         new Setting()
@@ -96,6 +96,11 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 {
                                     DictionaryKey = "POSTGRESQL_PASSWORD",
                                     DictionaryValue = "uccc07568009",
+                                },
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "PGPASSWORD",
+                                    DictionaryValue = "uccc07568009",
                                 }
                             }
                         },
@@ -105,7 +110,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 { 
                     InstallID = (int)EInstallID.WebAPI,
                     InstallName = "WebAPI", 
-                    IsChecked = false,
+                    IsChecked = true,
                     SettingList = new()
                     {
                         new Setting()
@@ -157,7 +162,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 { 
                     InstallID = (int)EInstallID.Website,    
                     InstallName = "Website", 
-                    IsChecked = false,
+                    IsChecked = true,
                     SettingList = new()
                     {
                         new Setting()
@@ -209,7 +214,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 {
                     InstallID = (int)EInstallID.UMonitorService,
                     InstallName = "UMonitorService",
-                    IsChecked = false,
+                    IsChecked = true,
                     SettingList = new()
                     {
                         new Setting()
@@ -237,7 +242,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 },
                                 new DictionaryInput()
                                 {
-                                    DictionaryKey = "LOCAL_IP",
+                                    DictionaryKey = "SOCKETSERVER_IP",
                                     DictionaryValue = ipAddress_WIFI,
                                 },
                                 new DictionaryInput()

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<AssemblyVersion>1.0.1</AssemblyVersion>
+	<AssemblyVersion>1.0.4</AssemblyVersion>
 	<OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -22,27 +22,43 @@
     <None Remove="Views\Assets\Icon_Close.png" />
     <None Remove="Views\Assets\Icon_Close_FFD3D3D3.png" />
     <None Remove="Views\Assets\Icon_Contract.png" />
+    <None Remove="Views\Assets\Icon_Copy.png" />
     <None Remove="Views\Assets\Icon_Fail_FFFF0000.png" />
     <None Remove="Views\Assets\Icon_GoToNext_Orange.png" />
     <None Remove="Views\Assets\Icon_GoToNext_White.png" />
-    <None Remove="Views\Assets\Icon_Info_00FFFFFF.png" />
+    <None Remove="Views\Assets\Icon_GreenCircle.png" />
     <None Remove="Views\Assets\Icon_Info_B0470F.png" />
+    <None Remove="Views\Assets\Icon_Info_FFFFD700.png" />
     <None Remove="Views\Assets\Icon_LatestVersion_00FFFFFF.png" />
     <None Remove="Views\Assets\Icon_LatestVersion_FF00FF7F.png" />
     <None Remove="Views\Assets\Icon_Option_FFD3D3D3.png" />
     <None Remove="Views\Assets\Icon_Pass_FF7CFC00.png" />
+    <None Remove="Views\Assets\Icon_RedCircle.png" />
+    <None Remove="Views\Assets\Icon_Refresh.png" />
     <None Remove="Views\Assets\Icon_Remove_FFD3D3D3.png" />
+    <None Remove="Views\Assets\Icon_Save.png" />
+    <None Remove="Views\Assets\Icon_SaveOK.png" />
     <None Remove="Views\Assets\Icon_Tick.png" />
+    <None Remove="Views\Assets\Icon_USB.png" />
     <None Remove="Views\Assets\Icon_Warning_FFFCD700.png" />
+    <None Remove="Views\Assets\Icon_Write.png" />
+    <None Remove="Views\Assets\Icon_WriteTemplate.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Views\Assets\Icon_Copy.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Views\Assets\Icon_GoToNext_Orange.png" />
     <Resource Include="Views\Assets\Icon_GoToNext_White.png" />
+    <Resource Include="Views\Assets\Icon_GreenCircle.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Views\Assets\Icon_Info_B0470F.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="LibUsbDotNet" Version="2.2.29" />
     <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Management" Version="9.0.6" />
@@ -67,7 +83,7 @@
     <Resource Include="Views\Assets\Icon_Fail_FFFF0000.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Views\Assets\Icon_Info_00FFFFFF.png">
+    <Resource Include="Views\Assets\Icon_Info_FFFFD700.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Views\Assets\Icon_LatestVersion_00FFFFFF.png">
@@ -85,11 +101,32 @@
     <Resource Include="Views\Assets\Icon_Pass_FF7CFC00.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Views\Assets\Icon_RedCircle.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Views\Assets\Icon_Refresh.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Views\Assets\Icon_Remove_FFD3D3D3.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Views\Assets\Icon_Save.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Views\Assets\Icon_SaveOK.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Views\Assets\Icon_Tick.png" />
+    <Resource Include="Views\Assets\Icon_USB.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Views\Assets\Icon_Warning_FFFCD700.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Views\Assets\Icon_Write.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Views\Assets\Icon_WriteTemplate.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

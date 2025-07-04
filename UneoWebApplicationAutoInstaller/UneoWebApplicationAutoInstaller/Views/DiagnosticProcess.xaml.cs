@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UneoWebApplicationAutoInstaller.ViewModels;
 
 namespace UneoWebApplicationAutoInstaller.Views
 {
@@ -20,9 +21,17 @@ namespace UneoWebApplicationAutoInstaller.Views
     /// </summary>
     public partial class DiagnosticProcess : Page
     {
+        private DiagnosticViewModel diagnosticProcessVM;
         public DiagnosticProcess()
         {
             InitializeComponent();
+            diagnosticProcessVM = new DiagnosticViewModel();
+            DataContext = diagnosticProcessVM;
+        }
+
+        private void BackToPrevious_Diagnostic_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            NavigationService.GoBack();
         }
     }
 }

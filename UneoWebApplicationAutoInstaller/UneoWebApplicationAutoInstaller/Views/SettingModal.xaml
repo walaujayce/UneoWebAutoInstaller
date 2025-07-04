@@ -386,6 +386,7 @@
                        MultipleKeyValueTemplate="{StaticResource MultipleKeyValueTemplate}"
                        MultipleKeyValueWithReferenceTemplate="{StaticResource MultipleKeyValueWithReferenceTemplate}"
         />
+        
     </Window.Resources>
     
     <Grid>

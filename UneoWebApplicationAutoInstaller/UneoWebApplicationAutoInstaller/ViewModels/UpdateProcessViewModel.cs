@@ -51,7 +51,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 {
                     UpdateID = (int)EUpdateID.Website_CONTAINER,
                     UpdateName = PublicFunction.GetUpdateName((int)EUpdateID.Website_CONTAINER),
-                    UpdateDescription = "IP Address changes, then use this to restore website settings.",
+                    UpdateDescription = "IP address changes, then use this to restore website settings.",
                     IsProceedToSettingModal = true,
                     SettingList = new()
                     {
@@ -105,7 +105,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 {
                     UpdateID = (int)EUpdateID.Website_IMAGE,
                     UpdateName = PublicFunction.GetUpdateName((int)EUpdateID.Website_IMAGE),
-                    UpdateDescription = "Update version.",
+                    UpdateDescription = "Update image version.",
                     IsProceedToSettingModal= true,
                     SettingList = new()
                     {
@@ -175,8 +175,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 {
                     UpdateID = (int)EUpdateID.UMonitorSocketServer_ALL,
                     UpdateName = PublicFunction.GetUpdateName((int)EUpdateID.UMonitorSocketServer_ALL),
-                    UpdateDescription = "Renew UMonitorSocketServer files.",
-                    IsProceedToSettingModal = true,
+                    UpdateDescription = "Update UMonitorSocketServer version.",
+                    IsProceedToSettingModal = false,
                     SettingList = new()
                     {
                         new Setting()
@@ -229,7 +229,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 {
                     UpdateID = (int)EUpdateID.WebAPI_IMAGE,
                     UpdateName = PublicFunction.GetUpdateName((int)EUpdateID.WebAPI_IMAGE),
-                    UpdateDescription = "Update version.",
+                    UpdateDescription = "Update image version.",
                     IsProceedToSettingModal= true,
                     SettingList = new()
                     {
@@ -296,7 +296,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 },
                                 new DictionaryInput()
                                 {
-                                    DictionaryKey = "LOCAL_IP",
+                                    DictionaryKey = "SOCKETSERVER_IP",
                                     DictionaryValue = ipAddress_WIFI,
                                 },
                                 new DictionaryInput()
@@ -312,7 +312,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                 {
                     UpdateID = (int)EUpdateID.UMonitorService_IMAGE,
                     UpdateName = PublicFunction.GetUpdateName((int)EUpdateID.UMonitorService_IMAGE),
-                    UpdateDescription = "Update version.",
+                    UpdateDescription = "Update image version.",
                     IsProceedToSettingModal = true,
                     SettingList = new()
                     {
@@ -341,7 +341,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 },
                                 new DictionaryInput()
                                 {
-                                    DictionaryKey = "LOCAL_IP",
+                                    DictionaryKey = "SOCKETSERVER_IP",
                                     DictionaryValue = ipAddress_WIFI,
                                 },
                                 new DictionaryInput()

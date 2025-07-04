@@ -7,6 +7,8 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Styles/ScrollBar.xaml" />
+                <ResourceDictionary Source="/Styles/BackButton.xaml" />
+                <ResourceDictionary Source="/Styles/ContinueButton.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

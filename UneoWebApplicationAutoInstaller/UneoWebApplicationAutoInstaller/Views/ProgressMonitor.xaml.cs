@@ -41,7 +41,7 @@ namespace UneoWebApplicationAutoInstaller.Views
 
         private void ProceedToNextStage_ProgressMonitor_Clicked(object sender, MouseButtonEventArgs e)
         {
-            _progressMonitorVM.Test_Click();
+            _progressMonitorVM.GoToHomePage();
         }
         public void SetDelegate(DelegateNavigate del)
         {

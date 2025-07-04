@@ -19,6 +19,7 @@ using MessageBox = System.Windows.MessageBox;
 using Process = System.Diagnostics.Process;
 using MessageBoxButtons = System.Windows.MessageBoxButton;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using System.Text.RegularExpressions;
 
 namespace UneoWebApplicationAutoInstaller.Utilities
 {
@@ -140,21 +141,21 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             switch (updateID)
             {
                 case (int)EUpdateID.Website_CONTAINER:
-                    return "Modify Website IP Address";
+                    return "Website IP Address";
                 case (int)EUpdateID.Website_IMAGE:
-                    return "Update Website version";
+                    return "Website version";
                 case (int)EUpdateID.UMonitorSocketServer_APPSETTINGS:
-                    return "Modify USocketServer settings";
+                    return "USocketServer settings";
                 case (int)EUpdateID.UMonitorSocketServer_ALL:
-                    return "Update USocketServer version";
+                    return "USocketServer version";
                 case (int)EUpdateID.WebAPI_CONTAINER:
-                    return "Remake WebAPI container";
+                    return "WebAPI container";
                 case (int)EUpdateID.WebAPI_IMAGE:
-                    return "Update WebAPI version";
+                    return "WebAPI version";
                 case (int)EUpdateID.UMonitorService_CONTAINER:
-                    return "Remake UMonitorService container";
+                    return "UMonitorService container";
                 case (int)EUpdateID.UMonitorService_IMAGE:
-                    return "Update UMonitorService version";
+                    return "UMonitorService version";
                 default:
                     return "Undefined";
             }
@@ -226,7 +227,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                 // Ignore vEthernet interfaces
                 if (networkInterface.Name.StartsWith("vEthernet")) continue;
                 if (networkInterface.Name.StartsWith("Loopback")) continue;
-                //if (networkInterface.Name.StartsWith("Wi-Fi")) continue; z
+                //if (networkInterface.Name.StartsWith("Wi-Fi")) continue;
 
                 // Only check interfaces that are up
                 if (networkInterface.OperationalStatus == OperationalStatus.Up)
@@ -488,7 +489,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             }
             else
             {
-                Log.I(TAG, "Folder is not exist.");
+                Log.I(TAG, "Folder does not exist.");
                 return false;
             }
         }
@@ -501,32 +502,48 @@ namespace UneoWebApplicationAutoInstaller.Utilities
 #else
             currentPublishFolderPath = Path.Combine(AppContext.BaseDirectory, "UMonitorSocketServer", "publish");
 #endif
-            // select the latest version of "publish" folder 
-            string newVersionPublishFolderPath;
-            
-            var dialog = new CommonOpenFileDialog
-            {
-                IsFolderPicker = true,
-                Title = "Select a folder to update.",
-            };
 
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            string? newVersionPublishFolderPath = null;
+            bool folderSelected = false;
+
+            while (!folderSelected)
             {
+                var dialog = new CommonOpenFileDialog
+                {
+                    IsFolderPicker = true,
+                    Title = "Select the folder containing \"UMonitorSocketServer.exe\"",
+                };
+
+                if (dialog.ShowDialog() != CommonFileDialogResult.Ok)
+                {
+                    // User cancelled
+                    return;
+                }
+
                 newVersionPublishFolderPath = dialog.FileName;
 
-                try
+                // Check if the .exe exists in the selected folder
+                string exePath = Path.Combine(newVersionPublishFolderPath, "UMonitorSocketServer.exe");
+                if (!File.Exists(exePath))
                 {
-                    CopyFolderToDestination(newVersionPublishFolderPath, currentPublishFolderPath);
-                    MessageBox.Show("Folder copied successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("The selected folder does not contain 'UMonitorSocketServer.exe'.\nPlease select the correct folder.", "Invalid Folder", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    continue;
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error copying folder: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+
+                folderSelected = true;
             }
 
-
+            try
+            {
+                CopyFolderToDestination(newVersionPublishFolderPath, currentPublishFolderPath);
+                MessageBox.Show("UMonitorSocketServer update successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error updating UMonitorSocketServer: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
+
 
         public static void CopyFolderToDestination(string sourceFolderPath, string destinationFolderPath)
         {
@@ -569,6 +586,72 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                 File.Copy(filePath, newFilePath, true);
             }
         }
+        public static Dictionary<string,string>? GetConnectedWifiNameAndPassword()
+        {
+            //Encoding systemEncoding = GetSystemEncoding();
 
+            var process1 = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "netsh",
+                    Arguments = "wlan show interfaces",
+                    StandardOutputEncoding = Encoding.UTF8,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+            process1.Start();
+            var output1 = process1.StandardOutput.ReadToEnd();
+            process1.WaitForExit();
+
+            var match1 = Regex.Match(output1, @"^\s*SSID\s*:\s*(.+)$", RegexOptions.Multiline);
+            string? wifiName = match1.Success ? match1.Groups[1].Value.Trim() : null;
+
+            if (wifiName == null) return null;
+
+            var process2 = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "netsh",
+                    Arguments = $"wlan show profile name=\"{wifiName}\" key=clear",
+                    RedirectStandardOutput = true,
+                    StandardOutputEncoding = Encoding.UTF8,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+            process2.Start();
+            string output2 = process2.StandardOutput.ReadToEnd();
+            process2.WaitForExit();
+
+            var match2 = Regex.Match(output2, @"(Key Content|金鑰內容|关键内容|キーの内容)\s*:\s*(.+)", RegexOptions.IgnoreCase);
+            string? wifiPassword = match2.Success ? match2.Groups[2].Value.Trim() : null;
+
+            if (wifiPassword == null) return null;
+
+            return new Dictionary<string, string>
+            {
+                { "SSID", wifiName },
+                { "PASSWORD", wifiPassword }
+            };
+        }
+        // When GetConnectedWifiNameAndPassword , if system is traditional chinese it will return garbled characters, so need to detech the system language
+        private static Encoding GetSystemEncoding()
+        {
+            string culture = CultureInfo.CurrentCulture.Name;
+
+            return culture switch
+            {
+                "zh-TW" => Encoding.GetEncoding(950),   // Big5
+                "zh-CN" => Encoding.GetEncoding(936),   // GB2312
+                "ja-JP" => Encoding.GetEncoding(932),   // Shift-JIS
+                _ => Encoding.UTF8                     // Default
+            };
+        }
     }
-}
+}   
