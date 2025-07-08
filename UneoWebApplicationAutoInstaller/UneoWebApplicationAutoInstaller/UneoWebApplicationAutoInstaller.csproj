@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<AssemblyVersion>1.0.4</AssemblyVersion>
+	<AssemblyVersion>0.0.1</AssemblyVersion>
 	<OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -27,6 +27,7 @@
     <None Remove="Views\Assets\Icon_GoToNext_Orange.png" />
     <None Remove="Views\Assets\Icon_GoToNext_White.png" />
     <None Remove="Views\Assets\Icon_GreenCircle.png" />
+    <None Remove="Views\Assets\Icon_Help.png" />
     <None Remove="Views\Assets\Icon_Info_B0470F.png" />
     <None Remove="Views\Assets\Icon_Info_FFFFD700.png" />
     <None Remove="Views\Assets\Icon_LatestVersion_00FFFFFF.png" />
@@ -52,6 +53,9 @@
     <Resource Include="Views\Assets\Icon_GoToNext_Orange.png" />
     <Resource Include="Views\Assets\Icon_GoToNext_White.png" />
     <Resource Include="Views\Assets\Icon_GreenCircle.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Views\Assets\Icon_Help.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Views\Assets\Icon_Info_B0470F.png" />
@@ -132,6 +136,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="PostgreSQL\dump-postgres.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

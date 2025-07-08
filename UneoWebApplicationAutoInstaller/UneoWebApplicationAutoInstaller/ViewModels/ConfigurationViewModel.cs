@@ -16,6 +16,12 @@ using UneoWebApplicationAutoInstaller.Host;
 using UneoWebApplicationAutoInstaller.Models;
 using static UneoWebApplicationAutoInstaller.Utilities.Enums;
 using UneoWebApplicationAutoInstaller.Utilities;
+using static UneoWebApplicationAutoInstaller.ViewModels.MainWindowViewModel;
+using UneoWebApplicationAutoInstaller.Views;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.CodeDom.Compiler;
+using System.IO;
+using System.Security.Cryptography;
 
 namespace UneoWebApplicationAutoInstaller.ViewModels
 {
@@ -244,6 +250,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
 
         private bool _isConnecting = false;
         private bool isSkipReadWifiValue = false;
+
+        private List<string> informationList;
+
         public ConfigurationViewModel()
         {
             IpAddressList = new ObservableCollection<DictionaryInput>();
@@ -344,7 +353,14 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                         },
                     }
                 },
-            };            
+            };
+            informationList = new List<string>
+            {
+                "If you have installed LibUsbDotNet_Setup.2.2.8, skip the following steps.",
+                "Plug in USB to PC and UCB, execute LibUsbDotNet_Setup.2.2.8.",
+                "After \"libusb-win32 filter installer\" program show up, go \"Install a device filter\", then \"Next\"",
+                "Select [Hardware ID] VID : 0F5A PID:0001 , REV:0200, then \"Install\"."
+            };
         }
         //////////////////////////////////////// CONNECT with LibUSB ////////////////////////////////////////
         private LibUSB? libUSB = null;
@@ -933,6 +949,16 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             SaveTemplateVisibility = Visibility.Hidden;
             IsWriteTemplateBtnEnabled = false;
             WriteTemplateImageOpacity = 0.5;
+        }
+
+        private DelegateInformation? delegateInformation = null;
+        public void SetVMDelegateInformation(DelegateInformation del)
+        {
+            this.delegateInformation = del;
+        }
+        public void ProceedToHelpCenter()
+        {
+            delegateInformation?.Invoke("Configuration Information", informationList);
         }
     }
 }

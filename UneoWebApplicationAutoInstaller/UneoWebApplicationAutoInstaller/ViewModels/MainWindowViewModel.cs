@@ -110,6 +110,9 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         public delegate void DelegateSelectedUpdate(Update selectedUpdate);
         public DelegateSelectedInstallation delegateSelectedUpdate;
 
+        public delegate void DelegateInformation(string title, List<string> informationList);
+        public DelegateInformation delegateinformation;
+
         public delegate void DelegateProgressResult(ProgressDetail progressResult);
 
         private ProcessSelection _processSelectionPage = new();
@@ -136,6 +139,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             _progressMonitorPage.SetDelegate(new DelegateNavigate(NavigateToSelectedPage));
 
             _updateProcessPage.SetDelegateSelectedUpdate(new DelegateSelectedUpdate(UpdateSettingModalListener));
+
+            _configurationPage.SetDelegateInformation(new DelegateInformation(InformationCenterModalListener));
 
             _=CheckApplicationVersion();
 
@@ -475,6 +480,20 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             }
 
             Application.Current.Shutdown(); 
+        }
+        public void InformationCenterModalListener(string title, List<string> informationList)
+        {
+            if (informationList.Count > 0)
+            {
+                OverlayShowListener(true);
+                InformationCenter infoCenterModal = new InformationCenter()
+                {
+                    Owner = Application.Current.MainWindow,
+                };
+                infoCenterModal.SetDelegateOverlayShow(new DelegateOverlayShow(OverlayShowListener));
+                infoCenterModal.SetInformationList(title, informationList);
+                infoCenterModal.ShowDialog();
+            }
         }
     }
 }
