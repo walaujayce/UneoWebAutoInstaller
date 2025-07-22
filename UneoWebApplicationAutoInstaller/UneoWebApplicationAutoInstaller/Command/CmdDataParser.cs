@@ -1265,6 +1265,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                         $"docker cp \"{postgreSQLPath}\" {containerId}:{containerSqlFilePath}",
                         "Copy SQL dump into container");
 
+                    await Task.Delay(100);
                     //Restore SQL dump into the new database
                     await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(
                         $"docker exec {environmentVariableScript}{containerId} pg_restore -U postgres -d {DATABASE_NAME} {containerSqlFilePath}",
@@ -1578,6 +1579,7 @@ namespace UneoWebApplicationAutoInstaller.Command
         }
         private async Task UMonitorSocketServerInstallProcess(List<Setting> settingList)
         {
+            await PublicFunction.IsTaskScheduledAsync("AutoRestartSocketServer");
             // Init progress result and send to progress monitor
             ProgressDetail progressDetail_UMonitorSocketServer = new ProgressDetail();
             progressDetail_UMonitorSocketServer.ProgressParentID = (int)EInstallID.UMonitorSocketServer;

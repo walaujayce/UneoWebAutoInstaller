@@ -20,6 +20,7 @@ using Process = System.Diagnostics.Process;
 using MessageBoxButtons = System.Windows.MessageBoxButton;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Text.RegularExpressions;
+using UneoWebApplicationAutoInstaller.Command;
 
 namespace UneoWebApplicationAutoInstaller.Utilities
 {
@@ -653,5 +654,35 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                 _ => Encoding.UTF8                     // Default
             };
         }
+        public static async Task IsTaskScheduledAsync(string taskName)
+        {
+            string checkTaskCommand = $"schtasks /query /tn \"{taskName}\"";
+
+            string result = await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(checkTaskCommand, "Checking if Auto Detect IP task exists");
+            try
+            {
+                if (!result.Contains(taskName, StringComparison.OrdinalIgnoreCase)) // If result is not found, task doesn't exist
+                {
+                    string batchFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RunSocketServerAfterDocker.bat");
+
+                    string cmdCommand = $"schtasks /create /tn \"{taskName}\" /tr \"\\\"{batchFilePath}\\\"\" /sc onlogon /rl highest /f";
+
+                    await CommandExecutor.Instance.RunCommandAsAdminAsync(cmdCommand, "Creating Windows Task Scheduler Task for Auto Detect IP");
+
+                    Log.I(TAG, $"Task Scheduler '{taskName}' has been created with 30-second delay.");
+                }
+                else
+                {
+                    Log.I(TAG, $"Task Scheduler '{taskName}' is already scheduled.");
+                    return;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Log.E(TAG, $"{ex.Message}");
+            }
+        }
+
     }
 }   

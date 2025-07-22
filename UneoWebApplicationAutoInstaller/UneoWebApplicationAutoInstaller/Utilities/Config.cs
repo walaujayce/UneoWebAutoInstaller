@@ -8,7 +8,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
 {
     public class Config
     {
-        public static string Version { get; set; } = "V0.0.1";
+        public static string Version { get; set; } = "V0.0.3";
         public static bool EnableDockerCheck { get; set; } = true;
         public static bool IsCheckWebAPIContainerRunning { get; set; } = true;
     }
