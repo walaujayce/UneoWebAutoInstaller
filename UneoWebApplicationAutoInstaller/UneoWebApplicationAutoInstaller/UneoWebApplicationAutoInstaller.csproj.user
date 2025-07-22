@@ -13,6 +13,9 @@
     <Compile Update="Views\DiagnosticProcess.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\InformationCenter.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\InstallProcess.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -43,6 +46,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\DiagnosticProcess.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\InformationCenter.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\InstallProcess.xaml">

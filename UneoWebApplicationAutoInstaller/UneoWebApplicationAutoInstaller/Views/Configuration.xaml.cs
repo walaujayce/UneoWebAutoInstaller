@@ -17,6 +17,7 @@ using System.Windows.Shapes;
 using UneoWebApplicationAutoInstaller.Models;
 using UneoWebApplicationAutoInstaller.ViewModels;
 using static UneoWebApplicationAutoInstaller.Utilities.Enums;
+using static UneoWebApplicationAutoInstaller.ViewModels.MainWindowViewModel;
 
 namespace UneoWebApplicationAutoInstaller.Views
 {
@@ -157,7 +158,6 @@ namespace UneoWebApplicationAutoInstaller.Views
             var button = (Border)sender;
             button.Tag = "MouseLeave";
         }
-
         private void RefreshIcon_Loaded(object sender, RoutedEventArgs e)
         {
             var image = sender as Image;
@@ -166,6 +166,14 @@ namespace UneoWebApplicationAutoInstaller.Views
                 rotate.CenterX = image.ActualWidth / 2;
                 rotate.CenterY = image.ActualHeight / 2;
             }
+        }
+        private void ProceedToHelpCenter_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            configurationVM.ProceedToHelpCenter();
+        }
+        public void SetDelegateInformation(DelegateInformation del)
+        {
+            configurationVM.SetVMDelegateInformation(del);
         }
     }
 }
