@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
 {
     public class Config
     {
-        public static string Version { get; set; } = "V0.0.3";
+        public static string Version { get; set; } = "V0.0.5";
         public static bool EnableDockerCheck { get; set; } = true;
         public static bool IsCheckWebAPIContainerRunning { get; set; } = true;
     }

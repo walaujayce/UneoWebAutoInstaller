@@ -622,7 +622,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                         WifiSetting.DHCP = (bool)item.IsChecked;
                         break;
                     case "Security":
-                        WifiSetting.Security = TryParseInt(item.DictionaryValue);
+                        WifiSetting.Security = TryParseInt(item.DictionaryValue) ?? 0;
                         break;
                     case "SSID":
                         WifiSetting.SSID = (string)item.DictionaryValue;
@@ -700,10 +700,10 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                         WifiSetting.Server_IP = (string)item.DictionaryValue;
                         break;
                     case "Port":
-                        WifiSetting.PORT = TryParseInt(item.DictionaryValue);
+                        WifiSetting.PORT = TryParseInt(item.DictionaryValue) ?? 0;
                         break;
                     case "RSSI":
-                        WifiSetting.RSSI = TryParseInt(item.DictionaryValue);
+                        WifiSetting.RSSI = TryParseInt(item.DictionaryValue) ?? 0;
                         break;
                 }
             }
@@ -734,7 +734,19 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
             {
                 libUSB?.singleWrite(HostCmds.Read_Command_1());
             });
-
+            string writeData = $"DHCP:\t {WifiSetting.DHCP}\n" +
+                $"Security:\t {WifiSetting.Security}\n" +
+                $"SSID:\t {WifiSetting.SSID}\n" +
+                $"PSK:\t {WifiSetting.PSK}\n" +
+                $"MAC:\t {WifiSetting.MAC}\n" +
+                $"UCBIP:\t {WifiSetting.UCB_IP}\n" +
+                $"Net:\t {WifiSetting.Netmask}\n" +
+                $"Gateway:\t {WifiSetting.Gateway}\n" +
+                $"Server:\t {WifiSetting.Server_IP}\n" +
+                $"Port:\t {WifiSetting.PORT}\n" +
+                $"RSSI:\t {WifiSetting.RSSI}\n" +
+                $"Save:\t {isWriteWithTemplate}";
+            //StatusMessageText = writeData;
         }
         //////////////////////////////////////// Save Template ////////////////////////////////////////
         private List<WifiSetting> tempWifiSettingList = new List<WifiSetting>();
@@ -814,19 +826,16 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         {
             return BitConverter.GetBytes(value);
         }
-        private int TryParseInt(object obj)
-        {
-            if (obj is string stringValue && int.TryParse(stringValue, out int value))
+        private int? TryParseInt(object obj)
+        {         
+            string temp = Convert.ToString(obj);
+            if(int.TryParse(temp, out int value))
             {
                 return value;
             }
-            else if (obj is int intValue)
-            {
-                return intValue;
-            }
             else
             {
-                return 0; // fallback if parsing fails
+                return 0;
             }
         }
         public void GetWifiNameAndPassword()

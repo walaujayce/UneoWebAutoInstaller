@@ -39,8 +39,8 @@ namespace UneoWebApplicationAutoInstaller.Models
                 OnPropertyChanged("SettingList");
             }
         }
-        public static bool DHCP { get; set; }
-        public static int Security { get; set; }
+        public static bool DHCP { get; set; } = true;
+        public static int Security { get; set; } = 2;
         public static string SSID { get; set; } = "";
         public static string PSK { get; set; } = "";               
         public static string MAC { get; set; } = "";
@@ -48,8 +48,8 @@ namespace UneoWebApplicationAutoInstaller.Models
         public static string Netmask { get; set; } = "";
         public static string Gateway { get; set; } = "";
         public static string Server_IP { get; set; } = "";
-        public static int PORT { get; set; }
-        public static int RSSI { get; set; }
+        public static int PORT { get; set; } = 7282;
+        public static int RSSI { get; set; } = 0;
     }
 
 }

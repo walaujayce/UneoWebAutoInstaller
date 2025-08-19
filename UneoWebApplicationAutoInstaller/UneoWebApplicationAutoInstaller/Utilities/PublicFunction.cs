@@ -608,10 +608,10 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             var output1 = process1.StandardOutput.ReadToEnd();
             process1.WaitForExit();
 
-            var match1 = Regex.Match(output1, @"^\s*SSID\s*:\s*(.+)$", RegexOptions.Multiline);
+            var match1 = Regex.Match(output1, @"^\s*SSID\s*[:：]\s*(.+)$", RegexOptions.Multiline);
             string? wifiName = match1.Success ? match1.Groups[1].Value.Trim() : null;
 
-            if (wifiName == null) return null;
+            if (string.IsNullOrWhiteSpace(wifiName)) return null;
 
             var process2 = new Process
             {
@@ -630,10 +630,10 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             string output2 = process2.StandardOutput.ReadToEnd();
             process2.WaitForExit();
 
-            var match2 = Regex.Match(output2, @"(Key Content|金鑰內容|关键内容|キーの内容)\s*:\s*(.+)", RegexOptions.IgnoreCase);
+            var match2 = Regex.Match(output2, @"(Key Content|金鑰內容|关键内容|キーの内容)\s*[:：]\s*(.+)", RegexOptions.IgnoreCase);
             string? wifiPassword = match2.Success ? match2.Groups[2].Value.Trim() : null;
 
-            if (wifiPassword == null) return null;
+            if (string.IsNullOrWhiteSpace(wifiPassword)) return null;
 
             return new Dictionary<string, string>
             {
@@ -672,7 +672,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                     Log.I(TAG, $"Task Scheduler '{taskName}' has been created with 30-second delay.");
                 }
                 else
-                {
+                {   
                     Log.I(TAG, $"Task Scheduler '{taskName}' is already scheduled.");
                     return;
                 }
