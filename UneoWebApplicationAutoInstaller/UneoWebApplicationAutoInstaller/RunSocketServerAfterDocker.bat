@@ -14,7 +14,7 @@ if errorlevel 1 (
 )
 
 REM Wait 15 seconds before launching app
-timeout /t 15 >nul
+timeout /t 60 >nul
 
 REM Start your application once Docker is running
 echo [INFO] Docker backend is running. Launching app...
