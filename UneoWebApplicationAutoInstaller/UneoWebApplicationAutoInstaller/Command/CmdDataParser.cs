@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static UneoWebApplicationAutoInstaller.ViewModels.MainWindowViewModel;
-using UneoWebApplicationAutoInstaller.Models;
-using static UneoWebApplicationAutoInstaller.Utilities.Enums;
-using Newtonsoft.Json.Linq;
-using ProcessOrigin = System.Diagnostics.Process;
-using System.IO;
-using UneoWebApplicationAutoInstaller.Utilities;
-using System.Diagnostics;
-using System.Text.Json;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Security.Policy;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using UneoWebApplicationAutoInstaller.Models;
+using UneoWebApplicationAutoInstaller.Utilities;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using static UneoWebApplicationAutoInstaller.Utilities.Enums;
+using static UneoWebApplicationAutoInstaller.ViewModels.MainWindowViewModel;
+using ProcessOrigin = System.Diagnostics.Process;
 
 namespace UneoWebApplicationAutoInstaller.Command
 {
@@ -71,6 +73,9 @@ namespace UneoWebApplicationAutoInstaller.Command
                         break;
                     case (int)EInstallID.UMonitorService:
                         await UMonitorServiceInstallProcess(settingList);
+                        break;
+                    case (int)EInstallID.Notification:
+                        await NotificationInstallProcess(settingList);
                         break;
                 }
 
@@ -1740,6 +1745,222 @@ namespace UneoWebApplicationAutoInstaller.Command
             // invoke progress monitor that all process finish
             progressDetail_UMonitorServices.IsFinish = true;
             delegateProgressResult?.Invoke(progressDetail_UMonitorServices);
+        }
+        private async Task NotificationInstallProcess(List<Setting> settingList)
+        {
+            // Init progress result and send to progress monitor
+            ProgressDetail progressDetail_Notification = new ProgressDetail();
+            progressDetail_Notification.ProgressParentID = (int)EInstallID.Notification;
+
+            // Get setting param - server name, webapi ip, email, emailcc, event id
+            string serverName = settingList.First(s => s.SettingName == "Server Name").SettingValue;
+            string webAPI_IP = settingList.First(s => s.SettingName == "WEBAPI IP").SettingValue;
+            string email = settingList.First(s => s.SettingName == "Email").SettingValue;
+            string emailCc = settingList.First(s => s.SettingName == "Email Cc").SettingValue;
+            string[] eventID = settingList.First(s => s.SettingName == "Event ID").SettingValue.Split(',');
+            string eventIdScript = string.Join(" or ", eventID.Select(eid => $"EventID={eid}"));
+
+            string exeDir = AppDomain.CurrentDomain.BaseDirectory;
+
+            // delete old task scheduler
+            string deleteWindowsUpdateCmd = "schtasks / delete / tn \"MonitorWindowsUpdate\" / f";
+            await CommandExecutor.Instance.RunCommandAsAdminAsync(deleteWindowsUpdateCmd, "Delete old Windows Update Notification");
+            // create a taskcheduler that monitor event id and execute SendEmailWindowsUpdate
+            string ps1_SendEmailWindowsUpdatePath = Path.Combine(exeDir, "SendEmailWindowsUpdate.ps1");
+
+            string windowsUpdateNotificationCmd =                
+                $"schtasks /create /tn \"MonitorWindowsUpdate\" " +
+                $"/tr \"powershell.exe -ExecutionPolicy Bypass -File \\\"{ps1_SendEmailWindowsUpdatePath}\\\"\" " +
+                "/sc onevent /ec System " +
+                $"/mo \"*[System[({eventIdScript})]]\" " +
+                "/rl HIGHEST /f";
+
+            // create a SendEmailWindowsUpdate.ps1
+            string psWindowsUpdateTemplate = @"
+# Get the current directory of the script
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+
+# Define the API URL
+$apiUrl = 'http://__WEBAPI_IP__:7284/api/SendEmail/send-customize-email'
+
+# Get the most recent System event with the specified IDs
+$event = Get-WinEvent -LogName System | Where-Object { $_.Id -in @(__EVENT_IDS__) } | Select-Object -First 1
+
+if ($null -eq $event) {
+    Write-Host ""No recent events with the specified IDs were found."" -ForegroundColor Yellow
+    exit
+}
+
+$eventId   = $event.Id
+$eventTime = $event.TimeCreated
+$eventMsg  = $event.FormatDescription()
+
+# Build message body (double-quoted string so variables expand)
+$message = ""Windows update event found. Please restart computer if necessary.`n------------------------------`nEvent ID   : $eventId`nTime       : $eventTime`nDetails    : $eventMsg""
+
+# Define the request body as a PowerShell object
+$body = @{
+    emails    = @(__EMAILS__);
+    emails_Cc = @(__EMAILS_CC__);
+    message   = $message;
+    subject   = '(__SERVER_NAME__) Windows Update Notification';
+}
+
+# Convert the PowerShell object to a JSON string
+$jsonBody = $body | ConvertTo-Json -Depth 100
+
+# Generate datetime string in yyyyMMddHHmmss format
+$datetime = Get-Date -Format 'yyyyMMddHHmmss'
+
+# Define the output file path in the same directory
+$outputFile = Join-Path -Path $scriptDir -ChildPath (""email_response_windows_update_{0}.txt"" -f $datetime)
+
+# Define headers for the request
+$headers = @{ 'Content-Type' = 'application/json; charset=utf-8' }
+
+# Call the API using Invoke-RestMethod
+try {
+    Write-Host ""Calling POST API: $apiUrl""
+    $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body $jsonBody -Headers $headers
+
+    if ($null -ne $response) {
+        $jsonResponse = $response | ConvertTo-Json -Depth 100
+        $jsonResponse | Out-File -FilePath $outputFile -Encoding utf8
+        Write-Host ""Success! API response saved to $outputFile""
+    } else {
+        Write-Host ""API call successful, but no data was returned."" -ForegroundColor Yellow
+    }
+} catch {
+    Write-Host ""Error calling the API:"" -ForegroundColor Red
+    Write-Host $_.Exception.Message -ForegroundColor Red
+}
+";          
+            // create a taskcheduler that send email when windows retart
+            string ps1_SendEmailWindowsRestartPath = Path.Combine(exeDir, "SendEmailWindowsRestart.ps1");
+
+            // delete old task scheduler
+            string deleteWindowsRestartCmd = "schtasks / delete / tn \"MonitorWindowsRestart\" / f";
+            await CommandExecutor.Instance.RunCommandAsAdminAsync(deleteWindowsRestartCmd, "Delete old Windows Restart Notification");
+
+            string windowsRestartNotificationCmd =
+                $"schtasks /create /TN \"MonitorWindowsRestart\" /TR \"powershell.exe -ExecutionPolicy Bypass -File \\\"{ps1_SendEmailWindowsRestartPath}\\\"\" /SC ONLOGON /DELAY 0015:00 /RL HIGHEST /F";
+
+            bool resultCreateRestartTaskScheduler = await CommandExecutor.Instance.RunCommandAsAdminAsync(windowsRestartNotificationCmd, "Create Windows Restart Notification");
+
+            if (resultCreateRestartTaskScheduler)
+            {
+                progressDetail_Notification.ProgressDescription = "Create windows restart task scheduler";
+                progressDetail_Notification.StatusStatePD = (int)EProgressStatus.Pass;
+                delegateProgressResult?.Invoke(progressDetail_Notification);
+            }
+            else
+            {
+                progressDetail_Notification.ProgressDescription = "Create windows restart task scheduler";
+                progressDetail_Notification.StatusStatePD = (int)EProgressStatus.Fail;
+                delegateProgressResult?.Invoke(progressDetail_Notification);
+
+            }
+            bool resultCreateUpdateTaskScheduler = await CommandExecutor.Instance.RunCommandAsAdminAsync(windowsUpdateNotificationCmd, "Create Windows Update Notification");
+
+            if (resultCreateUpdateTaskScheduler)
+            {
+                progressDetail_Notification.ProgressDescription = "Create windows update task scheduler";
+                progressDetail_Notification.StatusStatePD = (int)EProgressStatus.Pass;
+                delegateProgressResult?.Invoke(progressDetail_Notification);
+            }
+            else
+            {
+                progressDetail_Notification.ProgressDescription = "Create windows update task scheduler";
+                progressDetail_Notification.StatusStatePD = (int)EProgressStatus.Fail;
+                delegateProgressResult?.Invoke(progressDetail_Notification);
+
+            }
+            // create a SendEmailWindowsUpdate.ps1
+            string psWindowsRestartTemplate = @"
+# Get the current directory of the script
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+
+# Define the API URL
+$apiUrl = 'http://__WEBAPI_IP__:7284/api/SendEmail/send-customize-email'
+
+# Generate datetime string in yyyyMMddHHmmss format
+$datetime = Get-Date -Format 'yyyyMMddHHmmss'
+
+# Build message body (double-quoted string so variables expand)
+$message = ""Windows restart at $datetime.""
+
+# Define the request body as a PowerShell object
+$body = @{
+    emails    = @(__EMAILS__);
+    emails_Cc = @(__EMAILS_CC__);
+    message   = $message;
+    subject   = '(__SERVER_NAME__) Windows Restart Notification';
+}
+
+# Convert the PowerShell object to a JSON string
+$jsonBody = $body | ConvertTo-Json -Depth 100
+
+# Define the output file path in the same directory
+$outputFile = Join-Path -Path $scriptDir -ChildPath (""email_response_windows_restart_{0}.txt"" -f $datetime)
+
+# Define headers for the request
+$headers = @{ 'Content-Type' = 'application/json; charset=utf-8' }
+
+# Call the API using Invoke-RestMethod
+try {
+    Write-Host ""Calling POST API: $apiUrl""
+    $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body $jsonBody -Headers $headers
+
+    if ($null -ne $response) {
+        $jsonResponse = $response | ConvertTo-Json -Depth 100
+        $jsonResponse | Out-File -FilePath $outputFile -Encoding utf8
+        Write-Host ""Success! API response saved to $outputFile""
+    } else {
+        Write-Host ""API call successful, but no data was returned."" -ForegroundColor Yellow
+    }
+} catch {
+    Write-Host ""Error calling the API:"" -ForegroundColor Red
+    Write-Host $_.Exception.Message -ForegroundColor Red
+}
+";
+            // Prepare replacements (handle multiple emails and escaping)
+            string eventIdsCsv = string.Join(", ", eventID.Select(e => e.Trim())); // e.g. "13, 19"
+            string[] emails = (email ?? "").Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                                 .Select(x => x.Trim()).ToArray();
+            string[] emailsCc = (emailCc ?? "").Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                                 .Select(x => x.Trim()).ToArray();
+
+            // Build PowerShell array entries like: 'a@a.com', 'b@b.com'
+            string MakePsArrayString(string[] arr) =>
+                arr.Length == 0 ? "" : string.Join(", ", arr.Select(e => $"'{e.Replace("'", "''")}'")); // double single-quotes inside single-quoted PS strings
+
+            string psEmails = MakePsArrayString(emails);
+            string psEmailsCc = MakePsArrayString(emailsCc);
+            string safeServerName = (serverName ?? "").Replace("'", "''"); // server name inside single-quoted string
+
+            // Replace placeholders
+            string ps1_SendEmailWindowsUpdateContent = psWindowsUpdateTemplate
+                .Replace("__WEBAPI_IP__", webAPI_IP ?? "127.0.0.1")
+                .Replace("__EVENT_IDS__", eventIdsCsv)
+                .Replace("__EMAILS__", string.IsNullOrWhiteSpace(psEmails) ? "''" : psEmails)
+                .Replace("__EMAILS_CC__", string.IsNullOrWhiteSpace(psEmailsCc) ? "''" : psEmailsCc)
+                .Replace("__SERVER_NAME__", safeServerName);
+
+            string ps1_SendEmailWindowsRestartContent = psWindowsRestartTemplate
+                .Replace("__WEBAPI_IP__", webAPI_IP ?? "127.0.0.1")
+                .Replace("__EMAILS__", string.IsNullOrWhiteSpace(psEmails) ? "''" : psEmails)
+                .Replace("__EMAILS_CC__", string.IsNullOrWhiteSpace(psEmailsCc) ? "''" : psEmailsCc)
+                .Replace("__SERVER_NAME__", safeServerName);
+
+            // Save .ps1 file
+            File.WriteAllText(ps1_SendEmailWindowsUpdatePath, ps1_SendEmailWindowsUpdateContent, Encoding.UTF8);
+
+            // Save .ps1 file
+            File.WriteAllText(ps1_SendEmailWindowsRestartPath, ps1_SendEmailWindowsRestartContent, Encoding.UTF8);
+
+            // invoke progress monitor that all process finish
+            progressDetail_Notification.IsFinish = true;
+            delegateProgressResult?.Invoke(progressDetail_Notification);
         }
         private async Task StartUMonitorSocketServer(ProgressDetail progressDetail_UMonitorSocketServer)
         {

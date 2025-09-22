@@ -23,6 +23,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
         public required DataTemplate MultipleInputTemplate { get; set; }
         public required DataTemplate MultipleKeyValueTemplate { get; set; }
         public required DataTemplate MultipleKeyValueWithReferenceTemplate { get; set; }
+        public required DataTemplate CheckboxTemplate { get; set; }
         
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
@@ -39,6 +40,8 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                         return MultipleKeyValueTemplate;
                     case 3:
                         return MultipleKeyValueWithReferenceTemplate;
+                    case 4:
+                        return CheckboxTemplate;
                 }
             }
             return base.SelectTemplate(item, container);

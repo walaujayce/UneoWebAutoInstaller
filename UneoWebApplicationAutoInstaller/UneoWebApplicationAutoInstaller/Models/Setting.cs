@@ -22,6 +22,7 @@ namespace UneoWebApplicationAutoInstaller.Models
         private string _settingValue = "";
         private ObservableCollection<DictionaryInput> _inputList = new();
         private ObservableCollection<DictionaryInput> _keyValueItems = new();
+        private ObservableCollection<DictionaryInput> _checkboxList = new();
 
         public string SettingTitle
         {
@@ -100,6 +101,15 @@ namespace UneoWebApplicationAutoInstaller.Models
                     }
                 }
                 OnPropertyChanged(nameof(KeyValueItems));
+            }
+        }
+        public ObservableCollection<DictionaryInput> CheckboxList
+        {
+            get => _checkboxList;
+            set
+            {
+                _checkboxList = value;
+                OnPropertyChanged(nameof(CheckboxList));
             }
         }
     }

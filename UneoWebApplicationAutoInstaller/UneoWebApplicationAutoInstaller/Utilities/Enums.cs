@@ -23,6 +23,7 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             MultipleInput = 1,
             MultipleKeyValue = 2,
             MultipleKeyValueWithReference = 3,
+            Checkbox = 4,
         }
         public enum EInstallID
         {
@@ -30,7 +31,8 @@ namespace UneoWebApplicationAutoInstaller.Utilities
             WebAPI = 1,
             UMonitorSocketServer = 2,
             Website = 3,
-            UMonitorService = 4,            
+            UMonitorService = 4,
+            Notification = 5,            
         }
         public enum EProgressStatus
         {

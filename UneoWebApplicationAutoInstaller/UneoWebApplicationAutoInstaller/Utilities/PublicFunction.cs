@@ -133,6 +133,8 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                     return "Website";
                 case (int)EInstallID.UMonitorService:
                     return "UMonitorService";
+                case (int)EInstallID.Notification:
+                    return "Notification";
                 default:
                     return "Undefined";
             }
@@ -544,7 +546,6 @@ namespace UneoWebApplicationAutoInstaller.Utilities
                 MessageBox.Show($"Error updating UMonitorSocketServer: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
 
         public static void CopyFolderToDestination(string sourceFolderPath, string destinationFolderPath)
         {

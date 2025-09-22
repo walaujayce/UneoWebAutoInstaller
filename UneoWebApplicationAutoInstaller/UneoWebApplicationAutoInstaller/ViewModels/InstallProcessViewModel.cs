@@ -238,7 +238,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "USERNAME",
-                                    DictionaryValue = "NTU",
+                                    DictionaryValue = "TEST",
                                 },
                                 new DictionaryInput()
                                 {
@@ -262,6 +262,63 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 },
                             }
                         },
+                    }
+                },
+                new Install()
+                {
+                    InstallID = (int)EInstallID.Notification,
+                    InstallName = "Notification",
+                    IsChecked = true,
+                    SettingList = new()
+                    {                        
+                        new Setting()
+                        {
+                            SettingType = (int)ESettingType.Checkbox,
+                            SettingName = "Email Notification",
+                            CheckboxList = new ObservableCollection<DictionaryInput>()
+                            {
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "Windows Update",
+                                    IsChecked = true,
+                                },
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "Windows Restart",
+                                    IsChecked = true,
+                                },
+                            }
+                        },
+                        new Setting()
+                        {
+                            SettingType = (int)ESettingType.SingleInput,
+                            SettingName = "Server Name",
+                            SettingValue = "TEST",
+                        },
+                        new Setting()
+                        {
+                            SettingType = (int)ESettingType.SingleInput,
+                            SettingName = "WEBAPI IP",
+                            SettingValue = ipAddress_WIFI,
+                        },  
+                        new Setting()
+                        {
+                            SettingType = (int)ESettingType.SingleInput,
+                            SettingName = "Email",
+                            SettingValue = "carlos.chu@uneotech.com,ted.fang@uneotech.com",
+                        },
+                        new Setting()
+                        {
+                            SettingType = (int)ESettingType.SingleInput,
+                            SettingName = "Email Cc",
+                            SettingValue = "york_huang@uneotech.com,jayce@uneotech.com",
+                        },                        
+                        new Setting()
+                        {
+                            SettingType = (int)ESettingType.SingleInput,
+                            SettingName = "Event ID",
+                            SettingValue = "13,19,1074",
+                        },                        
                     }
                 },
             };
@@ -333,7 +390,15 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 DictionaryValue = kv.DictionaryValue,
                                 IsRemovable = kv.IsRemovable,
                                 AddBtnImageSource = kv.AddBtnImageSource,
-                            }))
+                            })),
+                        CheckboxList = new ObservableCollection<DictionaryInput>(
+                            s.CheckboxList.Select(kv => new DictionaryInput
+                            {
+                                DictionaryKey = kv.DictionaryKey,
+                                DictionaryValue = kv.DictionaryValue,
+                                IsChecked = kv.IsChecked,
+                                CheckboxImage = kv.CheckboxImage,
+                            })),
                     }))
             };
         }

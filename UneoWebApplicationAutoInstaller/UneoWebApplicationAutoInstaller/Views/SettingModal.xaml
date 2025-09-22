@@ -263,7 +263,85 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-       
+        
+        <!-- Checkbox button -->
+        <Style x:Key="CheckboxBorderStyle" TargetType="Border">
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="Transparent"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+            To="#F6F7E8"
+            Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ColorAnimation
+            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+            To="Transparent"
+            Duration="0:0:0.1"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="CheckButtonStyle" TargetType="CheckBox">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontFamily" Value="Arial"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border Style="{DynamicResource CheckboxBorderStyle}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="4">
+                                <!-- Rectangle -->
+                                <Grid>
+                                    <Rectangle x:Name="Rectangle"
+                                    Width="15"
+                                    Height="15"
+                                    Stroke="Black"
+                                    StrokeThickness="0.5"
+                                    Fill="Transparent"
+                                    VerticalAlignment="Center"/>
+                                    <Border  Height="20" Width="20" Margin="3,0,0,3" BorderBrush="Transparent" BorderThickness="1.5" Panel.ZIndex="10" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Image Source="{Binding CheckboxImage}"/>
+                                    </Border>
+
+                                </Grid>
+                                <!-- Space between circle and text -->
+                                <ContentPresenter Margin="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        RecognizesAccessKey="True"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <!-- Optional: MouseOver effect -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Rectangle" Property="StrokeThickness" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
         <!-- Single Input Template -->
         <DataTemplate x:Key="SingleInputTemplate">
             <Grid MouseLeftButtonDown="SetCurrentSettingSelected_Clicked">
@@ -379,12 +457,31 @@
             </Grid>
         </DataTemplate>
         
+        <!-- Checkbox Template -->
+        <DataTemplate x:Key="CheckboxTemplate">
+            <Grid MouseLeftButtonDown="SetCurrentSettingSelected_Clicked">
+                <StackPanel Orientation="Vertical" Margin="0,0,0,0">
+                    <TextBlock Text="{Binding SettingName}" Style="{DynamicResource TextBlock_Name}"/>
+                    <ItemsControl ItemsSource="{Binding CheckboxList}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <CheckBox x:Name="NotificationCheckbox" Style="{DynamicResource CheckButtonStyle}" Content="{Binding DictionaryKey}" IsChecked="{Binding IsChecked}"/>                                        
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+        
         <!-- The Selector -->
         <vm:SettingTemplateSelector x:Key="SettingTemplateSelector"
                        SingleInputTemplate="{StaticResource SingleInputTemplate}"
                        MultipleInputTemplate="{StaticResource MultipleInputTemplate}"
                        MultipleKeyValueTemplate="{StaticResource MultipleKeyValueTemplate}"
                        MultipleKeyValueWithReferenceTemplate="{StaticResource MultipleKeyValueWithReferenceTemplate}"
+                       CheckboxTemplate="{StaticResource CheckboxTemplate}"
         />
         
     </Window.Resources>

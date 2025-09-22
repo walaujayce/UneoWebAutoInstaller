@@ -292,7 +292,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "USERNAME",
-                                    DictionaryValue = "NTU",
+                                    DictionaryValue = "TEST",
                                 },
                                 new DictionaryInput()
                                 {
@@ -347,7 +347,7 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                 new DictionaryInput()
                                 {
                                     DictionaryKey = "USERNAME",
-                                    DictionaryValue = "NTU",
+                                    DictionaryValue = "TEST",
                                 },
                                 new DictionaryInput()
                                 {
