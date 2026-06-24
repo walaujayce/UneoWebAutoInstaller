@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<AssemblyVersion>0.0.7</AssemblyVersion>
+	<AssemblyVersion>0.0.9</AssemblyVersion>
 	<OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -151,7 +151,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="UMonitorSocketServer\" />
+    <Folder Include="UMonitorSocketServer\publish\" />
   </ItemGroup>
 
 </Project>

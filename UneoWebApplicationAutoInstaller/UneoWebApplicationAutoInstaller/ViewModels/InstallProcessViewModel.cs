@@ -140,7 +140,30 @@ namespace UneoWebApplicationAutoInstaller.ViewModels
                                     DictionaryValue = "7284:8080"
                                 },
                             }
-                        }                        
+                        },
+                        new Setting()
+                        {
+                            SettingType = (int)ESettingType.MultipleKeyValue,
+                            SettingName = "Environment Variables",
+                            KeyValueItems = new ObservableCollection<DictionaryInput>()
+                            {
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "DATABASE_IP",
+                                    DictionaryValue = ipAddress_Ethernet,
+                                },
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "FLOOR",
+                                    DictionaryValue = "1F",
+                                },
+                                new DictionaryInput()
+                                {
+                                    DictionaryKey = "SECTION",
+                                    DictionaryValue = "A",
+                                }
+                            }
+                        },
                     }
                 },
                 new Install() 
