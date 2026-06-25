@@ -458,7 +458,14 @@ namespace UneoWebApplicationAutoInstaller.Command
             {
                 portScript += $"-p {port.DictionaryValue} ";
             }
-            
+
+            List<DictionaryInput> environmentVariablesList = settingList.First(s => s.SettingName == "Environment Variables").KeyValueItems.ToList();
+            string environmentVariableScript = "";
+            foreach (var ev in environmentVariablesList)
+            {
+                environmentVariableScript += $"-e {ev.DictionaryKey}={ev.DictionaryValue} ";
+            }
+
             containerName_WebAPI = settingList.First(s => s.SettingName == "Container Name").SettingValue;
 
             progressDetail_RemakeWebAPIContainer.ProgressDescription = "Stopping current existed container";
@@ -535,7 +542,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                 progressDetail_RemakeWebAPIContainer.StatusStatePD = (int)EProgressStatus.Ongoing;
                 delegateProgressResult?.Invoke(progressDetail_RemakeWebAPIContainer);
 
-                await ContainerizeImage(imageName_WebAPI, containerName_WebAPI, portScript);
+                await ContainerizeImage(imageName_WebAPI, containerName_WebAPI, portScript, environmentVariableScript);
             }
             else
             {
@@ -586,6 +593,13 @@ namespace UneoWebApplicationAutoInstaller.Command
             foreach (var port in portsList)
             {
                 portScript += $"-p {port.DictionaryValue} ";
+            }
+
+            List<DictionaryInput> environmentVariablesList = settingList.First(s => s.SettingName == "Environment Variables").KeyValueItems.ToList();
+            string environmentVariableScript = "";
+            foreach (var ev in environmentVariablesList)
+            {
+                environmentVariableScript += $"-e {ev.DictionaryKey}={ev.DictionaryValue} ";
             }
 
             containerName_WebAPI = settingList.First(s => s.SettingName == "Container Name").SettingValue;
@@ -1273,7 +1287,7 @@ namespace UneoWebApplicationAutoInstaller.Command
                     await Task.Delay(100);
                     //Restore SQL dump into the new database
                     await CommandExecutor.Instance.RunCommandAsAdminReturnStringAsync(
-                        $"docker exec {environmentVariableScript}{containerId} pg_restore -U postgres -d {DATABASE_NAME} {containerSqlFilePath}",
+                        $"docker exec {environmentVariableScript}{containerId} psql -U postgres -d {DATABASE_NAME} -f {containerSqlFilePath}",
                         $"Restore database {DATABASE_NAME}");
 
                     await Task.Delay(1000);
@@ -1318,6 +1332,13 @@ namespace UneoWebApplicationAutoInstaller.Command
             foreach (var port in portList)
             {
                 portsScript += $"-p {port.DictionaryValue} ";
+            }
+
+            List<DictionaryInput> environmentVariablesList = settingList.First(s => s.SettingName == "Environment Variables").KeyValueItems.ToList();
+            string environmentVariableScript = "";
+            foreach (var ev in environmentVariablesList)
+            {
+                environmentVariableScript += $"-e {ev.DictionaryKey}={ev.DictionaryValue} ";
             }
 
             containerName_WebAPI = settingList.First(s => s.SettingName == "Container Name").SettingValue;
@@ -1408,7 +1429,7 @@ namespace UneoWebApplicationAutoInstaller.Command
             {
                 Log.I(TAG, "Container UmonitorWebAPI does NOT exist locally.");
                 Log.I(TAG, "Start to containerize image");
-                await ContainerizeImage(imageName_WebAPI, containerName_WebAPI, portsScript);
+                await ContainerizeImage(imageName_WebAPI, containerName_WebAPI, portsScript, environmentVariableScript);
 
                 //Check again if the container is running
                 int attemptTimes = 0;
